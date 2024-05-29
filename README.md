@@ -1,2 +1,3 @@
 # EncounterManager
-Encounter Manager for D&amp;D 5E
+
+Custom Encounter Manager for D&D 5E.
