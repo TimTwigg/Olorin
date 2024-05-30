@@ -23,8 +23,6 @@
     - Spells
     - Initiative order (drag and drop is nice)
     - Concentration
-- Player view
-    - Specific stats and entire creatures hideable from player view
 - Nice home page
 - Saveable/loadable encounters.
 - Condensed menu for options for each creature
@@ -37,6 +35,16 @@
 - Lock creatures to keep them in encounter space on reset/clean
 - Character sheet sync
 - Avatars for PCs
+- Player view
+    - Specific stats and entire creatures hideable from player view
+
+### Faroff Ideas
+
+- User-specified configuration for creature display
+    - Which sections are displayed
+    - How many columns
+- AI generated avatar based on character sheet
+- Automatic damage adjustments
 
 ## Other Programs
 
@@ -127,8 +135,9 @@ Dislike:
 
 ## Frameworks
 
-Some ideas for frameworks to use to build:
-- React (probably NextJS with TS)
-- You can create websites in Go
-- Hugo
-- EmberJS
+Frontend - Remix?
+Backend - Go
+Database - Firebase/SQLite
+
+Frontend responsible for animations, styling
+Backend responsible for stat block generation, server-side rendering
