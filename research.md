@@ -2,16 +2,17 @@
 
 | Contents |
 |----------|
-|[Other Programs](#other-programs)|
 |[Feature List](#feature-list)|
+|[Other Programs](#other-programs)|
 |[Frameworks](#frameworks)|
 
 ## Feature List
 
+### Core Features
+
 - Stat blocks
     - Must pop up on page
     - Full stat block not just summary
-- AI Encounter Generation
 - Easily editable creatures
     - HP
         - "+" and "-" buttons
@@ -22,13 +23,17 @@
     - Spells
     - Initiative order (drag and drop is nice)
     - Concentration
-    - Transformation (wildshape)
 - Player view
     - Specific stats and entire creatures hideable from player view
 - Nice home page
 - Saveable/loadable encounters.
-- Stat block editor
 - Condensed menu for options for each creature
+
+### Bonus Features
+
+- AI Encounter Generation
+- Transformation (wildshape)
+- Stat block editor
 - Lock creatures to keep them in encounter space on reset/clean
 - Character sheet sync
 - Avatars for PCs
@@ -36,6 +41,8 @@
 ## Other Programs
 
 Some brief (incomplete) notes on some other encounter managers that already exist.
+
+Overall, the D&D Battle Tracker does a great job - it just lacks some finishing touches.
 
 ### Kobold Fight Club / Improved Initiative
 
@@ -67,7 +74,8 @@ Like:
 
 Dislike:
 - No drag and drop editing for initiative.
-- **No stat blocks.**
+- No stat blocks.
+- Super lightweight - missing a lot of the features on the list.
 
 ### D&D Battle Tracker
 
@@ -91,6 +99,9 @@ Like:
 
 Dislike:
 - Stat block just links to D&D Beyond stat block instead of displaying on page.
+    - Not even creature actions are displayed on page.
+- No concentration (minor point).
+- No character sheet sync.
 
 ### Shieldmaiden
 
