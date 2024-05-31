@@ -28,6 +28,7 @@
 - Nice home page
 - Saveable/loadable encounters.
 - Condensed menu for options for each creature
+- Add/remove creatures mid-combat
 
 ### Bonus Features
 
