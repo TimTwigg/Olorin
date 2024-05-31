@@ -6,6 +6,8 @@
 |[Other Programs](#other-programs)|
 |[Frameworks](#frameworks)|
 
+---
+
 ## Feature List
 
 ### Core Features
@@ -38,19 +40,34 @@
 - Player view
     - Specific stats and entire creatures hideable from player view
 
-### Faroff Ideas
+### Extension Ideas
 
 - User-specified configuration for creature display
     - Which sections are displayed
     - How many columns
 - AI generated avatar based on character sheet
 - Automatic damage adjustments
+- Automatic dice rolling (with animation?)
+
+### Important
+
+- Performance
+
+---
 
 ## Other Programs
 
 Some brief (incomplete) notes on some other encounter managers that already exist.
 
-Overall, the D&D Battle Tracker does a great job - it just lacks some finishing touches.
+Overall, D&D Beyond and the D&D Battle Tracker do well - they just lack some features that are nice quality of life features for a DM.
+
+| Encounter Managers |
+|----------|
+|[Kobold Fight Club](#kobold-fight-club--improved-initiative)|
+|[DnDEM](#dndem)|
+|[D&D Battle Tracker](#dd-battle-tracker)|
+|[Shieldmaiden](#shieldmaiden)|
+|[D&D Beyond](#dd-beyond)|
 
 ### Kobold Fight Club / Improved Initiative
 
@@ -133,11 +150,33 @@ Dislike:
     - Appearance
     - Appearing/disappearing side menu is annoying
 
+### D&D Beyond
+
+> [D&D Beyond](https://www.dndbeyond.com/my-encounters)
+
+Like:
+- Character sheet integration (shows PC hit points, AC, speed, etc)
+    - IF they are using DDB character sheets
+- All monsters are available
+- Homebrew monsters (if you have already built the stat block in DDB) are easily used
+- Autoroll initiative for non-PCs
+- Saves state
+- Displays stat block on screen
+
+Dislike:
+- Manual entries are a pain
+- Cannot add a creature mid-combat
+- No condition tracker
+- No way to keep track of spell slots
+- Slow
+
+---
+
 ## Frameworks
 
 Frontend - Remix?
 Backend - Go
-Database - Firebase/SQLite
+Database - Firebase
 
 Frontend responsible for animations, styling
 Backend responsible for stat block generation, server-side rendering
