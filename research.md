@@ -2,57 +2,10 @@
 
 | Contents |
 |----------|
-|[Feature List](#feature-list)|
 |[Other Programs](#other-programs)|
 |[Frameworks](#frameworks)|
 
----
-
-## Feature List
-
-### Core Features
-
-- Stat blocks
-    - Must pop up on page
-    - Full stat block not just summary
-- Easily editable creatures
-    - HP
-        - "+" and "-" buttons
-    - Temp HP
-    - Max HP
-    - AC
-    - Conditions
-    - Spells
-    - Initiative order (drag and drop is nice)
-    - Concentration
-- Nice home page
-- Saveable/loadable encounters.
-- Condensed menu for options for each creature
-- Add/remove creatures mid-combat
-
-### Bonus Features
-
-- AI Encounter Generation
-- Transformation (wildshape)
-- Stat block editor
-- Lock creatures to keep them in encounter space on reset/clean
-- Character sheet sync
-- Avatars for PCs
-- Player view
-    - Specific stats and entire creatures hideable from player view
-
-### Extension Ideas
-
-- User-specified configuration for creature display
-    - Which sections are displayed
-    - How many columns
-- AI generated avatar based on character sheet
-- Automatic damage adjustments
-- Automatic dice rolling (with animation?)
-
-### Important
-
-- Performance
+> The [Feature list](https://docs.google.com/document/d/1gcp4wCQ_KJGpyJuejGjFVm9OYXVAI7gMLL2YEeMQ00k/edit?usp=sharing) Doc
 
 ---
 
