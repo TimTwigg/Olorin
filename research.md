@@ -128,9 +128,9 @@ Dislike:
 
 ## Frameworks
 
-Frontend - Remix?
+Frontend - React with tanstack
 Backend - Go
 Database - Firebase
 
 Frontend responsible for animations, styling
-Backend responsible for stat block generation, server-side rendering
+Backend responsible for stat block generation
