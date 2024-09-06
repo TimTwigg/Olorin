@@ -6,3 +6,6 @@
 
 # local env files
 .env
+
+# generated files
+# **.gen.ts
