@@ -8,4 +8,4 @@
 .env
 
 # generated files
-# **.gen.ts
+**.gen.ts
