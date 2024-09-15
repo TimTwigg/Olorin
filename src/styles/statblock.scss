@@ -1,0 +1,44 @@
+.statblock {
+    background-color: #E6D19C;
+
+    h4 {
+        font-size: 1.5em;
+        margin: 0;
+        color: #861C06;
+        font-weight: bold;
+    }
+
+    h5 {
+        font-size: 1.5em;
+        margin: 0;
+        color: #861C06;
+    }
+
+    p {
+        font-size: 0.75em;
+    }
+
+    hr {
+        height: 2px;
+        background-color: #861C06;
+        width: 90%;
+        border: 0;
+        clip-path: polygon(100% 50%, 0 0, 0 100%);
+    }
+
+    hr.thin {
+        height: 0.5px;
+        clip-path: none;
+    }
+}
+
+.statdisplay {
+    display: inline-block;
+    text-align: center;
+    margin: 5px;
+}
+
+.justify-between {
+    display: flex;
+    justify-content: space-between;
+}

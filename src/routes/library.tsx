@@ -1,17 +1,8 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
-import { AuthProviderProps } from "@src/controllers/auth"
+import { createFileRoute } from "@tanstack/react-router"
+import { StatBlockDisplay } from "@src/models/stat_block"
+import { winter_ghoul } from "@src/temp/winter-ghoul"
 
 export const Route = createFileRoute("/library")({
-    beforeLoad: ({ context, location } : AuthProviderProps) => {
-        if (!context.auth.isAuthenticated) {
-            throw redirect({
-                to: "/login",
-                search: {
-                    redirect: location.href
-                },
-            })
-        }
-    },
     component: Library,
 })
 
@@ -21,6 +12,8 @@ function Library() {
             <p>
                 This is the library.
             </p>
+
+            <StatBlockDisplay statBlock={winter_ghoul} />
         </div>
     )
 }

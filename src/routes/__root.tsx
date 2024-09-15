@@ -1,6 +1,5 @@
 import React, { Suspense } from "react"
-import { createRootRouteWithContext, Link, Outlet } from "@tanstack/react-router"
-import { RouterContext } from "@src/controllers/auth"
+import { createRootRoute, Link, Outlet } from "@tanstack/react-router"
 import "@src/styles/main.scss"
 
 const TanStackRouterDevtools =
@@ -12,7 +11,7 @@ const TanStackRouterDevtools =
             })),
         )
 
-export const Route = createRootRouteWithContext<RouterContext>()({
+export const Route = createRootRoute({
     component: () => (
         <div className="pageDiv container">
             <nav>
