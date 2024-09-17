@@ -6,16 +6,6 @@
 *  - Base Styles
 *  - Nav Bar
 *  - Links
-*  - Buttons
-*  - Images
-*  - Forms
-*  - Lists
-*  - Tables
-*  - Tabs
-*  - Profile Images and Text
-*  - Spacing
-*  - Misc
-*  - Utilities
 *
 */
 
@@ -185,11 +175,10 @@ h5 {
 }
 
 .pageDiv {
-    min-height: 100vh;
-}
-
-div {
-    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 p {

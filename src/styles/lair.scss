@@ -1,8 +1,7 @@
-.statblock {
+.lair {
     background-color: #E6D19C;
     margin: 5px;
     padding: 5px;
-    column-count: 2;
     font-size: 0.75em;
     max-width: 60em;
     display: inline-block;
@@ -23,11 +22,6 @@
         color: #861C06;
     }
 
-    p {
-        font-size: 0.75em;
-        padding: 0;
-    }
-
     hr {
         height: 2px;
         background-color: #861C06;
@@ -39,19 +33,4 @@
         height: 0.5px;
         clip-path: none;
     }
-
-    section {
-        margin: 5px;
-    }
-}
-
-.statdisplay {
-    display: inline-block;
-    text-align: center;
-    margin: 5px;
-}
-
-.justify-between {
-    display: flex;
-    justify-content: space-between;
 }
