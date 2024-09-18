@@ -133,15 +133,13 @@ body {
     line-height: 1.6;
     font-weight: 400;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
     margin: 0;
 }
 
 h1, h2, h3, h4, h5 {
     margin-top: 0;
     margin-bottom: 2rem;
-    font-weight: 300;
+    font-weight: 400;
     padding: 0;
 }
 
@@ -175,9 +173,7 @@ h5 {
 }
 
 .pageDiv {
-    width: 100vw;
     height: 100vh;
-    overflow-x: hidden;
     overflow-y: auto;
 }
 

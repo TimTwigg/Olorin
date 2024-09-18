@@ -1,4 +1,4 @@
-import { StatBlock } from "@src/models/stat_block"
+import { StatBlock } from "@src/models/statBlock"
 import "@src/styles/lair.scss"
 
 export function LairDisplay({ name, lair }: { name: string, lair: StatBlock["Lair"] }) {

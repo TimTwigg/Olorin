@@ -11,7 +11,7 @@ export const Route = createFileRoute("/library")({
 
 function Library() {
     return (
-        <div>
+        <>
             <p>
                 This is the library.
             </p>
@@ -20,6 +20,6 @@ function Library() {
             <LairDisplay name="Arasta" lair={arasta.Lair} />
             <StatBlockDisplay statBlock={aurelia} />
             <StatBlockDisplay statBlock={winter_ghoul} />
-        </div>
+        </>
     )
 }

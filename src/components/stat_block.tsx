@@ -1,9 +1,10 @@
 import "@src/styles/statblock.scss"
-import { StatBlock } from "@src/models/stat_block"
+import { StatBlock } from "@src/models/statBlock"
 import { Card } from "@src/components/card"
+import { modifierOf } from "@src/controllers/utils"
 
 function StatDisplay({ name, value }: { name: string, value: number }) {
-    const modifier = Math.floor((value - 10) / 2);
+    const modifier = modifierOf(value);
     return (
         <span className="statdisplay">
             <strong>{name}</strong> <br />
@@ -58,9 +59,17 @@ function MythicActionsDisplay({ mythicActions }: { mythicActions: StatBlock["Myt
     );
 }
 
-export function StatBlockDisplay({ statBlock }: { statBlock: StatBlock }) {
+type StatBlockDisplayProps = {
+    statBlock: StatBlock;
+    displayColumns?: number;
+}
+
+export function StatBlockDisplay({ statBlock, displayColumns }: StatBlockDisplayProps) {
+    const dynamicStyles: React.CSSProperties = {
+        columnCount: displayColumns || 2
+    }
     return (
-        <div className="statblock">
+        <div className={"statblock"} style={dynamicStyles}>
             <Card>
                 <h4>{statBlock.Name}</h4>
                 {statBlock.Description.Size} {statBlock.Description.Type}, {statBlock.Description.Alignment}
