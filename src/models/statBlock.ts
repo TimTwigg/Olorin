@@ -20,6 +20,7 @@ export type StatBlock = {
             Burrow?: number;
             Climb?: number;
         };
+        ReactionCount: number;
         Strength: number;
         Dexterity: number;
         Constitution: number;

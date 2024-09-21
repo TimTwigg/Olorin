@@ -1,4 +1,3 @@
-import "@src/styles/statblock.scss"
 import { StatBlock } from "@src/models/statBlock"
 import { Card } from "@src/components/card"
 import { modifierOf } from "@src/controllers/utils"
@@ -69,7 +68,7 @@ export function StatBlockDisplay({ statBlock, displayColumns }: StatBlockDisplay
         columnCount: displayColumns || 2
     }
     return (
-        <div className={"statblock"} style={dynamicStyles}>
+        <div className="displayCard" style={dynamicStyles}>
             <Card>
                 <h4>{statBlock.Name}</h4>
                 {statBlock.Description.Size} {statBlock.Description.Type}, {statBlock.Description.Alignment}

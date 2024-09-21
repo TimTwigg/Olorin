@@ -17,6 +17,7 @@ export const winter_ghoul =
         "Speed": {
             "Walk": 30
         },
+        "ReactionCount": 1,
         "Strength": 13,
         "Dexterity": 15,
         "Constitution": 10,

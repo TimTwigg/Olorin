@@ -17,6 +17,7 @@ export const aurelia = {
             "Walk": 50,
             "Fly": 150
         },
+        "ReactionCount": 1,
         "Strength": 26,
         "Dexterity": 24,
         "Constitution": 25,

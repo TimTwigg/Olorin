@@ -17,6 +17,7 @@ export const arasta = {
             "Walk": 40,
             "Climb": 40
         },
+        "ReactionCount": 1,
         "Strength": 24,
         "Dexterity": 16,
         "Constitution": 23,
