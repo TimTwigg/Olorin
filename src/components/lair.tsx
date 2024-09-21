@@ -1,10 +1,9 @@
 import { StatBlock } from "@src/models/statBlock"
-import "@src/styles/lair.scss"
 
 export function LairDisplay({ name, lair }: { name: string, lair: StatBlock["Lair"] }) {
     if (!lair) return null;
     return (
-        <div className="lair">
+        <div className="displayCard">
             <h4>{name}'s Lair</h4>
             <hr className="thin"/>
             {lair.Description} <br />

@@ -1,11 +1,11 @@
-type CardProps = {
-    children?: React.ReactNode;
-}
+import * as React from "react"
 
-export function Card({ children } : CardProps) {
+interface CardProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {}
+
+export function Card(props : CardProps) {
     return (
-        <section className = "card">
-            {children}
+        <section className = {"card "+props.className} style={props.style}>
+            {props.children}
         </section>
     );
 }

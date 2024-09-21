@@ -157,10 +157,6 @@ h1 {
     margin-top: 30px;
 }
 
-h5 {
-    padding-left: 20px;
-}
-
 /* Larger than phablet */
 @media (min-width: 550px) {
     h1 { font-size: 5.0rem; }
@@ -168,10 +164,6 @@ h5 {
     h3 { font-size: 3.6rem; }
     h4 { font-size: 3.0rem; }
     h5 { font-size: 2.4rem; }
-
-    h1, h2, h3, h4, h5 {
-        padding: 0 10px;
-    }
 }
 
 .pageDiv {
@@ -282,19 +274,20 @@ a {
 .displayCard {
     background-color: #E6D19C;
     margin: 5px;
-    padding: 5px;
+    padding: 0.5rem 1rem;
     font-size: 0.75em;
     max-width: 60em;
     display: inline-block;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    border-radius: 2px;
+    border-radius: 3px;
+    column-gap: 0.5rem;
 
-    h4 {
+    h4, .h4 {
         font-size: 1.5em;
         margin: 0;
         color: #861C06;
         font-weight: bold;
-        padding: 0;
+        column-span: all;
     }
 
     h5 {
@@ -304,7 +297,6 @@ a {
     }
 
     p {
-        font-size: 0.75em;
         padding: 0;
     }
 
@@ -312,6 +304,7 @@ a {
         height: 2px;
         background-color: #861C06;
         border: 0;
+        margin-right: 1rem;
         clip-path: polygon(100% 50%, 0 0, 0 100%);
     }
 
@@ -321,13 +314,17 @@ a {
     }
 
     section {
-        margin: 5px;
+        margin: 5px 0;
+    }
+
+    span {
+        padding-right: 1rem;
     }
 }
 
 .displayCard.entity {
-    border-top: 1px solid #861C06;
-    border-bottom: 1px solid #861C06;
+    border-top: 2px solid #861C06;
+    border-bottom: 2px solid #861C06;
 
     img {
         max-width: 1.5rem;
