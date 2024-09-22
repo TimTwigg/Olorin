@@ -16,6 +16,7 @@ export interface Entity {
 
     tick(): void
     randomizeInitiative(): void
+    setInitiative(value: number): void
     updateHP(amount: number): void
     addCondition(condition: string): void
     removeCondition(condition: string): void

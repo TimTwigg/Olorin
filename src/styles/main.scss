@@ -23,7 +23,7 @@ $gold: #AB8D59;
 $gray: #2f3136;
 $lightGray: #D1D1D1;
 $lightBlue: #33C3F0;
-$red: rgb(155, 20, 20);
+$red: #861C06;
 $lightGold: #C4AB7E;
 $blue: #2c97de;
 
@@ -417,6 +417,11 @@ a {
         color: #861C06;
         font-weight: bold;
         column-span: all;
+
+        #titleLock {
+            float: right;
+            margin: 5px 5px 0 5px;
+        }
     }
 
     h5 {
@@ -456,14 +461,15 @@ a {
     margin-bottom: 20px;
 
     .displayCard {
-        border-top: 2px solid #861C06;
-        border-bottom: 2px solid #861C06;
+        border-top: 2px solid $red;
+        border-bottom: 2px solid $red;
         width: 60rem;
     }
 
     .displayCardControls {
         width: 60rem;
-        padding: 0.5rem 1rem;
+        padding: 0rem 1rem;
+        margin: 0 5px;
 
         svg {
             width: 3rem;
@@ -471,9 +477,27 @@ a {
             margin: 5px;
         }
 
-        .space-evenly {
+        #controls {
             display: flex;
             justify-content: space-evenly;
+            padding: 0.5rem 0;
+        }
+
+        #suboptions {
+            padding: 1rem;
+            margin-left: 5rem;
+            width: fit-content;
+
+            button {
+                margin: 0 1rem;
+                font-size: 1rem;
+            }
+
+            svg {
+                width: 2rem;
+                height: 2rem;
+                margin: 5px;
+            }
         }
     }
 }

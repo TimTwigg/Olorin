@@ -18,9 +18,9 @@ function Library() {
                 This is the library.
             </p>
 
-            <EntityDisplay entity={new StatBlockEntity(arasta, 5)} expanded = {true}/>
-            <EntityDisplay entity={new StatBlockEntity(aurelia, 5)}/>
-            <EntityDisplay entity={new StatBlockEntity(winter_ghoul, 5)}/>
+            <EntityDisplay entity={new StatBlockEntity(arasta, 5)} deleteCallback={() => {console.log(`Delete ${arasta.Name}`)}} expanded = {true}/>
+            <EntityDisplay entity={new StatBlockEntity(aurelia, 5)} deleteCallback={() => {}}/>
+            <EntityDisplay entity={new StatBlockEntity(winter_ghoul, 5)} deleteCallback={() => {}}/>
         </>
     )
 }

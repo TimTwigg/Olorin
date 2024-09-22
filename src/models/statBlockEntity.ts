@@ -35,6 +35,10 @@ export class StatBlockEntity implements Entity {
         this.Initiative = d20() + modifierOf(this.StatBlock.Stats.Dexterity);
     }
 
+    setInitiative(value: number): void {
+        this.Initiative = value;
+    }
+
     updateHP(amount: number): void {
         this.CurrentHitPoints = Math.min(this.CurrentHitPoints + amount, this.StatBlock.Stats.HitPoints.Average);
         if (this.CurrentHitPoints < 0) this.CurrentHitPoints = 0;
