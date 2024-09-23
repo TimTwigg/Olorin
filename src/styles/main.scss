@@ -6,8 +6,8 @@
 *  - Base Styles
 *  - Nav Bar
 *  - Links
-*  - Utilities
 *  - Encounter Manager Elements
+*  - Utilities
 *
 */
 
@@ -417,11 +417,6 @@ a {
         color: #861C06;
         font-weight: bold;
         column-span: all;
-
-        #titleLock {
-            float: right;
-            margin: 5px 5px 0 5px;
-        }
     }
 
     h5 {
@@ -486,17 +481,79 @@ a {
         #suboptions {
             padding: 1rem;
             margin-left: 5rem;
-            width: fit-content;
+            display: flex;
+            justify-content: left;
 
-            button {
+            span {
                 margin: 0 1rem;
-                font-size: 1rem;
+            }
+
+            p {
+                margin: 0;
+                padding: 0;
+                text-align: center;
+                font-size: small;
             }
 
             svg {
-                width: 2rem;
-                height: 2rem;
-                margin: 5px;
+                width: 1.5rem;
+                height: 1.5rem;
+                margin: auto;
+            }
+
+            button,
+            input {
+                height: 3rem;
+                margin-top: 0.25rem;
+                vertical-align: top;
+                border: ridge 1px $gray;
+            }
+
+            button {
+                width: 3rem;
+                font-size: 2.5rem;
+
+                &.icon {
+                    height: 5rem;
+                    width: 6rem;
+                    font-size: 1rem;
+
+                    svg {
+                        width: 2rem;
+                        height: 2rem;
+                    }
+                }
+
+                &.leftButton {
+                    border-top-left-radius: 5px;
+                    border-bottom-left-radius: 5px;
+                }
+
+                &.rightButton {
+                    border-top-right-radius: 5px;
+                    border-bottom-right-radius: 5px;
+                }
+            }
+
+            input {
+                width: 10rem;
+                box-sizing: border-box;
+                padding-left: 5px;
+
+                &:focus {
+                    outline: none;
+                    border-color: $lightBlue;
+                }
+
+                &.curveLeft {
+                    border-top-left-radius: 5px;
+                    border-bottom-left-radius: 5px;
+                }
+
+                &.curveRight {
+                    border-top-right-radius: 5px;
+                    border-bottom-right-radius: 5px;
+                }
             }
         }
     }
@@ -530,4 +587,12 @@ a {
 .justify-between {
     display: flex;
     justify-content: space-between;
+}
+
+.m-right {
+    margin-right: 0.5rem;
+}
+
+.m-left {
+    margin-left: 0.5rem;
 }

@@ -1,23 +1,36 @@
 import { SmartMap } from "@src/models/smartMap"
-import { StatBlock } from "@src/models/statBlock"
 
 export interface Entity {
     Name: string
     Initiative: number
+    MaxHitPoints: number
+    TempHitPoints: number
     CurrentHitPoints: number
+    ArmorClass: number
+    Speed: {
+        Walk?: number
+        Fly?: number
+        Swim?: number
+        Burrow?: number
+        Climb?: number
+    }
     Conditions: SmartMap<string, number>
     SpellSlots: SmartMap<number, { total: number, used: number }>
     Concentration: boolean
     Reactions: { total: number, used: number }
     Notes: string
-    StatBlock: StatBlock;
     IsHostile: boolean
     EncounterLocked: boolean
 
     tick(): void
     randomizeInitiative(): void
     setInitiative(value: number): void
-    updateHP(amount: number): void
+    heal(amount: number): void
+    damage(amount: number): void
+    setMaxHP(amount: number): void
+    addTempHP(amount: number): void
+    removeTempHP(): void
+    setAC(amount: number): void
     addCondition(condition: string): void
     removeCondition(condition: string): void
     addSpellSlot(level: number): void

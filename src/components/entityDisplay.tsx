@@ -40,7 +40,7 @@ enum ControlOptions {
     StatBlock
 }
 
-function renderSpeed(speed: Entity["StatBlock"]["Stats"]["Speed"]): JSX.Element {
+function renderSpeed(speed: Entity["Speed"]): JSX.Element {
     return <div>
         <strong>Speed:</strong><br />
         {speed.Walk && <span><GiRun /> {speed.Walk} ft.</span>}
@@ -56,12 +56,31 @@ export function EntityDisplay({ entity, deleteCallback, expanded }: EntityDispla
     const [ControlState, SetControlState] = React.useState<ControlOptions>(ControlOptions.None);
     const [Locked, SetLocked] = React.useState<boolean>(entity.EncounterLocked);
     const [Initiative, SetInitiative] = React.useState<number>(entity.Initiative);
-    const [LocalInitState, SetLocalInitState] = React.useState<number>(Initiative);
+    const [LocalNumericalState, SetLocalNumericalState] = React.useState<number>(0);
+    const [LocalNumericalState2, SetLocalNumericalState2] = React.useState<number>(0);
+    const [LocalNumericalState3, SetLocalNumericalState3] = React.useState<number>(0);
+    const [MaxHitpoints, SetMaxHitpoints] = React.useState<number>(entity.MaxHitPoints);
+    const [CurrentHitpoints, SetCurrentHitpoints] = React.useState<number>(entity.CurrentHitPoints);
+    const [TempHitpoints, SetTempHitpoints] = React.useState<number>(entity.TempHitPoints);
+    const [AC, SetAC] = React.useState<number>(entity.ArmorClass);
 
     const FlipControlState = (state: ControlOptions) => {
         if (ControlState === state) {
             SetControlState(ControlOptions.None);
         } else {
+            switch (state) {
+                case ControlOptions.Initiative:
+                    SetLocalNumericalState(Initiative);
+                    break;
+                case ControlOptions.Hitpoints:
+                    SetLocalNumericalState(0);
+                    SetLocalNumericalState2(TempHitpoints);
+                    SetLocalNumericalState3(MaxHitpoints);
+                    break;
+                case ControlOptions.AC:
+                    SetLocalNumericalState(AC);
+                    break;
+            }
             SetControlState(state);
         }
     }
@@ -74,78 +93,96 @@ export function EntityDisplay({ entity, deleteCallback, expanded }: EntityDispla
     function renderSettingsControl(): JSX.Element {
         return <>
             {Locked ?
-                <button onClick={_ => LockEntity(false)}><AiFillLock /><br/>Locked</button>
+                <span><button onClick={_ => LockEntity(false)} className="icon"><AiFillLock /><br />Locked</button></span>
                 :
-                <button onClick={_ => LockEntity(true)}><SlLockOpen /><br/>Unlocked</button>
+                <span><button onClick={_ => LockEntity(true)} className="icon"><SlLockOpen /><br />Unlocked</button></span>
             }
-            <button onClick={_ => {deleteCallback()}} disabled={Locked}><GiTrashCan /><br/>Delete</button>
+            <span><button onClick={_ => { deleteCallback() }} disabled={Locked} className="icon"><GiTrashCan /><br />Delete</button></span>
         </>
     }
 
     function renderInitiativeControl(): JSX.Element {
         return <>
-            <input type="number" value={LocalInitState} onChange={e => SetLocalInitState(parseInt(e.target.value))} />
-            <button onClick={_ => {SetInitiative(LocalInitState), entity.setInitiative(LocalInitState)}}><GiCheckMark /><br/></button>
+            <span>
+                <p>Initiative</p>
+                <input type="number" min={0} placeholder="Set Initiative" onChange={e => SetLocalNumericalState(parseInt(e.target.value))} className="curveLeft" />
+                <button onClick={_ => { SetInitiative(LocalNumericalState), entity.setInitiative(LocalNumericalState), SetControlState(ControlOptions.None) }} className="rightButton"><GiCheckMark /></button>
+            </span>
         </>
     }
 
     function renderHitpointsControl(): JSX.Element {
-        return <section>
-            Hitpoints - Not Implemented
-        </section>
+        return <>
+            <span>
+                <p>Hit Points</p>
+                <button onClick={_ => { entity.damage(LocalNumericalState), SetCurrentHitpoints(entity.CurrentHitPoints), SetTempHitpoints(entity.TempHitPoints), SetControlState(ControlOptions.None) }} className="leftButton">-</button>
+                <input type="number" min={0} placeholder="Adjust HP" onChange={e => SetLocalNumericalState(parseInt(e.target.value))} />
+                <button onClick={_ => { entity.heal(LocalNumericalState), SetCurrentHitpoints(entity.CurrentHitPoints), SetControlState(ControlOptions.None) }} className="rightButton">+</button>
+            </span>
+            <span>
+                <p>Temp Hit Points</p>
+                <input type="number" min={0} placeholder="Temp HP" onChange={e => SetLocalNumericalState2(parseInt(e.target.value))} className="curveLeft" />
+                <button onClick={_ => { SetTempHitpoints(LocalNumericalState2), entity.addTempHP(LocalNumericalState2), SetControlState(ControlOptions.None) }} className="rightButton"><GiCheckMark /></button>
+            </span>
+            <span>
+                <p>Max Hit Points</p>
+                <input type="number" min={0} placeholder="Set Max HP" onChange={e => SetLocalNumericalState3(parseInt(e.target.value))} className="curveLeft" />
+                <button onClick={_ => { SetMaxHitpoints(LocalNumericalState3), entity.setMaxHP(LocalNumericalState3), SetCurrentHitpoints(entity.CurrentHitPoints), SetControlState(ControlOptions.None) }} className="rightButton"><GiCheckMark /></button>
+            </span>
+        </>
     }
 
     function renderACControl(): JSX.Element {
-        return <section>
-            AC - Not Implemented
-        </section>
+        return <>
+            <span>
+                <p>Armor Class</p>
+                <input type="number" min={0} placeholder="Set AC" onChange={e => { SetLocalNumericalState(parseInt(e.target.value)) }} className="curveLeft" />
+                <button onClick={_ => { SetAC(LocalNumericalState), entity.setAC(LocalNumericalState), SetControlState(ControlOptions.None) }} className="rightButton"><GiCheckMark /></button>
+            </span>
+        </>
     }
 
     function renderConditionsControl(): JSX.Element {
-        return <section>
+        return <>
             Conditions - Not Implemented
-        </section>
+        </>
     }
 
     function renderSpellsControl(): JSX.Element {
-        return <section>
+        return <>
             Spells - Not Implemented
-        </section>
+        </>
     }
 
     function renderNotesControl(): JSX.Element {
-        return <section>
+        return <>
             Notes - Not Implemented
-        </section>
+        </>
     }
 
     function renderStatBlockControl(): JSX.Element {
-        return <section>
+        return <>
             StatBlock - Not Implemented
-        </section>
+        </>
     }
-
-    const dynamicStyle: React.CSSProperties = {
-        columnCount: 2,
-    };
 
     return (
         <div className="entity">
             <div className="displayCard" onClick={_ => { SetExpandedState(!ExpandedState) }}>
                 {ExpandedState ?
-                    <Card className="expanded" style={dynamicStyle}>
-                        <h4>{entity.IsHostile ? <GiCrossedSwords /> : null} {entity.Name} {entity.EncounterLocked ? <AiFillLock id="titleLock"/> : null}</h4>
-                        <strong>Hit Points:</strong> {entity.CurrentHitPoints} / {entity.StatBlock.Stats.HitPoints.Average}<br />
-                        <strong>Armor Class:</strong> {entity.StatBlock.Stats.ArmorClass}<br />
+                    <Card className="expanded" style={{ columnCount: 2 }}>
+                        <h4 style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 2px" }}>{entity.IsHostile ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</h4>
+                        <strong>Hit Points:</strong> {CurrentHitpoints} {TempHitpoints > 0 ? ` (+${TempHitpoints})` : null} / {MaxHitpoints}<br />
+                        <strong>Armor Class:</strong> {AC}<br />
                         <strong>Initiative:</strong> {Initiative}<br />
-                        {renderSpeed(entity.StatBlock.Stats.Speed)}
+                        {renderSpeed(entity.Speed)}
                     </Card>
                     :
                     <Card className="collapsed">
-                        <span className="h4">{entity.IsHostile ? <GiCrossedSwords /> : null} {entity.Name} {entity.EncounterLocked ? <AiFillLock id="titleLock"/> : null}</span>
+                        <span className="h4" style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 2px" }}>{entity.IsHostile ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</span>
                         <p>
-                            <span><strong>HP:</strong> {entity.CurrentHitPoints} / {entity.StatBlock.Stats.HitPoints.Average}</span>
-                            <span><strong>AC:</strong> {entity.StatBlock.Stats.ArmorClass}</span>
+                            <span><strong>HP:</strong> {CurrentHitpoints} {TempHitpoints > 0 ? ` (+${TempHitpoints})` : null} / {MaxHitpoints}</span>
+                            <span><strong>AC:</strong> {AC}</span>
                         </p>
                     </Card>}
             </div>

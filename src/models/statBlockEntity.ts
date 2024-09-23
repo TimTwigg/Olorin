@@ -7,14 +7,18 @@ export class StatBlockEntity implements Entity {
     Name;
     Initiative;
     CurrentHitPoints;
+    MaxHitPoints;
+    TempHitPoints = 0;
+    ArmorClass;
+    Speed;
     Conditions = new SmartMap<string, number>();
     SpellSlots = new SmartMap<number, { total: number, used: number }>();
     Concentration = false;
     Reactions;
     Notes = "";
+    IsHostile;
+    EncounterLocked = false;
     StatBlock: StatBlock;
-    IsHostile: boolean;
-    EncounterLocked: boolean = false;
 
     constructor(statBlock: StatBlock, initiative: number, IsHostile: boolean = true) {
         this.Name = statBlock.Name;
@@ -23,6 +27,9 @@ export class StatBlockEntity implements Entity {
         this.Reactions = { total: statBlock.Stats.ReactionCount, used: 0 };
         this.IsHostile = IsHostile;
         this.CurrentHitPoints = statBlock.Stats.HitPoints.Average;
+        this.MaxHitPoints = statBlock.Stats.HitPoints.Average;
+        this.ArmorClass = statBlock.Stats.ArmorClass;
+        this.Speed = statBlock.Stats.Speed;
     }
 
     tick(): void {
@@ -39,9 +46,32 @@ export class StatBlockEntity implements Entity {
         this.Initiative = value;
     }
 
-    updateHP(amount: number): void {
-        this.CurrentHitPoints = Math.min(this.CurrentHitPoints + amount, this.StatBlock.Stats.HitPoints.Average);
-        if (this.CurrentHitPoints < 0) this.CurrentHitPoints = 0;
+    heal(amount: number): void {
+        this.CurrentHitPoints = Math.min(this.CurrentHitPoints + amount, this.MaxHitPoints);
+    }
+
+    damage(amount: number): void {
+        let dmg = Math.max(amount - this.TempHitPoints, 0);
+        this.TempHitPoints = Math.max(this.TempHitPoints - amount, 0);
+        this.CurrentHitPoints = Math.max(this.CurrentHitPoints - dmg, 0);
+    }
+
+    setMaxHP(amount: number): void {
+        let missing = amount>this.MaxHitPoints ? this.MaxHitPoints-this.CurrentHitPoints : 0;
+        this.MaxHitPoints = Math.max(amount, 1);
+        this.CurrentHitPoints = this.MaxHitPoints - missing;
+    }
+
+    addTempHP(amount: number): void {
+        this.TempHitPoints = Math.max(amount, 0);
+    }
+
+    removeTempHP(): void {
+        this.TempHitPoints = 0;
+    }
+
+    setAC(amount: number): void {
+        this.ArmorClass = Math.max(amount, 1);
     }
 
     addCondition(condition: string): void {
