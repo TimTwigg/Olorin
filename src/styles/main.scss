@@ -472,15 +472,15 @@ a {
             margin: 5px;
         }
 
-        #controls {
+        .controls {
             display: flex;
             justify-content: space-evenly;
             padding: 0.5rem 0;
         }
 
-        #suboptions {
-            padding: 1rem;
-            margin-left: 5rem;
+        .suboptions {
+            padding: 1rem 0;
+            margin-left: 3rem;
             display: flex;
             justify-content: left;
 
@@ -536,7 +536,7 @@ a {
             }
 
             input {
-                width: 10rem;
+                width: 8rem;
                 box-sizing: border-box;
                 padding-left: 5px;
 
@@ -553,6 +553,17 @@ a {
                 &.curveRight {
                     border-top-right-radius: 5px;
                     border-bottom-right-radius: 5px;
+                }
+            }
+
+            .conditionCheckBoxes {
+                column-count: 4;
+                font-size: 1.5rem;
+
+                input {
+                    width: initial;
+                    vertical-align: middle;
+                    margin: 0 2px;
                 }
             }
         }

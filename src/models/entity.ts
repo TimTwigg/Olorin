@@ -30,6 +30,7 @@ export interface Entity {
     setMaxHP(amount: number): void
     addTempHP(amount: number): void
     removeTempHP(): void
+    kill(): void
     setAC(amount: number): void
     addCondition(condition: string): void
     removeCondition(condition: string): void

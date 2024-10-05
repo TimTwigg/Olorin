@@ -1,6 +1,8 @@
 import { Entity } from "@src/models/entity"
 import { Card } from "@src/components/card"
 import * as React from "react"
+import { SmartMap } from "@src/models/smartMap"
+import { UserOptions } from "@src/models/userOptions"
 
 import {
     GiCrossedSwords,
@@ -17,6 +19,7 @@ import {
     GiHourglass,
     GiTrashCan,
     GiCheckMark,
+    GiDeathSkull,
 } from "react-icons/gi"
 import { FaSwimmer, FaAddressCard } from "react-icons/fa"
 import { SlLockOpen } from "react-icons/sl"
@@ -25,7 +28,8 @@ import { AiFillLock } from "react-icons/ai"
 type EntityDisplayProps = {
     entity: Entity,
     deleteCallback: () => void,
-    expanded?: boolean
+    expanded?: boolean,
+    userOptions?: UserOptions,
 };
 
 enum ControlOptions {
@@ -51,7 +55,14 @@ function renderSpeed(speed: Entity["Speed"]): JSX.Element {
     </div>
 }
 
-export function EntityDisplay({ entity, deleteCallback, expanded }: EntityDisplayProps) {
+function renderConditions(conditions: SmartMap<string, number>): JSX.Element {
+    if (conditions.size === 0) return <></>;
+    return (<div>
+        <strong>Conditions:</strong> {conditions.map<string>((num, cond) => `${cond} (${num} round${num==1?'':'s'}) `)}<br />
+    </div>)
+}
+
+export function EntityDisplay({ entity, deleteCallback, expanded, userOptions }: EntityDisplayProps) {
     const [ExpandedState, SetExpandedState] = React.useState<boolean>(expanded || false);
     const [ControlState, SetControlState] = React.useState<ControlOptions>(ControlOptions.None);
     const [Locked, SetLocked] = React.useState<boolean>(entity.EncounterLocked);
@@ -63,6 +74,14 @@ export function EntityDisplay({ entity, deleteCallback, expanded }: EntityDispla
     const [CurrentHitpoints, SetCurrentHitpoints] = React.useState<number>(entity.CurrentHitPoints);
     const [TempHitpoints, SetTempHitpoints] = React.useState<number>(entity.TempHitPoints);
     const [AC, SetAC] = React.useState<number>(entity.ArmorClass);
+    const [Conditions, SetConditions] = React.useState<SmartMap<string, number>>(new SmartMap<string, number>());
+
+    const ConditionTypes: string[] = userOptions?.conditions || [];
+
+    const FlipExpandedState = () => {
+        if (ExpandedState && ControlState !== ControlOptions.None) SetControlState(ControlOptions.None);
+        SetExpandedState(!ExpandedState);
+    }
 
     const FlipControlState = (state: ControlOptions) => {
         if (ControlState === state) {
@@ -88,6 +107,16 @@ export function EntityDisplay({ entity, deleteCallback, expanded }: EntityDispla
     const LockEntity = (state: boolean) => {
         entity.setLock(state);
         SetLocked(state);
+    }
+
+    const UpdateConditions = (condition: string, state: boolean) => {
+        let localConditions = Conditions;
+        if (state) {
+            localConditions.set(condition, 0);
+        } else {
+            localConditions.delete(condition);
+        }
+        SetConditions(localConditions);
     }
 
     function renderSettingsControl(): JSX.Element {
@@ -116,19 +145,20 @@ export function EntityDisplay({ entity, deleteCallback, expanded }: EntityDispla
             <span>
                 <p>Hit Points</p>
                 <button onClick={_ => { entity.damage(LocalNumericalState), SetCurrentHitpoints(entity.CurrentHitPoints), SetTempHitpoints(entity.TempHitPoints), SetControlState(ControlOptions.None) }} className="leftButton">-</button>
-                <input type="number" min={0} placeholder="Adjust HP" onChange={e => SetLocalNumericalState(parseInt(e.target.value))} />
+                <input type="number" min={0} placeholder="Adjust" onChange={e => SetLocalNumericalState(parseInt(e.target.value))} />
                 <button onClick={_ => { entity.heal(LocalNumericalState), SetCurrentHitpoints(entity.CurrentHitPoints), SetControlState(ControlOptions.None) }} className="rightButton">+</button>
             </span>
             <span>
                 <p>Temp Hit Points</p>
-                <input type="number" min={0} placeholder="Temp HP" onChange={e => SetLocalNumericalState2(parseInt(e.target.value))} className="curveLeft" />
+                <input type="number" min={0} placeholder="Set" onChange={e => SetLocalNumericalState2(parseInt(e.target.value))} className="curveLeft" />
                 <button onClick={_ => { SetTempHitpoints(LocalNumericalState2), entity.addTempHP(LocalNumericalState2), SetControlState(ControlOptions.None) }} className="rightButton"><GiCheckMark /></button>
             </span>
             <span>
                 <p>Max Hit Points</p>
-                <input type="number" min={0} placeholder="Set Max HP" onChange={e => SetLocalNumericalState3(parseInt(e.target.value))} className="curveLeft" />
+                <input type="number" min={0} placeholder="Set" onChange={e => SetLocalNumericalState3(parseInt(e.target.value))} className="curveLeft" />
                 <button onClick={_ => { SetMaxHitpoints(LocalNumericalState3), entity.setMaxHP(LocalNumericalState3), SetCurrentHitpoints(entity.CurrentHitPoints), SetControlState(ControlOptions.None) }} className="rightButton"><GiCheckMark /></button>
             </span>
+            <span><button onClick={_ => { SetTempHitpoints(0), SetCurrentHitpoints(0), entity.kill(), SetControlState(ControlOptions.None) }} className="icon">Kill<br /><GiDeathSkull /></button></span>
         </>
     }
 
@@ -143,9 +173,9 @@ export function EntityDisplay({ entity, deleteCallback, expanded }: EntityDispla
     }
 
     function renderConditionsControl(): JSX.Element {
-        return <>
-            Conditions - Not Implemented
-        </>
+        return <span className="conditionCheckBoxes">
+            {ConditionTypes.map((condition, ind) => <section key={ind}><input type="checkbox" name={condition} id={condition} defaultChecked={Conditions.has(condition)} onChange={e => { UpdateConditions(condition, e.target.checked) }} /><label htmlFor={condition}>{condition}</label></section>)}
+        </span>
     }
 
     function renderSpellsControl(): JSX.Element {
@@ -168,7 +198,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded }: EntityDispla
 
     return (
         <div className="entity">
-            <div className="displayCard" onClick={_ => { SetExpandedState(!ExpandedState) }}>
+            <div className="displayCard" onClick={FlipExpandedState}>
                 {ExpandedState ?
                     <Card className="expanded" style={{ columnCount: 2 }}>
                         <h4 style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 2px" }}>{entity.IsHostile ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</h4>
@@ -176,6 +206,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded }: EntityDispla
                         <strong>Armor Class:</strong> {AC}<br />
                         <strong>Initiative:</strong> {Initiative}<br />
                         {renderSpeed(entity.Speed)}
+                        {renderConditions(Conditions)}
                     </Card>
                     :
                     <Card className="collapsed">
@@ -187,18 +218,18 @@ export function EntityDisplay({ entity, deleteCallback, expanded }: EntityDispla
                     </Card>}
             </div>
             <div className="displayCardControls">
-                <div id="controls">
-                    <button onClick={_ => FlipControlState(ControlOptions.Settings)}><GiCog /></button>
-                    <button onClick={_ => FlipControlState(ControlOptions.Initiative)}><GiHourglass /></button>
-                    <button onClick={_ => FlipControlState(ControlOptions.Hitpoints)}><GiHalfHeart /></button>
-                    <button onClick={_ => FlipControlState(ControlOptions.AC)}><GiShield /></button>
-                    <button onClick={_ => FlipControlState(ControlOptions.Conditions)}><GiChalkOutlineMurder /></button>
-                    <button onClick={_ => FlipControlState(ControlOptions.Spells)}><GiSpellBook /></button>
-                    <button onClick={_ => FlipControlState(ControlOptions.Notes)}><GiPencil /></button>
-                    <button onClick={_ => FlipControlState(ControlOptions.StatBlock)}><FaAddressCard /></button>
+                <div className="controls">
+                    <button onClick={_ => FlipControlState(ControlOptions.Settings)} title="Settings"><GiCog /></button>
+                    <button onClick={_ => FlipControlState(ControlOptions.Initiative)} title="Initiative"><GiHourglass /></button>
+                    <button onClick={_ => FlipControlState(ControlOptions.Hitpoints)} title="HitPoints"><GiHalfHeart /></button>
+                    <button onClick={_ => FlipControlState(ControlOptions.AC)} title="AC"><GiShield /></button>
+                    <button onClick={_ => FlipControlState(ControlOptions.Conditions)} title="Conditions"><GiChalkOutlineMurder /></button>
+                    <button onClick={_ => FlipControlState(ControlOptions.Spells)} title="Spells"><GiSpellBook /></button>
+                    <button onClick={_ => FlipControlState(ControlOptions.Notes)} title="Notes"><GiPencil /></button>
+                    <button onClick={_ => FlipControlState(ControlOptions.StatBlock)} title="StatBlock"><FaAddressCard /></button>
                 </div>
                 {ControlState === ControlOptions.None ? null :
-                    <div id="suboptions">
+                    <div className="suboptions">
                         {ControlState === ControlOptions.Settings ? renderSettingsControl() : null}
                         {ControlState === ControlOptions.Initiative ? renderInitiativeControl() : null}
                         {ControlState === ControlOptions.Hitpoints ? renderHitpointsControl() : null}

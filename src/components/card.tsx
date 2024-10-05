@@ -4,7 +4,7 @@ interface CardProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDiv
 
 export function Card(props : CardProps) {
     return (
-        <section className = {"card "+props.className} style={props.style}>
+        <section className = {"card"+(props.className?" "+props.className:"")} style={props.style}>
             {props.children}
         </section>
     );

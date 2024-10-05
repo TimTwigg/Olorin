@@ -58,7 +58,7 @@ export class StatBlockEntity implements Entity {
 
     setMaxHP(amount: number): void {
         let missing = amount>this.MaxHitPoints ? this.MaxHitPoints-this.CurrentHitPoints : 0;
-        this.MaxHitPoints = Math.max(amount, 1);
+        this.MaxHitPoints = Math.max(amount, 0);
         this.CurrentHitPoints = this.MaxHitPoints - missing;
     }
 
@@ -67,6 +67,11 @@ export class StatBlockEntity implements Entity {
     }
 
     removeTempHP(): void {
+        this.TempHitPoints = 0;
+    }
+
+    kill(): void {
+        this.CurrentHitPoints = 0;
         this.TempHitPoints = 0;
     }
 
