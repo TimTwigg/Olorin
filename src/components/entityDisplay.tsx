@@ -89,7 +89,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
     const FlipControlState = (state: ControlOptions) => {
         if (ControlState === state) {
             SetControlState(ControlOptions.None);
-            if (state === ControlOptions.Display) setDisplay(undefined);
+            if (state === ControlOptions.Display) setDisplay(entity);
         } else {
             switch (state) {
                 case ControlOptions.Initiative:
@@ -141,7 +141,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
         return <>
             <span>
                 <p>Initiative</p>
-                <input type="number" min={0} placeholder="Set Initiative" onChange={e => SetLocalNumericalState(parseInt(e.target.value))} className="curveLeft" />
+                <input type="number" min={0} placeholder="Set" onChange={e => SetLocalNumericalState(parseInt(e.target.value))} className="curveLeft" />
                 <button onClick={_ => { SetInitiative(LocalNumericalState), entity.setInitiative(LocalNumericalState), SetControlState(ControlOptions.None) }} className="rightButton"><GiCheckMark /></button>
             </span>
         </>
@@ -173,7 +173,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
         return <>
             <span>
                 <p>Armor Class</p>
-                <input type="number" min={0} placeholder="Set AC" onChange={e => { SetLocalNumericalState(parseInt(e.target.value)) }} className="curveLeft" />
+                <input type="number" min={0} placeholder="Set" onChange={e => { SetLocalNumericalState(parseInt(e.target.value)) }} className="curveLeft" />
                 <button onClick={_ => { SetAC(LocalNumericalState), entity.setAC(LocalNumericalState), SetControlState(ControlOptions.None) }} className="rightButton"><GiCheckMark /></button>
             </span>
         </>
@@ -199,13 +199,15 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
 
     return (
         <div className="entity">
+            <div className="displayCardInfo">
+                <section>{Initiative}</section>
+            </div>
             <div className="displayCard" onClick={FlipExpandedState}>
                 {ExpandedState ?
                     <Card className="expanded" style={{ columnCount: 2 }}>
                         <h4 style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 2px" }}>{entity.IsHostile ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</h4>
                         <strong>Hit Points:</strong> {CurrentHitpoints} {TempHitpoints > 0 ? ` (+${TempHitpoints})` : null} / {MaxHitpoints}<br />
                         <strong>Armor Class:</strong> {AC}<br />
-                        <strong>Initiative:</strong> {Initiative}<br />
                         {renderSpeed(entity.Speed)}
                         {renderConditions(Conditions)}
                     </Card>
@@ -229,7 +231,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
                     <button onClick={_ => FlipControlState(ControlOptions.Notes)} title="Notes"><GiPencil /></button>
                     <button onClick={_ => FlipControlState(ControlOptions.Display)} title="Display"><FaAddressCard /></button>
                 </div>
-                {ControlState === ControlOptions.None ? null :
+                {(ControlState === ControlOptions.None || ControlState === ControlOptions.Display) ? null :
                     <div className="suboptions">
                         {ControlState === ControlOptions.Settings ? renderSettingsControl() : null}
                         {ControlState === ControlOptions.Initiative ? renderInitiativeControl() : null}

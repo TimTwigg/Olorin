@@ -3,12 +3,20 @@ import { Entity } from "@src/models/entity"
 export class Encounter {
     Name: string
     Description: string
+    Metadata: {
+        CreationDate: Date,
+        Campaign: string,
+    }
     Entities: Entity[]
 
-    constructor(name: string, description: string, entities: Entity[] = []) {
+    constructor(name: string, description: string, Campaign: string = "", entities: Entity[] = []) {
         this.Name = name
         this.Description = description
         this.Entities = entities
+        this.Metadata = {
+            CreationDate: new Date(),
+            Campaign: Campaign
+        }
     }
 
     addEntity(entity: Entity): void {

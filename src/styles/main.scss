@@ -7,6 +7,7 @@
 *  - Nav Bar
 *  - Links
 *  - Encounter Manager Elements
+*  - Tables
 *  - Utilities
 *
 */
@@ -26,6 +27,7 @@ $lightBlue: #33C3F0;
 $red: #861C06;
 $lightGold: #C4AB7E;
 $blue: #2c97de;
+$parchment: #E6D19C;
 
 /* 
 *   Grid
@@ -391,7 +393,40 @@ a {
 
     &:hover {
         text-decoration: underline;
+        cursor: pointer;
     }
+}
+
+.big.button {
+    background-color: $gray;
+    color: $blue;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-size: 1.5rem;
+    margin: 1rem 0.5rem;
+    text-align: center;
+    display: inline-block;
+    transition: 0.25s ease;
+    width: 20rem;
+
+    &:hover {
+        opacity: 0.75;
+    }
+}
+
+button.delete.button {
+    border-radius: 25%;
+    border: 1px solid $red;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 99;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $red;
+    font-weight: bold;
+    font-size: 1.5rem;
 }
 
 /*
@@ -400,15 +435,16 @@ a {
 */
 
 .displayCard {
-    background-color: #E6D19C;
-    margin: 5px;
+    background-color: $parchment;
+    margin: 5px 5px 5px 0;
     padding: 0.5rem 1rem;
     font-size: 1.5rem;
     max-width: 60em;
     display: inline-block;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    border-radius: 3px;
+    border-radius: 0 3px 3px 3px;
     column-gap: 0.5rem;
+    position: relative;
 
     h4,
     .h4 {
@@ -450,6 +486,18 @@ a {
         padding-right: 1rem;
         white-space: nowrap;
     }
+}
+
+.displayCardInfo {
+    background-color: #ebe2d3;
+    width: 3rem;
+    text-align: center;
+    border-top: 1px solid $red;
+    border-bottom: 1px solid $red;
+    display: inline-block;
+    margin: 5px 0 5px 5px;
+    vertical-align: top;
+    border-radius: 3px 0 0 3px;
 }
 
 .entity {
@@ -587,7 +635,7 @@ a {
 }
 
 .encounterDisplay {
-    background-color: #E6D19C;
+    background-color: $parchment;
     margin: 5px;
     padding: 0.5rem 1rem;
     font-size: 1.5rem;
@@ -595,6 +643,32 @@ a {
     display: inline-block;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     border-radius: 3px;
+}
+
+.playScreen {
+    padding: 10px;
+
+    h3 {
+        text-align: center;
+        margin: 0;
+    }
+}
+
+/*
+*   Tables
+*   ================================================================
+*/
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+th,
+td {
+    padding: 2px 15px;
+    text-align: left;
+    border-bottom: 1px solid $lightGray;
 }
 
 /*

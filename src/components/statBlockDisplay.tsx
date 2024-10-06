@@ -61,14 +61,16 @@ function MythicActionsDisplay({ mythicActions }: { mythicActions: StatBlock["Myt
 type StatBlockDisplayProps = {
     statBlock: StatBlock;
     displayColumns?: number;
+    deleteCallback?: () => void;
 }
 
-export function StatBlockDisplay({ statBlock, displayColumns }: StatBlockDisplayProps) {
+export function StatBlockDisplay({ statBlock, displayColumns, deleteCallback }: StatBlockDisplayProps) {
     const dynamicStyles: React.CSSProperties = {
         columnCount: displayColumns || 2
     }
     return (
         <div className="displayCard" style={dynamicStyles}>
+            {deleteCallback && <button className="delete button" onClick={deleteCallback}>X</button>}
             <Card>
                 <h4>{statBlock.Name}</h4>
                 {statBlock.Description.Size} {statBlock.Description.Type}, {statBlock.Description.Alignment}
