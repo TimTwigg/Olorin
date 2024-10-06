@@ -21,6 +21,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
                     <Link to="/">
                         Home
                     </Link>{" "}
+                    <Link to="/encounters">
+                        Encounters
+                    </Link>{" "}
                     <Link to="/library">
                         Library
                     </Link>

@@ -1,5 +1,10 @@
 import { SmartMap } from "@src/models/smartMap"
 
+export enum EntityType {
+    StatBlock,
+    Player
+}
+
 export interface Entity {
     Name: string
     Initiative: number
@@ -21,6 +26,8 @@ export interface Entity {
     Notes: string
     IsHostile: boolean
     EncounterLocked: boolean
+    Displayable: any
+    EntityType: EntityType
 
     tick(): void
     randomizeInitiative(): void

@@ -1,6 +1,6 @@
+import * as React from "react"
 import { Entity } from "@src/models/entity"
 import { Card } from "@src/components/card"
-import * as React from "react"
 import { SmartMap } from "@src/models/smartMap"
 import { UserOptions } from "@src/models/userOptions"
 
@@ -30,6 +30,7 @@ type EntityDisplayProps = {
     deleteCallback: () => void,
     expanded?: boolean,
     userOptions?: UserOptions,
+    setDisplay?: (entity?: Entity) => void
 };
 
 enum ControlOptions {
@@ -41,7 +42,7 @@ enum ControlOptions {
     Conditions,
     Spells,
     Notes,
-    StatBlock
+    Display
 }
 
 function renderSpeed(speed: Entity["Speed"]): JSX.Element {
@@ -62,7 +63,7 @@ function renderConditions(conditions: SmartMap<string, number>): JSX.Element {
     </div>)
 }
 
-export function EntityDisplay({ entity, deleteCallback, expanded, userOptions }: EntityDisplayProps) {
+export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, setDisplay }: EntityDisplayProps) {
     const [ExpandedState, SetExpandedState] = React.useState<boolean>(expanded || false);
     const [ControlState, SetControlState] = React.useState<ControlOptions>(ControlOptions.None);
     const [Locked, SetLocked] = React.useState<boolean>(entity.EncounterLocked);
@@ -78,6 +79,8 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions }:
 
     const ConditionTypes: string[] = userOptions?.conditions || [];
 
+    setDisplay = setDisplay || ((entity?: Entity) => { console.log(`No display callback found for entity: ${entity?entity.Name:"undefined"}`) });
+
     const FlipExpandedState = () => {
         if (ExpandedState && ControlState !== ControlOptions.None) SetControlState(ControlOptions.None);
         SetExpandedState(!ExpandedState);
@@ -86,6 +89,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions }:
     const FlipControlState = (state: ControlOptions) => {
         if (ControlState === state) {
             SetControlState(ControlOptions.None);
+            if (state === ControlOptions.Display) setDisplay(undefined);
         } else {
             switch (state) {
                 case ControlOptions.Initiative:
@@ -98,6 +102,9 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions }:
                     break;
                 case ControlOptions.AC:
                     SetLocalNumericalState(AC);
+                    break;
+                case ControlOptions.Display:
+                    setDisplay(entity);
                     break;
             }
             SetControlState(state);
@@ -190,12 +197,6 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions }:
         </>
     }
 
-    function renderStatBlockControl(): JSX.Element {
-        return <>
-            StatBlock - Not Implemented
-        </>
-    }
-
     return (
         <div className="entity">
             <div className="displayCard" onClick={FlipExpandedState}>
@@ -226,7 +227,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions }:
                     <button onClick={_ => FlipControlState(ControlOptions.Conditions)} title="Conditions"><GiChalkOutlineMurder /></button>
                     <button onClick={_ => FlipControlState(ControlOptions.Spells)} title="Spells"><GiSpellBook /></button>
                     <button onClick={_ => FlipControlState(ControlOptions.Notes)} title="Notes"><GiPencil /></button>
-                    <button onClick={_ => FlipControlState(ControlOptions.StatBlock)} title="StatBlock"><FaAddressCard /></button>
+                    <button onClick={_ => FlipControlState(ControlOptions.Display)} title="Display"><FaAddressCard /></button>
                 </div>
                 {ControlState === ControlOptions.None ? null :
                     <div className="suboptions">
@@ -237,7 +238,6 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions }:
                         {ControlState === ControlOptions.Conditions ? renderConditionsControl() : null}
                         {ControlState === ControlOptions.Spells ? renderSpellsControl() : null}
                         {ControlState === ControlOptions.Notes ? renderNotesControl() : null}
-                        {ControlState === ControlOptions.StatBlock ? renderStatBlockControl() : null}
                     </div>
                 }
             </div>

@@ -586,6 +586,17 @@ a {
     margin: 5px;
 }
 
+.encounterDisplay {
+    background-color: #E6D19C;
+    margin: 5px;
+    padding: 0.5rem 1rem;
+    font-size: 1.5rem;
+    width: 80%;
+    display: inline-block;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    border-radius: 3px;
+}
+
 /*
 *   Utilities
 *   ================================================================
@@ -606,4 +617,10 @@ a {
 
 .m-left {
     margin-left: 0.5rem;
+}
+
+.break {
+    width: 100%;
+    overflow: hidden;
+    height: 1px;
 }

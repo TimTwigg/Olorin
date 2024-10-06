@@ -1,4 +1,4 @@
-import { Entity } from "@src/models/entity"
+import { Entity, EntityType } from "@src/models/entity"
 import { SmartMap } from "@src/models/smartMap";
 import { StatBlock } from "@src/models/statBlock"
 import { d20, modifierOf } from "@src/controllers/utils";
@@ -18,9 +18,11 @@ export class StatBlockEntity implements Entity {
     Notes = "";
     IsHostile;
     EncounterLocked = false;
+    Displayable;
     StatBlock: StatBlock;
+    EntityType = EntityType.StatBlock;
 
-    constructor(statBlock: StatBlock, initiative: number, IsHostile: boolean = true) {
+    constructor(statBlock: StatBlock, initiative: number = 0, IsHostile: boolean = true) {
         this.Name = statBlock.Name;
         this.StatBlock = statBlock;
         this.Initiative = initiative;
@@ -30,6 +32,7 @@ export class StatBlockEntity implements Entity {
         this.MaxHitPoints = statBlock.Stats.HitPoints.Average;
         this.ArmorClass = statBlock.Stats.ArmorClass;
         this.Speed = statBlock.Stats.Speed;
+        this.Displayable = statBlock;
     }
 
     tick(): void {

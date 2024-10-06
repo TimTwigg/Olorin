@@ -3,11 +3,12 @@ import { Entity } from "@src/models/entity"
 export class Encounter {
     Name: string
     Description: string
-    Entities: Entity[] = []
+    Entities: Entity[]
 
-    constructor(name: string, description: string) {
+    constructor(name: string, description: string, entities: Entity[] = []) {
         this.Name = name
         this.Description = description
+        this.Entities = entities
     }
 
     addEntity(entity: Entity): void {
