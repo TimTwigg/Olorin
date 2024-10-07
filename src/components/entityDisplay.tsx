@@ -27,10 +27,11 @@ import { AiFillLock } from "react-icons/ai"
 
 type EntityDisplayProps = {
     entity: Entity,
-    deleteCallback: () => void,
+    deleteCallback: (id: string) => void,
     expanded?: boolean,
     userOptions?: UserOptions,
-    setDisplay?: (entity?: Entity) => void
+    setDisplay?: (entity?: Entity) => void,
+    renderTrigger?: () => void
 };
 
 enum ControlOptions {
@@ -47,7 +48,7 @@ enum ControlOptions {
 
 function renderSpeed(speed: Entity["Speed"]): JSX.Element {
     return <div>
-        <strong>Speed:</strong><br />
+        <strong>Speed: </strong>
         {speed.Walk && <span><GiRun /> {speed.Walk} ft.</span>}
         {speed.Fly && <span><GiLibertyWing /> {speed.Fly} ft.</span>}
         {speed.Climb && <span><GiMountainClimbing /> {speed.Climb} ft.</span>}
@@ -63,7 +64,7 @@ function renderConditions(conditions: SmartMap<string, number>): JSX.Element {
     </div>)
 }
 
-export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, setDisplay }: EntityDisplayProps) {
+export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, setDisplay, renderTrigger }: EntityDisplayProps) {
     const [ExpandedState, SetExpandedState] = React.useState<boolean>(expanded || false);
     const [ControlState, SetControlState] = React.useState<ControlOptions>(ControlOptions.None);
     const [Locked, SetLocked] = React.useState<boolean>(entity.EncounterLocked);
@@ -78,8 +79,8 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
     const [Conditions, SetConditions] = React.useState<SmartMap<string, number>>(new SmartMap<string, number>());
 
     const ConditionTypes: string[] = userOptions?.conditions || [];
-
     setDisplay = setDisplay || ((entity?: Entity) => { console.log(`No display callback found for entity: ${entity?entity.Name:"undefined"}`) });
+    renderTrigger = renderTrigger || (() => { console.log("No render trigger found") });
 
     const FlipExpandedState = () => {
         if (ExpandedState && ControlState !== ControlOptions.None) SetControlState(ControlOptions.None);
@@ -126,28 +127,28 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
         SetConditions(localConditions);
     }
 
-    function renderSettingsControl(): JSX.Element {
+    const renderSettingsControl = () => {
         return <>
             {Locked ?
                 <span><button onClick={_ => LockEntity(false)} className="icon"><AiFillLock /><br />Locked</button></span>
                 :
                 <span><button onClick={_ => LockEntity(true)} className="icon"><SlLockOpen /><br />Unlocked</button></span>
             }
-            <span><button onClick={_ => { deleteCallback() }} disabled={Locked} className="icon"><GiTrashCan /><br />Delete</button></span>
+            <span><button onClick={_ => { deleteCallback(entity.id) }} disabled={Locked} className="icon"><GiTrashCan /><br />Delete</button></span>
         </>
     }
 
-    function renderInitiativeControl(): JSX.Element {
+    const renderInitiativeControl = () => {
         return <>
             <span>
                 <p>Initiative</p>
                 <input type="number" min={0} placeholder="Set" onChange={e => SetLocalNumericalState(parseInt(e.target.value))} className="curveLeft" />
-                <button onClick={_ => { SetInitiative(LocalNumericalState), entity.setInitiative(LocalNumericalState), SetControlState(ControlOptions.None) }} className="rightButton"><GiCheckMark /></button>
+                <button onClick={_ => { SetInitiative(LocalNumericalState), entity.setInitiative(LocalNumericalState), SetControlState(ControlOptions.None), renderTrigger() }} className="rightButton"><GiCheckMark /></button>
             </span>
         </>
     }
 
-    function renderHitpointsControl(): JSX.Element {
+    const renderHitpointsControl = () => {
         return <>
             <span>
                 <p>Hit Points</p>
@@ -169,7 +170,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
         </>
     }
 
-    function renderACControl(): JSX.Element {
+    const renderACControl = () => {
         return <>
             <span>
                 <p>Armor Class</p>
@@ -179,19 +180,19 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
         </>
     }
 
-    function renderConditionsControl(): JSX.Element {
+    const renderConditionsControl = () => {
         return <span className="conditionCheckBoxes">
             {ConditionTypes.map((condition, ind) => <section key={ind}><input type="checkbox" name={condition} id={condition} defaultChecked={Conditions.has(condition)} onChange={e => { UpdateConditions(condition, e.target.checked) }} /><label htmlFor={condition}>{condition}</label></section>)}
         </span>
     }
 
-    function renderSpellsControl(): JSX.Element {
+    const renderSpellsControl = () => {
         return <>
             Spells - Not Implemented
         </>
     }
 
-    function renderNotesControl(): JSX.Element {
+    const renderNotesControl = () => {
         return <>
             Notes - Not Implemented
         </>
@@ -205,7 +206,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
             <div className="displayCard" onClick={FlipExpandedState}>
                 {ExpandedState ?
                     <Card className="expanded" style={{ columnCount: 2 }}>
-                        <h4 style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 2px" }}>{entity.IsHostile ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</h4>
+                        <h4 style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && CurrentHitpoints>0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix>""?` (${entity.Suffix})`:""}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</h4>
                         <strong>Hit Points:</strong> {CurrentHitpoints} {TempHitpoints > 0 ? ` (+${TempHitpoints})` : null} / {MaxHitpoints}<br />
                         <strong>Armor Class:</strong> {AC}<br />
                         {renderSpeed(entity.Speed)}
@@ -213,7 +214,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
                     </Card>
                     :
                     <Card className="collapsed">
-                        <span className="h4" style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 2px" }}>{entity.IsHostile ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</span>
+                        <span className="h4" style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && CurrentHitpoints>0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix>""?` (${entity.Suffix})`:""}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</span>
                         <p>
                             <span><strong>HP:</strong> {CurrentHitpoints} {TempHitpoints > 0 ? ` (+${TempHitpoints})` : null} / {MaxHitpoints}</span>
                             <span><strong>AC:</strong> {AC}</span>

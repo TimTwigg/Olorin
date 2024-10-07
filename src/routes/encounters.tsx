@@ -1,12 +1,13 @@
 import * as React from "react"
 import { createFileRoute } from "@tanstack/react-router"
 
-import { getEncounters } from "@src/controllers/api"
+import * as api from "@src/controllers/api"
 import { Encounter } from "@src/models/encounter"
 import { EntityDisplay } from "@src/components/entityDisplay"
 import { Entity, EntityType } from "@src/models/entity"
 import { StatBlockDisplay } from "@src/components/statBlockDisplay"
 import { StatBlock } from "@src/models/statBlock"
+import { UserOptions } from "@src/models/userOptions"
 
 export const Route = createFileRoute("/encounters")({
     component: Encounters,
@@ -16,6 +17,22 @@ function Encounters() {
     const [encounters, SetEncounters] = React.useState<Encounter[]>([]);
     const [activeEncounter, SetActiveEncounter] = React.useState<Encounter | null>(null);
     const [DisplayEntity, SetDisplayEntity] = React.useState<Entity | undefined>();
+    const [RenderTrigger, SetRenderTrigger] = React.useState(true);
+    const [Config, SetConfig] = React.useState<UserOptions>(new UserOptions());
+
+    async function TriggerReRender() {
+        SetRenderTrigger(false);
+        setTimeout(() => SetRenderTrigger(true), 1);
+    }
+
+    const deleteEntity = (entityID: string) => {
+        if (!activeEncounter) return;
+        let entities = activeEncounter.Entities;
+        entities = entities.filter((ent) => ent.id !== entityID);
+        activeEncounter.Entities = entities;
+        SetActiveEncounter(activeEncounter);
+        TriggerReRender();
+    }
 
     const renderDisplayEntity = (ent?: Entity) => {
         if (!ent) return <></>;
@@ -24,9 +41,23 @@ function Encounters() {
         else return <></>;
     }
 
+    const renderEntities = () => {
+        let entities = activeEncounter?.Entities || [];
+        entities.sort((a, b) => b.Initiative - a.Initiative);
+        return entities.map((entity, ind) => <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} />);
+    }
+
     React.useEffect(() => {
-        getEncounters("dummy").then((res) => { SetEncounters(res.Encounters) });
-    }, [SetEncounters])
+        api.getEncounters("dummy").then((res) => { SetEncounters(res.Encounters) });
+    }, []);
+
+    React.useEffect(() => {
+        api.getConditions("dummy").then((res) => {
+            let user = Config;
+            user.conditions = res.Conditions;
+            SetConfig(user);
+        });
+    }, []);
 
     // Encounters Overview
     if (!activeEncounter) return (
@@ -69,18 +100,20 @@ function Encounters() {
             <h3 className="seven columns">{activeEncounter.Name}</h3>
             <section className="two columns">
                 <span><strong>Created On:</strong> {activeEncounter.Metadata.CreationDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</span><br />
-                <span><strong>Campaign</strong> {activeEncounter.Metadata.Campaign}</span>
+                <span><strong>Campaign:</strong> {activeEncounter.Metadata.Campaign}</span>
             </section>
             <div className="break" />
             <hr />
             <p>{activeEncounter.Description}</p>
             <hr />
-            <div className="five columns">
-                {activeEncounter.Entities.map((entity, ind) => <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={() => { }} setDisplay={SetDisplayEntity} />)}
-            </div>
-            <div className="seven columns">
-                {DisplayEntity && renderDisplayEntity(DisplayEntity)}
-            </div>
+            <section className="panel">
+                <div>
+                    {RenderTrigger && renderEntities()}
+                </div>
+                <div>
+                    {DisplayEntity && renderDisplayEntity(DisplayEntity)}
+                </div>
+            </section>
         </div>
     );
 }

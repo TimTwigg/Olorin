@@ -6,7 +6,9 @@ export enum EntityType {
 }
 
 export interface Entity {
+    id: string
     Name: string
+    Suffix: string
     Initiative: number
     MaxHitPoints: number
     TempHitPoints: number
@@ -30,6 +32,7 @@ export interface Entity {
     EntityType: EntityType
 
     tick(): void
+    setSuffix(suffix: string): void
     randomizeInitiative(): void
     setInitiative(value: number): void
     heal(amount: number): void

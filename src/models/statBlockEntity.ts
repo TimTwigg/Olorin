@@ -1,10 +1,12 @@
 import { Entity, EntityType } from "@src/models/entity"
 import { SmartMap } from "@src/models/smartMap";
 import { StatBlock } from "@src/models/statBlock"
-import { d20, modifierOf } from "@src/controllers/utils";
+import { d20, hashCode, modifierOf } from "@src/controllers/utils";
 
 export class StatBlockEntity implements Entity {
+    id;
     Name;
+    Suffix = "";
     Initiative;
     CurrentHitPoints;
     MaxHitPoints;
@@ -23,6 +25,7 @@ export class StatBlockEntity implements Entity {
     EntityType = EntityType.StatBlock;
 
     constructor(statBlock: StatBlock, initiative: number = 0, IsHostile: boolean = true) {
+        this.id = (hashCode(statBlock.Name) * Math.random()).toString(16);
         this.Name = statBlock.Name;
         this.StatBlock = statBlock;
         this.Initiative = initiative;
@@ -39,6 +42,10 @@ export class StatBlockEntity implements Entity {
         for (let cond of this.Conditions.keys()) {
             this.Conditions.set(cond, this.Conditions.dGet(cond, 0) + 1);
         }
+    }
+
+    setSuffix(suffix: string): void {
+        this.Suffix = suffix;
     }
 
     randomizeInitiative(): void {
