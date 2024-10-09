@@ -22,6 +22,7 @@ export interface Entity {
         Climb?: number
     }
     Conditions: SmartMap<string, number>
+    SpellSaveDC: number
     SpellSlots: SmartMap<number, { total: number, used: number }>
     Concentration: boolean
     Reactions: { total: number, used: number }
@@ -30,6 +31,14 @@ export interface Entity {
     EncounterLocked: boolean
     Displayable: any
     EntityType: EntityType
+    SavingThrows: {
+        Strength: number
+        Dexterity: number
+        Constitution: number
+        Intelligence: number
+        Wisdom: number
+        Charisma: number
+    }
 
     tick(): void
     setSuffix(suffix: string): void

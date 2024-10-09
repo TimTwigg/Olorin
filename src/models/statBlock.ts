@@ -56,6 +56,7 @@ export type StatBlock = {
             Name: string;
             Description: string;
         }[],
+        SpellSaveDC?: number;
     },
     Actions: {
         Name: string;

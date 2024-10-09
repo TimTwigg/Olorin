@@ -75,7 +75,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
     const [MaxHitpoints, SetMaxHitpoints] = React.useState<number>(entity.MaxHitPoints);
     const [CurrentHitpoints, SetCurrentHitpoints] = React.useState<number>(entity.CurrentHitPoints);
     const [TempHitpoints, SetTempHitpoints] = React.useState<number>(entity.TempHitPoints);
-    const [AC, SetAC] = React.useState<number>(entity.ArmorClass);
+    const [ACBonus, SetACBonus] = React.useState<number>(0);
     const [Conditions, SetConditions] = React.useState<SmartMap<string, number>>(new SmartMap<string, number>());
 
     const ConditionTypes: string[] = userOptions?.conditions || [];
@@ -102,7 +102,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
                     SetLocalNumericalState3(MaxHitpoints);
                     break;
                 case ControlOptions.AC:
-                    SetLocalNumericalState(AC);
+                    SetLocalNumericalState(0);
                     break;
                 case ControlOptions.Display:
                     setDisplay(entity);
@@ -174,8 +174,9 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
         return <>
             <span>
                 <p>Armor Class</p>
-                <input type="number" min={0} placeholder="Set" onChange={e => { SetLocalNumericalState(parseInt(e.target.value)) }} className="curveLeft" />
-                <button onClick={_ => { SetAC(LocalNumericalState), entity.setAC(LocalNumericalState), SetControlState(ControlOptions.None) }} className="rightButton"><GiCheckMark /></button>
+                <button onClick={_ => { SetACBonus(-LocalNumericalState), SetControlState(ControlOptions.None) }} className="leftButton">-</button>
+                <input type="number" min={0} placeholder="Modify" onChange={e => { SetLocalNumericalState(parseInt(e.target.value)) }} />
+                <button onClick={_ => { SetACBonus(LocalNumericalState), SetControlState(ControlOptions.None) }} className="rightButton">+</button>
             </span>
         </>
     }
@@ -208,8 +209,10 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
                     <Card className="expanded" style={{ columnCount: 2 }}>
                         <h4 style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && CurrentHitpoints>0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix>""?` (${entity.Suffix})`:""}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</h4>
                         <strong>Hit Points:</strong> {CurrentHitpoints} {TempHitpoints > 0 ? ` (+${TempHitpoints})` : null} / {MaxHitpoints}<br />
-                        <strong>Armor Class:</strong> {AC}<br />
+                        <strong>Armor Class:</strong> {entity.ArmorClass+ACBonus}{ACBonus===0?"":` (${entity.ArmorClass}${ACBonus>0?"+":""}${ACBonus})`}<br />
                         {renderSpeed(entity.Speed)}
+                        <strong>Saves:</strong> DEX {entity.SavingThrows.Dexterity>=0?"+":""}{entity.SavingThrows.Dexterity} WIS {entity.SavingThrows.Wisdom>=0?"+":""}{entity.SavingThrows.Wisdom} CON {entity.SavingThrows.Constitution>=0?"+":""}{entity.SavingThrows.Constitution}<br />
+                        {entity.SpellSaveDC>0?<><strong>Spell Save DC:</strong> {entity.SpellSaveDC}<br /></>:null}
                         {renderConditions(Conditions)}
                     </Card>
                     :
@@ -217,7 +220,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
                         <span className="h4" style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && CurrentHitpoints>0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix>""?` (${entity.Suffix})`:""}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</span>
                         <p>
                             <span><strong>HP:</strong> {CurrentHitpoints} {TempHitpoints > 0 ? ` (+${TempHitpoints})` : null} / {MaxHitpoints}</span>
-                            <span><strong>AC:</strong> {AC}</span>
+                            <span><strong>AC:</strong> {entity.ArmorClass+ACBonus}{ACBonus===0?"":` (${entity.ArmorClass}${ACBonus>0?"+":""}${ACBonus})`}</span>
                         </p>
                     </Card>}
             </div>

@@ -14,6 +14,7 @@ export class StatBlockEntity implements Entity {
     ArmorClass;
     Speed;
     Conditions = new SmartMap<string, number>();
+    SpellSaveDC: number;
     SpellSlots = new SmartMap<number, { total: number, used: number }>();
     Concentration = false;
     Reactions;
@@ -23,6 +24,7 @@ export class StatBlockEntity implements Entity {
     Displayable;
     StatBlock: StatBlock;
     EntityType = EntityType.StatBlock;
+    SavingThrows;
 
     constructor(statBlock: StatBlock, initiative: number = 0, IsHostile: boolean = true) {
         this.id = (hashCode(statBlock.Name) * Math.random()).toString(16);
@@ -36,6 +38,15 @@ export class StatBlockEntity implements Entity {
         this.ArmorClass = statBlock.Stats.ArmorClass;
         this.Speed = statBlock.Stats.Speed;
         this.Displayable = statBlock;
+        this.SavingThrows = {
+            Strength: modifierOf(statBlock.Stats.Strength),
+            Dexterity: modifierOf(statBlock.Stats.Dexterity),
+            Constitution: modifierOf(statBlock.Stats.Constitution),
+            Intelligence: modifierOf(statBlock.Stats.Intelligence),
+            Wisdom: modifierOf(statBlock.Stats.Wisdom),
+            Charisma: modifierOf(statBlock.Stats.Charisma)
+        }
+        this.SpellSaveDC = statBlock.Details.SpellSaveDC||0;
     }
 
     tick(): void {
