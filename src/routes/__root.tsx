@@ -2,6 +2,7 @@ import React, { Suspense } from "react"
 import { createRootRouteWithContext, Link, Outlet } from "@tanstack/react-router"
 import { RouterContext } from "@src/router"
 import "@src/styles/main.scss"
+import "@src/styles/normalize.scss"
 
 const TanStackRouterDevtools =
     process.env.NODE_ENV === "production"

@@ -6,6 +6,7 @@ export class Encounter {
     Description: string
     Metadata: {
         CreationDate: Date,
+        AccessedDate: Date,
         Campaign: string,
     }
     Entities: Entity[] = []
@@ -15,6 +16,7 @@ export class Encounter {
         this.Description = description
         this.Metadata = {
             CreationDate: new Date(),
+            AccessedDate: new Date(),
             Campaign: Campaign
         }
     }

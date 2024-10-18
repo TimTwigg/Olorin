@@ -39,6 +39,7 @@ export interface Entity {
         Wisdom: number
         Charisma: number
     }
+    DifficultyRating: number
 
     tick(): void
     setSuffix(suffix: string): void

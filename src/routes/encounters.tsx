@@ -16,6 +16,7 @@ export const Route = createFileRoute("/encounters")({
 function Encounters() {
     const [encounters, SetEncounters] = React.useState<Encounter[]>([]);
     const [activeEncounter, SetActiveEncounter] = React.useState<Encounter | null>(null);
+    const [runningEncounter, SetRunningEncounter] = React.useState<boolean>(false);
     const [DisplayEntity, SetDisplayEntity] = React.useState<Entity | undefined>();
     const [RenderTrigger, SetRenderTrigger] = React.useState(true);
     const [Config, SetConfig] = React.useState<UserOptions>(new UserOptions());
@@ -41,10 +42,10 @@ function Encounters() {
         else return <></>;
     }
 
-    const renderEntities = () => {
+    const renderEntities = (overviewOnly: boolean) => {
         let entities = activeEncounter?.Entities || [];
         entities.sort((a, b) => b.Initiative - a.Initiative);
-        return entities.map((entity, ind) => <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} />);
+        return entities.map((entity, ind) => <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} />);
     }
 
     React.useEffect(() => {
@@ -75,6 +76,7 @@ function Encounters() {
                         <th>Description</th>
                         <th>Campaign</th>
                         <th>Creation Date</th>
+                        <th>Last Accessed</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -85,6 +87,7 @@ function Encounters() {
                                 <td>{encounter.Description}</td>
                                 <td>{encounter.Metadata.Campaign}</td>
                                 <td>{encounter.Metadata.CreationDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</td>
+                                <td>{encounter.Metadata.AccessedDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</td>
                             </tr>
                         );
                     })}
@@ -96,7 +99,7 @@ function Encounters() {
     // Encounter Play Screen
     return (
         <div className="playScreen container">
-            <span className="three columns"><button className="big button" onClick={() => SetActiveEncounter(null)}>Back to Encounters</button></span>
+            <span className="three columns"><button className="big button" onClick={() => { SetRunningEncounter(false), SetActiveEncounter(null) }}>Back to Encounters</button></span>
             <h3 className="seven columns">{activeEncounter.Name}</h3>
             <section className="two columns">
                 <span><strong>Created On:</strong> {activeEncounter.Metadata.CreationDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</span><br />
@@ -104,11 +107,15 @@ function Encounters() {
             </section>
             <div className="break" />
             <hr />
-            <p>{activeEncounter.Description}</p>
+            <p className="nine columns">{activeEncounter.Description}</p>
+            <span className="three columns"><button className="big button" onClick={() => { SetRunningEncounter(!runningEncounter), TriggerReRender() }}>{runningEncounter ? "Pause" : "Start"} Encounter</button></span>
+            <div className="break" />
+            <hr />
+            <section></section>
             <hr />
             <section className="panel">
                 <div>
-                    {RenderTrigger && renderEntities()}
+                    {RenderTrigger && renderEntities(!runningEncounter)}
                 </div>
                 <div>
                     {DisplayEntity && renderDisplayEntity(DisplayEntity)}

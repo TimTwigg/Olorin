@@ -25,6 +25,7 @@ export class StatBlockEntity implements Entity {
     StatBlock: StatBlock;
     EntityType = EntityType.StatBlock;
     SavingThrows;
+    DifficultyRating;
 
     constructor(statBlock: StatBlock, initiative: number = 0, IsHostile: boolean = true) {
         this.id = (hashCode(statBlock.Name) * Math.random()).toString(16);
@@ -47,6 +48,7 @@ export class StatBlockEntity implements Entity {
             Charisma: modifierOf(statBlock.Stats.Charisma)
         }
         this.SpellSaveDC = statBlock.Details.SpellSaveDC||0;
+        this.DifficultyRating = statBlock.ChallengeRating;
     }
 
     tick(): void {

@@ -24,6 +24,7 @@ import {
 import { FaSwimmer, FaAddressCard } from "react-icons/fa"
 import { SlLockOpen } from "react-icons/sl"
 import { AiFillLock } from "react-icons/ai"
+import { TbPencilOff, TbPencil } from "react-icons/tb"
 
 type EntityDisplayProps = {
     entity: Entity,
@@ -31,7 +32,8 @@ type EntityDisplayProps = {
     expanded?: boolean,
     userOptions?: UserOptions,
     setDisplay?: (entity?: Entity) => void,
-    renderTrigger?: () => void
+    renderTrigger?: () => void,
+    overviewOnly?: boolean
 };
 
 enum ControlOptions {
@@ -60,11 +62,11 @@ function renderSpeed(speed: Entity["Speed"]): JSX.Element {
 function renderConditions(conditions: SmartMap<string, number>): JSX.Element {
     if (conditions.size === 0) return <></>;
     return (<div>
-        <strong>Conditions:</strong> {conditions.map<string>((num, cond) => `${cond} (${num} round${num==1?'':'s'}) `)}<br />
+        <strong>Conditions:</strong> {conditions.map<string>((num, cond) => `${cond} (${num} round${num == 1 ? '' : 's'}) `)}<br />
     </div>)
 }
 
-export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, setDisplay, renderTrigger }: EntityDisplayProps) {
+export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, setDisplay, renderTrigger, overviewOnly }: EntityDisplayProps) {
     const [ExpandedState, SetExpandedState] = React.useState<boolean>(expanded || false);
     const [ControlState, SetControlState] = React.useState<ControlOptions>(ControlOptions.None);
     const [Locked, SetLocked] = React.useState<boolean>(entity.EncounterLocked);
@@ -77,9 +79,10 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
     const [TempHitpoints, SetTempHitpoints] = React.useState<number>(entity.TempHitPoints);
     const [ACBonus, SetACBonus] = React.useState<number>(0);
     const [Conditions, SetConditions] = React.useState<SmartMap<string, number>>(new SmartMap<string, number>());
+    const [readonly, SetReadonly] = React.useState<boolean>(false);
 
     const ConditionTypes: string[] = userOptions?.conditions || [];
-    setDisplay = setDisplay || ((entity?: Entity) => { console.log(`No display callback found for entity: ${entity?entity.Name:"undefined"}`) });
+    setDisplay = setDisplay || ((entity?: Entity) => { console.log(`No display callback found for entity: ${entity ? entity.Name : "undefined"}`) });
     renderTrigger = renderTrigger || (() => { console.log("No render trigger found") });
 
     const FlipExpandedState = () => {
@@ -129,12 +132,9 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
 
     const renderSettingsControl = () => {
         return <>
-            {Locked ?
-                <span><button onClick={_ => LockEntity(false)} className="icon"><AiFillLock /><br />Locked</button></span>
-                :
-                <span><button onClick={_ => LockEntity(true)} className="icon"><SlLockOpen /><br />Unlocked</button></span>
-            }
-            <span><button onClick={_ => { deleteCallback(entity.id) }} disabled={Locked} className="icon"><GiTrashCan /><br />Delete</button></span>
+            <span><button onClick={_ => LockEntity(!Locked)} className="icon">{Locked ? <AiFillLock /> : <SlLockOpen />}<br />{Locked ? "Locked" : "Unlocked"}</button></span>
+            <span><button onClick={_ => SetReadonly(!readonly)} className="icon">{readonly ? <TbPencilOff /> : <TbPencil />}<br />{readonly ? "Read Only" : "Edit"}</button></span>
+            <span><button onClick={_ => deleteCallback(entity.id)} disabled={Locked} className="icon"><GiTrashCan /><br />Delete</button></span>
         </>
     }
 
@@ -152,21 +152,21 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
         return <>
             <span>
                 <p>Hit Points</p>
-                <button onClick={_ => { entity.damage(LocalNumericalState), SetCurrentHitpoints(entity.CurrentHitPoints), SetTempHitpoints(entity.TempHitPoints), SetControlState(ControlOptions.None) }} className="leftButton">-</button>
-                <input type="number" min={0} placeholder="Adjust" onChange={e => SetLocalNumericalState(parseInt(e.target.value))} />
-                <button onClick={_ => { entity.heal(LocalNumericalState), SetCurrentHitpoints(entity.CurrentHitPoints), SetControlState(ControlOptions.None) }} className="rightButton">+</button>
+                <button onClick={_ => { entity.damage(LocalNumericalState), SetCurrentHitpoints(entity.CurrentHitPoints), SetTempHitpoints(entity.TempHitPoints), SetControlState(ControlOptions.None) }} className="leftButton" disabled={readonly}>-</button>
+                <input type="number" min={0} placeholder="Adjust" onChange={e => SetLocalNumericalState(parseInt(e.target.value))} disabled={readonly} />
+                <button onClick={_ => { entity.heal(LocalNumericalState), SetCurrentHitpoints(entity.CurrentHitPoints), SetControlState(ControlOptions.None) }} className="rightButton" disabled={readonly}>+</button>
             </span>
             <span>
                 <p>Temp Hit Points</p>
-                <input type="number" min={0} placeholder="Set" onChange={e => SetLocalNumericalState2(parseInt(e.target.value))} className="curveLeft" />
-                <button onClick={_ => { SetTempHitpoints(LocalNumericalState2), entity.addTempHP(LocalNumericalState2), SetControlState(ControlOptions.None) }} className="rightButton"><GiCheckMark /></button>
+                <input type="number" min={0} placeholder="Set" onChange={e => SetLocalNumericalState2(parseInt(e.target.value))} className="curveLeft" disabled={readonly} />
+                <button onClick={_ => { SetTempHitpoints(LocalNumericalState2), entity.addTempHP(LocalNumericalState2), SetControlState(ControlOptions.None) }} className="rightButton" disabled={readonly}><GiCheckMark /></button>
             </span>
             <span>
                 <p>Max Hit Points</p>
-                <input type="number" min={0} placeholder="Set" onChange={e => SetLocalNumericalState3(parseInt(e.target.value))} className="curveLeft" />
-                <button onClick={_ => { SetMaxHitpoints(LocalNumericalState3), entity.setMaxHP(LocalNumericalState3), SetCurrentHitpoints(entity.CurrentHitPoints), SetControlState(ControlOptions.None) }} className="rightButton"><GiCheckMark /></button>
+                <input type="number" min={0} placeholder="Set" onChange={e => SetLocalNumericalState3(parseInt(e.target.value))} className="curveLeft" disabled={readonly} />
+                <button onClick={_ => { SetMaxHitpoints(LocalNumericalState3), entity.setMaxHP(LocalNumericalState3), SetCurrentHitpoints(entity.CurrentHitPoints), SetControlState(ControlOptions.None) }} className="rightButton" disabled={readonly}><GiCheckMark /></button>
             </span>
-            <span><button onClick={_ => { SetTempHitpoints(0), SetCurrentHitpoints(0), entity.kill(), SetControlState(ControlOptions.None) }} className="icon">Kill<br /><GiDeathSkull /></button></span>
+            {!overviewOnly && <span><button onClick={_ => { SetTempHitpoints(0), SetCurrentHitpoints(0), entity.kill(), SetControlState(ControlOptions.None) }} className="icon" disabled={readonly}>Kill<br /><GiDeathSkull /></button></span>}
         </>
     }
 
@@ -174,16 +174,16 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
         return <>
             <span>
                 <p>Armor Class</p>
-                <button onClick={_ => { SetACBonus(-LocalNumericalState), SetControlState(ControlOptions.None) }} className="leftButton">-</button>
-                <input type="number" min={0} placeholder="Modify" onChange={e => { SetLocalNumericalState(parseInt(e.target.value)) }} />
-                <button onClick={_ => { SetACBonus(LocalNumericalState), SetControlState(ControlOptions.None) }} className="rightButton">+</button>
+                <button onClick={_ => { SetACBonus(-LocalNumericalState), SetControlState(ControlOptions.None) }} className="leftButton" disabled={readonly}>-</button>
+                <input type="number" min={0} placeholder="Modify" onChange={e => { SetLocalNumericalState(parseInt(e.target.value)) }} disabled={readonly} />
+                <button onClick={_ => { SetACBonus(LocalNumericalState), SetControlState(ControlOptions.None) }} className="rightButton" disabled={readonly}>+</button>
             </span>
         </>
     }
 
     const renderConditionsControl = () => {
         return <span className="conditionCheckBoxes">
-            {ConditionTypes.map((condition, ind) => <section key={ind}><input type="checkbox" name={condition} id={condition} defaultChecked={Conditions.has(condition)} onChange={e => { UpdateConditions(condition, e.target.checked) }} /><label htmlFor={condition}>{condition}</label></section>)}
+            {ConditionTypes.map((condition, ind) => <section key={ind}><input type="checkbox" name={condition} id={condition} defaultChecked={Conditions.has(condition)} onChange={e => { UpdateConditions(condition, e.target.checked) }} disabled={readonly} /><label htmlFor={condition}>{condition}</label></section>)}
         </span>
     }
 
@@ -199,6 +199,39 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
         </>
     }
 
+    if (overviewOnly) return (
+        <div className="entity overview">
+            <div className="displayCardInfo">
+                <label>Initiative</label>
+                <input type="number" min={0} defaultValue={entity.Initiative === 0 ? undefined : entity.Initiative} onChange={e => { SetInitiative(parseInt(e.target.value)), entity.setInitiative(parseInt(e.target.value)) }} />
+            </div>
+            <div className="displayCard" style={{ columnCount: 2 }}>
+                <h4 style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && CurrentHitpoints > 0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix > "" ? ` (${entity.Suffix})` : ""}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</h4>
+                <strong>Challenge Rating:</strong> {entity.DifficultyRating}<br />
+                <strong>Max Hit Points:</strong> {MaxHitpoints}<br />
+                <strong>Armor Class:</strong> {entity.ArmorClass + ACBonus}{ACBonus === 0 ? "" : ` (${entity.ArmorClass}${ACBonus > 0 ? "+" : ""}${ACBonus})`}<br />
+                
+            </div>
+            <div className="displayCardControls">
+                <div className="controls">
+                    <button onClick={_ => FlipControlState(ControlOptions.Settings)} title="Settings"><GiCog /></button>
+                    <button onClick={_ => FlipControlState(ControlOptions.Hitpoints)} title="HitPoints"><GiHalfHeart /></button>
+                    <button onClick={_ => FlipControlState(ControlOptions.AC)} title="AC"><GiShield /></button>
+                    <button onClick={_ => FlipControlState(ControlOptions.Notes)} title="Notes"><GiPencil /></button>
+                    <button onClick={_ => FlipControlState(ControlOptions.Display)} title="Display"><FaAddressCard /></button>
+                </div>
+                {(ControlState === ControlOptions.None || ControlState === ControlOptions.Display) ? null :
+                    <div className="suboptions">
+                        {ControlState === ControlOptions.Settings ? renderSettingsControl() : null}
+                        {ControlState === ControlOptions.Hitpoints ? renderHitpointsControl() : null}
+                        {ControlState === ControlOptions.AC ? renderACControl() : null}
+                        {ControlState === ControlOptions.Notes ? renderNotesControl() : null}
+                    </div>
+                }
+            </div>
+        </div>
+    );
+
     return (
         <div className="entity">
             <div className="displayCardInfo">
@@ -207,20 +240,20 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
             <div className="displayCard" onClick={FlipExpandedState}>
                 {ExpandedState ?
                     <Card className="expanded" style={{ columnCount: 2 }}>
-                        <h4 style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && CurrentHitpoints>0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix>""?` (${entity.Suffix})`:""}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</h4>
+                        <h4 style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && CurrentHitpoints > 0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix > "" ? ` (${entity.Suffix})` : ""}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</h4>
                         <strong>Hit Points:</strong> {CurrentHitpoints} {TempHitpoints > 0 ? ` (+${TempHitpoints})` : null} / {MaxHitpoints}<br />
-                        <strong>Armor Class:</strong> {entity.ArmorClass+ACBonus}{ACBonus===0?"":` (${entity.ArmorClass}${ACBonus>0?"+":""}${ACBonus})`}<br />
+                        <strong>Armor Class:</strong> {entity.ArmorClass + ACBonus}{ACBonus === 0 ? "" : ` (${entity.ArmorClass}${ACBonus > 0 ? "+" : ""}${ACBonus})`}<br />
                         {renderSpeed(entity.Speed)}
-                        <strong>Saves:</strong> DEX {entity.SavingThrows.Dexterity>=0?"+":""}{entity.SavingThrows.Dexterity} WIS {entity.SavingThrows.Wisdom>=0?"+":""}{entity.SavingThrows.Wisdom} CON {entity.SavingThrows.Constitution>=0?"+":""}{entity.SavingThrows.Constitution}<br />
-                        {entity.SpellSaveDC>0?<><strong>Spell Save DC:</strong> {entity.SpellSaveDC}<br /></>:null}
+                        <strong>Saves:</strong> DEX {entity.SavingThrows.Dexterity >= 0 ? "+" : ""}{entity.SavingThrows.Dexterity} WIS {entity.SavingThrows.Wisdom >= 0 ? "+" : ""}{entity.SavingThrows.Wisdom} CON {entity.SavingThrows.Constitution >= 0 ? "+" : ""}{entity.SavingThrows.Constitution}<br />
+                        {entity.SpellSaveDC > 0 ? <><strong>Spell Save DC:</strong> {entity.SpellSaveDC}<br /></> : null}
                         {renderConditions(Conditions)}
                     </Card>
                     :
                     <Card className="collapsed">
-                        <span className="h4" style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && CurrentHitpoints>0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix>""?` (${entity.Suffix})`:""}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</span>
+                        <span className="h4" style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && CurrentHitpoints > 0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix > "" ? ` (${entity.Suffix})` : ""}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</span>
                         <p>
                             <span><strong>HP:</strong> {CurrentHitpoints} {TempHitpoints > 0 ? ` (+${TempHitpoints})` : null} / {MaxHitpoints}</span>
-                            <span><strong>AC:</strong> {entity.ArmorClass+ACBonus}{ACBonus===0?"":` (${entity.ArmorClass}${ACBonus>0?"+":""}${ACBonus})`}</span>
+                            <span><strong>AC:</strong> {entity.ArmorClass + ACBonus}{ACBonus === 0 ? "" : ` (${entity.ArmorClass}${ACBonus > 0 ? "+" : ""}${ACBonus})`}</span>
                         </p>
                     </Card>}
             </div>
