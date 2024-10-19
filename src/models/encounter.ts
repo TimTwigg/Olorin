@@ -14,7 +14,7 @@ export class Encounter {
     Metadata: EncounterMetadata
     Entities: Entity[] = []
 
-    constructor(name: string, description: string, Campaign: string = "") {
+    constructor(name: string = "", description: string = "", Campaign: string = "") {
         this.Name = name
         this.Description = description
         this.Metadata = {
@@ -25,7 +25,7 @@ export class Encounter {
         }
     }
 
-    addEntity(entity: Entity): void {
+    addEntity(entity: Entity): Encounter {
         let entityCounts = new SmartMap<string, number>();
         for (let entity of this.Entities) {
             entityCounts.set(entity.Name, entityCounts.dGet(entity.Name, 0) + 1);
@@ -38,11 +38,12 @@ export class Encounter {
             entity.setSuffix((entityCounts.get(entity.Name)+1).toString());
         }
         this.Entities.push(entity);
+        return this;
     }
 
     tick(): void {
         for (let entity of this.Entities) {
-            entity.tick()
+            entity.tick();
         }
     }
 
@@ -50,9 +51,19 @@ export class Encounter {
         this.Entities.filter((e) => (e.EncounterLocked));
     }
 
-    reset() {
+    reset(): Encounter {
         this.Entities.forEach((e) => e.resetAll());
         this.Metadata.Started = false;
-        return this
+        return this;
+    }
+
+    withName(name: string): Encounter {
+        this.Name = name;
+        return this;
+    }
+
+    withDescription(description: string): Encounter {
+        this.Description = description;
+        return this;
     }
 }

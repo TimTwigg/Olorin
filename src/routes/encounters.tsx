@@ -4,14 +4,18 @@ import { createFileRoute } from "@tanstack/react-router"
 import * as api from "@src/controllers/api"
 import { Encounter, EncounterMetadata } from "@src/models/encounter"
 import { EntityDisplay } from "@src/components/entityDisplay"
-import { Entity, EntityType } from "@src/models/entity"
+import { Entity, EntityOverview, EntityType } from "@src/models/entity"
 import { StatBlockDisplay } from "@src/components/statBlockDisplay"
 import { StatBlock } from "@src/models/statBlock"
 import { UserOptions } from "@src/models/userOptions"
 
+import { FaAddressCard } from "react-icons/fa"
+
 export const Route = createFileRoute("/encounters")({
     component: Encounters,
 })
+
+const CACHESIZE = 10;
 
 function Encounters() {
     const [encounters, SetEncounters] = React.useState<Encounter[]>([]);
@@ -22,6 +26,18 @@ function Encounters() {
     const [Config, SetConfig] = React.useState<UserOptions>(new UserOptions());
     const [EncounterIsActive, SetEncounterIsActive] = React.useState<boolean>(false);
     const [EditingEncounter, SetEditingEncounter] = React.useState<boolean>(false);
+    const [LocalStringState1, SetLocalStringState1] = React.useState<string>("");
+    const [LocalStringState2, SetLocalStringState2] = React.useState<string>("");
+    const [LocalStringState3, SetLocalStringState3] = React.useState<string>("");
+    const [CreatureList, SetCreatureList] = React.useState<EntityOverview[]>([]);
+    const [FullEntityList, SetFullEntityList] = React.useState<Entity[]>([]);
+
+    const appendToEntityList = (entity: Entity) => {
+        let list = FullEntityList;
+        let newLength = list.push(entity);
+        if (newLength > CACHESIZE) list.shift();
+        SetFullEntityList(list);
+    }
 
     async function TriggerReRender() {
         SetRenderTrigger(false);
@@ -57,9 +73,33 @@ function Encounters() {
         SetActiveEncounter(enc);
     }
 
-    const renderDisplayEntity = (ent?: Entity) => {
+    const createNewEncounter = () => {
+        let enc = new Encounter();
+        enc.Metadata.CreationDate = new Date();
+        enc.Metadata.AccessedDate = new Date();
+        SetActiveEncounter(enc);
+        SetEditingEncounter(true);
+        SetEncounters([...encounters, enc]);
+    }
+
+    const initializeStatesForEditing = () => {
+        if (EditingEncounter) return;
+        SetLocalStringState1(activeEncounter?.Name || "");
+        SetLocalStringState2(activeEncounter?.Metadata.Campaign || "");
+        SetLocalStringState3(activeEncounter?.Description || "");
+    }
+
+    const saveEncounterChanges = () => {
+        if (!activeEncounter) return;
+        SetActiveEncounter(activeEncounter.withName(LocalStringState1));
+        updateMetadata({ Campaign: LocalStringState2 });
+        SetActiveEncounter(activeEncounter.withDescription(LocalStringState3));
+        SetEditingEncounter(false);
+    }
+
+    const renderDisplayEntity = (ent?: Entity, overviewOnly: boolean = false) => {
         if (!ent) return <></>;
-        else if (ent.EntityType === EntityType.StatBlock) return <StatBlockDisplay statBlock={ent.Displayable as StatBlock} deleteCallback={() => SetDisplayEntity(undefined)} />;
+        else if (ent.EntityType === EntityType.StatBlock) return <StatBlockDisplay statBlock={ent.Displayable as StatBlock} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={overviewOnly ? 1 : Config.defaultColumns || 2} />;
         else if (ent.EntityType === EntityType.Player) return <></>;
         else return <></>;
     }
@@ -67,7 +107,44 @@ function Encounters() {
     const renderEntities = (overviewOnly: boolean) => {
         let entities = activeEncounter?.Entities || [];
         entities.sort((a, b) => b.Initiative - a.Initiative);
-        return entities.map((entity, ind) => <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} />);
+        return entities.map((entity, ind) => <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} />);
+    }
+
+    const getEntities = (page: number) => {
+        api.getEntities("dummy", page, 1).then((res) => {
+            SetCreatureList(res.Entities.map(e => e as EntityOverview));
+        });
+    }
+
+    const getEntity = (entityName: string): Promise<Entity | undefined> => {
+        return api.getEntity("dummy", entityName).then((res) => {
+            if (res.Entity === undefined) return;
+            appendToEntityList(res.Entity);
+            return res.Entity;
+        });
+    }
+
+    const displayMiscEntity = (entityName: string) => {
+        let entity = FullEntityList.find((ent) => ent.Name === entityName);
+        if (entity) SetDisplayEntity(entity);
+        else {
+            getEntity(entityName).then((ent) => {
+                if (ent) SetDisplayEntity(ent);
+            });
+        }
+    }
+
+    const addMiscEntity = (entityName: string) => {
+        console.log("Adding entity: " + entityName);
+        if (!activeEncounter) return;
+        let entity = FullEntityList.find((ent) => ent.Name === entityName);
+        if (!entity) {
+            getEntity(entityName).then((ent) => {
+                if (ent) SetActiveEncounter(activeEncounter.addEntity(ent));
+            });
+        }
+        else SetActiveEncounter(activeEncounter.addEntity(entity));
+        TriggerReRender();
     }
 
     React.useEffect(() => {
@@ -82,13 +159,17 @@ function Encounters() {
         });
     }, []);
 
+    React.useEffect(() => {
+        getEntities(1);
+    }, []);
+
     // Encounters Overview
     if (!activeEncounter) return (
         <>
             <h1>Encounters</h1>
             <div className="twelve columns">
                 <h3 className="eight columns offset-by-one column">My Encounters</h3>
-                <button className="two columns">Create New Encounter</button>
+                <button className="two columns" onClick={createNewEncounter}>Create New Encounter</button>
             </div>
             <div className="break" />
             <table className="ten columns offset-by-one column">
@@ -121,39 +202,80 @@ function Encounters() {
     // Encounter Play Screen
     return (
         <div className="playScreen container">
-            <span className="three columns"><button className="big button" onClick={() => { resetAllStates() }}>Back to Encounters</button></span>
-            <h3 className="seven columns">{activeEncounter.Name}</h3>
-            <section className="two columns">
-                <span><strong>Created On:</strong> {activeEncounter.Metadata.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</span><br />
-                <span><strong>Campaign:</strong> {activeEncounter.Metadata.Campaign}</span>
+            <section className="justify-between">
+                <span className="three columns"><button className="big button" onClick={() => { resetAllStates() }}>Back to Encounters</button></span>
+                {EditingEncounter ?
+                    <span className="six columns titleEdit"><input type="text" defaultValue={LocalStringState1} onChange={(e) => { SetLocalStringState1(e.target.value) }} /></span>
+                    :
+                    <h3 className="six columns">{activeEncounter.Name}</h3>
+                }
+                <section className="three columns">
+                    <span><strong>Created On:</strong> {activeEncounter.Metadata.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</span><br />
+                    <span><strong>Campaign:</strong> {EditingEncounter ? <input type="text" defaultValue={LocalStringState2} onChange={e => { SetLocalStringState2(e.target.value) }} /> : activeEncounter.Metadata.Campaign}</span>
+                </section>
             </section>
             <div className="break" />
             <hr />
-            <p>{activeEncounter.Description}</p>
+            {EditingEncounter ?
+                <input type="text" className="ten columns descriptionEdit" defaultValue={LocalStringState3} onChange={(e) => { SetLocalStringState3(e.target.value) }} />
+                :
+                <p>{activeEncounter.Description}</p>
+            }
+            <div className="break" />
             <hr />
             <section className="container">
                 <section id="buttonSet1" className="five columns">
-                    <button onClick={() => { SetEditingEncounter(!EditingEncounter) }} disabled={runningEncounter} >{EditingEncounter ? "Save Changes" : "Edit Mode"}</button>
-                    <button onClick={() => { SetRunningEncounter(!runningEncounter), SetEncounterIsActive(true), updateMetadata({ Started: true }), TriggerReRender() }} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
+                    <button onClick={() => { initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter), updateMetadata({ AccessedDate: new Date() }) }} disabled={runningEncounter} >{EditingEncounter ? "Cancel" : "Edit Mode"}</button>
+                    <button onClick={() => { SetRunningEncounter(!runningEncounter), SetEncounterIsActive(true), updateMetadata({ Started: true, AccessedDate: new Date() }), TriggerReRender() }} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
                     <button onClick={() => { SetActiveEncounter(activeEncounter.reset()), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter} >Reset Encounter</button>
                 </section>
                 <section id="mode-log">
-                    <p>{EditingEncounter?"Editing":""}</p>
+                    <p>{EditingEncounter ? "Editing" : ""}</p>
                 </section>
                 <section id="buttonSet2" className="five columns">
-                    <button onClick={() => { SetEditingEncounter(false) }} disabled={!EditingEncounter} ></button>
-                    <button onClick={() => { }} disabled={!EditingEncounter} >Add Entity</button>
-                    <button onClick={() => { }} disabled={!EditingEncounter} ></button>
+                    <button onClick={saveEncounterChanges} disabled={!EditingEncounter} >Save Changes</button>
+                    <button onClick={() => { }} disabled={!EditingEncounter} >Add Creature</button>
+                    <button onClick={() => { }} disabled={!EditingEncounter} >Add Player</button>
                 </section>
                 <div className="break" />
             </section>
             <hr />
             <section className="panel">
-                <div>
+                <div id="EncounterList">
                     {RenderTrigger && renderEntities(!runningEncounter)}
                 </div>
-                <div>
-                    {DisplayEntity && renderDisplayEntity(DisplayEntity)}
+                <div id="CreatureList" style={{display:runningEncounter?"none":"block"}}>
+                    {EditingEncounter &&
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Size</th>
+                                    <th>CR</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {CreatureList.map((creature, ind) => {
+                                    return (
+                                        <tr key={`${creature.Name}${ind}`}>
+                                            <td>{creature.Name}</td>
+                                            <td>{creature.Type}</td>
+                                            <td>{creature.Size}</td>
+                                            <td>{creature.DifficultyRating}</td>
+                                            <td><button className="iconButton" onClick={() => { displayMiscEntity(creature.Name) }}><FaAddressCard /></button></td>
+                                            <td><button className="iconButton" onClick={() => { addMiscEntity(creature.Name) }}>+</button></td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    }
+                </div>
+                <div id="StatBlockDisplay" style={{maxWidth:runningEncounter?"none":"30%", margin:runningEncounter?"0 10rem":"0"}}>
+                    {DisplayEntity && renderDisplayEntity(DisplayEntity, !runningEncounter)}
                 </div>
             </section>
         </div>

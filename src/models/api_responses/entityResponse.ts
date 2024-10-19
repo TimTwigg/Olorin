@@ -1,5 +1,9 @@
-import { Entity } from "@src/models/entity"
+import { Entity, EntityOverview } from "@src/models/entity"
 
 export type EntityResponse = {
-    Entities: Entity[]|string[]
+    Entities: Entity[]|EntityOverview[]
+}
+
+export type SingleEntityResponse = {
+    Entity: Entity|undefined
 }

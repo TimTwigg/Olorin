@@ -34,6 +34,7 @@ type EntityDisplayProps = {
     setDisplay?: (entity?: Entity) => void,
     renderTrigger?: () => void,
     overviewOnly?: boolean
+    editMode?: boolean
 };
 
 enum ControlOptions {
@@ -66,7 +67,7 @@ function renderConditions(conditions: SmartMap<string, number>): JSX.Element {
     </div>)
 }
 
-export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, setDisplay, renderTrigger, overviewOnly }: EntityDisplayProps) {
+export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, setDisplay, renderTrigger, overviewOnly, editMode }: EntityDisplayProps) {
     const [ExpandedState, SetExpandedState] = React.useState<boolean>(expanded || false);
     const [ControlState, SetControlState] = React.useState<ControlOptions>(ControlOptions.None);
     const [Locked, SetLocked] = React.useState<boolean>(entity.EncounterLocked);
@@ -214,12 +215,16 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
         <div className="entity overview">
             <div className="displayCardInfo">
                 <label>Initiative</label>
-                <input type="number" min={0} defaultValue={entity.Initiative === 0 ? undefined : entity.Initiative} onChange={e => { SetInitiative(parseInt(e.target.value)), entity.setInitiative(parseInt(e.target.value)) }} />
+                {editMode ?
+                    <input type="number" min={0} defaultValue={entity.Initiative === 0 ? undefined : entity.Initiative} onChange={e => { SetInitiative(parseInt(e.target.value)), entity.setInitiative(parseInt(e.target.value)) }} />
+                    :
+                    <section>{entity.Initiative}</section>
+                }
             </div>
             <div className="displayCard" style={{ columnCount: 2 }}>
                 <h4 style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && CurrentHitpoints > 0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix > "" ? ` (${entity.Suffix})` : ""}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</h4>
                 <strong>Challenge Rating:</strong> {entity.DifficultyRating}<br />
-                <strong>Hit Points:</strong> {CurrentHitpoints < MaxHitpoints?` ${CurrentHitpoints} / ${MaxHitpoints}`:MaxHitpoints}<br />
+                <strong>Hit Points:</strong> {CurrentHitpoints < MaxHitpoints ? ` ${CurrentHitpoints} / ${MaxHitpoints}` : MaxHitpoints}<br />
                 <strong>Armor Class:</strong> {entity.ArmorClass + ACBonus}{ACBonus === 0 ? "" : ` (${entity.ArmorClass}${ACBonus > 0 ? "+" : ""}${ACBonus})`}<br />
             </div>
             <div className="displayCardControls">

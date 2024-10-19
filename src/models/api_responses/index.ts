@@ -1,9 +1,10 @@
 import { EncounterResponse } from "./encounterResponse"
 import { ConditionResponse } from "./conditionResponse"
-import { EntityResponse } from "./entityResponse"
+import { EntityResponse, SingleEntityResponse } from "./entityResponse"
 
 export type {
     EncounterResponse,
     ConditionResponse,
-    EntityResponse
+    EntityResponse,
+    SingleEntityResponse
 }

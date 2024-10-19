@@ -5,6 +5,20 @@ export enum EntityType {
     Player
 }
 
+export class EntityOverview {
+    Name: string
+    Type: string
+    Size: string
+    DifficultyRating: number
+
+    constructor(Name: string, Type: string, Size: string, DifficultyRating: number) {
+        this.Name = Name
+        this.Type = Type
+        this.Size = Size
+        this.DifficultyRating = DifficultyRating
+    }
+}
+
 export interface Entity {
     id: string
     Name: string
