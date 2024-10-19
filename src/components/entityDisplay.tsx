@@ -77,13 +77,24 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
     const [MaxHitpoints, SetMaxHitpoints] = React.useState<number>(entity.MaxHitPoints);
     const [CurrentHitpoints, SetCurrentHitpoints] = React.useState<number>(entity.CurrentHitPoints);
     const [TempHitpoints, SetTempHitpoints] = React.useState<number>(entity.TempHitPoints);
-    const [ACBonus, SetACBonus] = React.useState<number>(0);
+    const [ACBonus, SetACBonus] = React.useState<number>(entity.ArmorClassBonus);
     const [Conditions, SetConditions] = React.useState<SmartMap<string, number>>(new SmartMap<string, number>());
     const [readonly, SetReadonly] = React.useState<boolean>(false);
 
     const ConditionTypes: string[] = userOptions?.conditions || [];
     setDisplay = setDisplay || ((entity?: Entity) => { console.log(`No display callback found for entity: ${entity ? entity.Name : "undefined"}`) });
     renderTrigger = renderTrigger || (() => { console.log("No render trigger found") });
+
+    // const ResetAllStates = () => {
+    //     SetLocalNumericalState(0);
+    //     SetLocalNumericalState2(0);
+    //     SetLocalNumericalState3(0);
+    //     SetMaxHitpoints(entity.MaxHitPoints);
+    //     SetCurrentHitpoints(entity.CurrentHitPoints);
+    //     SetTempHitpoints(entity.TempHitPoints);
+    //     SetACBonus(entity.ArmorClassBonus);
+    //     SetConditions(new SmartMap<string, number>());
+    // }
 
     const FlipExpandedState = () => {
         if (ExpandedState && ControlState !== ControlOptions.None) SetControlState(ControlOptions.None);
@@ -174,9 +185,9 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
         return <>
             <span>
                 <p>Armor Class</p>
-                <button onClick={_ => { SetACBonus(-LocalNumericalState), SetControlState(ControlOptions.None) }} className="leftButton" disabled={readonly}>-</button>
+                <button onClick={_ => { entity.setACBonus(-LocalNumericalState), SetACBonus(entity.ArmorClassBonus), SetControlState(ControlOptions.None) }} className="leftButton" disabled={readonly}>-</button>
                 <input type="number" min={0} placeholder="Modify" onChange={e => { SetLocalNumericalState(parseInt(e.target.value)) }} disabled={readonly} />
-                <button onClick={_ => { SetACBonus(LocalNumericalState), SetControlState(ControlOptions.None) }} className="rightButton" disabled={readonly}>+</button>
+                <button onClick={_ => { entity.setACBonus(LocalNumericalState), SetACBonus(entity.ArmorClassBonus), SetControlState(ControlOptions.None) }} className="rightButton" disabled={readonly}>+</button>
             </span>
         </>
     }
@@ -208,9 +219,8 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
             <div className="displayCard" style={{ columnCount: 2 }}>
                 <h4 style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && CurrentHitpoints > 0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix > "" ? ` (${entity.Suffix})` : ""}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</h4>
                 <strong>Challenge Rating:</strong> {entity.DifficultyRating}<br />
-                <strong>Max Hit Points:</strong> {MaxHitpoints}<br />
+                <strong>Hit Points:</strong> {CurrentHitpoints < MaxHitpoints?` ${CurrentHitpoints} / ${MaxHitpoints}`:MaxHitpoints}<br />
                 <strong>Armor Class:</strong> {entity.ArmorClass + ACBonus}{ACBonus === 0 ? "" : ` (${entity.ArmorClass}${ACBonus > 0 ? "+" : ""}${ACBonus})`}<br />
-                
             </div>
             <div className="displayCardControls">
                 <div className="controls">

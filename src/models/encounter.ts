@@ -1,14 +1,17 @@
 import { Entity } from "@src/models/entity"
 import { SmartMap } from "@src/models/smartMap"
 
+export type EncounterMetadata = {
+    CreationDate?: Date,
+    AccessedDate?: Date,
+    Started?: boolean,
+    Campaign?: string,
+}
+
 export class Encounter {
     Name: string
     Description: string
-    Metadata: {
-        CreationDate: Date,
-        AccessedDate: Date,
-        Campaign: string,
-    }
+    Metadata: EncounterMetadata
     Entities: Entity[] = []
 
     constructor(name: string, description: string, Campaign: string = "") {
@@ -17,6 +20,7 @@ export class Encounter {
         this.Metadata = {
             CreationDate: new Date(),
             AccessedDate: new Date(),
+            Started: false,
             Campaign: Campaign
         }
     }
@@ -44,5 +48,11 @@ export class Encounter {
 
     clear(): void {
         this.Entities.filter((e) => (e.EncounterLocked));
+    }
+
+    reset() {
+        this.Entities.forEach((e) => e.resetAll());
+        this.Metadata.Started = false;
+        return this
     }
 }

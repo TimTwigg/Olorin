@@ -2,7 +2,7 @@ import * as React from "react"
 import { createFileRoute } from "@tanstack/react-router"
 
 import * as api from "@src/controllers/api"
-import { Encounter } from "@src/models/encounter"
+import { Encounter, EncounterMetadata } from "@src/models/encounter"
 import { EntityDisplay } from "@src/components/entityDisplay"
 import { Entity, EntityType } from "@src/models/entity"
 import { StatBlockDisplay } from "@src/components/statBlockDisplay"
@@ -18,12 +18,22 @@ function Encounters() {
     const [activeEncounter, SetActiveEncounter] = React.useState<Encounter | null>(null);
     const [runningEncounter, SetRunningEncounter] = React.useState<boolean>(false);
     const [DisplayEntity, SetDisplayEntity] = React.useState<Entity | undefined>();
-    const [RenderTrigger, SetRenderTrigger] = React.useState(true);
+    const [RenderTrigger, SetRenderTrigger] = React.useState<boolean>(true);
     const [Config, SetConfig] = React.useState<UserOptions>(new UserOptions());
+    const [EncounterIsActive, SetEncounterIsActive] = React.useState<boolean>(false);
+    const [EditingEncounter, SetEditingEncounter] = React.useState<boolean>(false);
 
     async function TriggerReRender() {
         SetRenderTrigger(false);
         setTimeout(() => SetRenderTrigger(true), 1);
+    }
+
+    const resetAllStates = () => {
+        SetActiveEncounter(null);
+        SetRunningEncounter(false);
+        SetDisplayEntity(undefined);
+        SetEncounterIsActive(false);
+        SetEditingEncounter(false);
     }
 
     const deleteEntity = (entityID: string) => {
@@ -33,6 +43,18 @@ function Encounters() {
         activeEncounter.Entities = entities;
         SetActiveEncounter(activeEncounter);
         TriggerReRender();
+    }
+
+    const updateMetadata = (data: EncounterMetadata) => {
+        if (!activeEncounter) return;
+        let enc = activeEncounter;
+        enc.Metadata = {
+            CreationDate: data.CreationDate === undefined ? enc.Metadata.CreationDate : data.CreationDate,
+            AccessedDate: data.AccessedDate === undefined ? enc.Metadata.AccessedDate : data.AccessedDate,
+            Campaign: data.Campaign === undefined ? enc.Metadata.Campaign : data.Campaign,
+            Started: data.Started === undefined ? enc.Metadata.Started : data.Started,
+        }
+        SetActiveEncounter(enc);
     }
 
     const renderDisplayEntity = (ent?: Entity) => {
@@ -83,11 +105,11 @@ function Encounters() {
                     {encounters?.map((encounter, ind) => {
                         return (
                             <tr key={`${encounter.Name}${ind}`}>
-                                <td className="link"><a onClick={() => SetActiveEncounter(encounter)}>{encounter.Name}</a></td>
+                                <td className="link"><a onClick={() => { SetActiveEncounter(encounter), SetEncounterIsActive(encounter.Metadata.Started || false) }}>{encounter.Name}</a></td>
                                 <td>{encounter.Description}</td>
-                                <td>{encounter.Metadata.Campaign}</td>
-                                <td>{encounter.Metadata.CreationDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</td>
-                                <td>{encounter.Metadata.AccessedDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</td>
+                                <td>{encounter.Metadata.Campaign || ""}</td>
+                                <td>{encounter.Metadata.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</td>
+                                <td>{encounter.Metadata.AccessedDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</td>
                             </tr>
                         );
                     })}
@@ -99,19 +121,32 @@ function Encounters() {
     // Encounter Play Screen
     return (
         <div className="playScreen container">
-            <span className="three columns"><button className="big button" onClick={() => { SetRunningEncounter(false), SetActiveEncounter(null) }}>Back to Encounters</button></span>
+            <span className="three columns"><button className="big button" onClick={() => { resetAllStates() }}>Back to Encounters</button></span>
             <h3 className="seven columns">{activeEncounter.Name}</h3>
             <section className="two columns">
-                <span><strong>Created On:</strong> {activeEncounter.Metadata.CreationDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</span><br />
+                <span><strong>Created On:</strong> {activeEncounter.Metadata.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</span><br />
                 <span><strong>Campaign:</strong> {activeEncounter.Metadata.Campaign}</span>
             </section>
             <div className="break" />
             <hr />
-            <p className="nine columns">{activeEncounter.Description}</p>
-            <span className="three columns"><button className="big button" onClick={() => { SetRunningEncounter(!runningEncounter), TriggerReRender() }}>{runningEncounter ? "Pause" : "Start"} Encounter</button></span>
-            <div className="break" />
+            <p>{activeEncounter.Description}</p>
             <hr />
-            <section></section>
+            <section className="container">
+                <section id="buttonSet1" className="five columns">
+                    <button onClick={() => { SetEditingEncounter(!EditingEncounter) }} disabled={runningEncounter} >{EditingEncounter ? "Save Changes" : "Edit Mode"}</button>
+                    <button onClick={() => { SetRunningEncounter(!runningEncounter), SetEncounterIsActive(true), updateMetadata({ Started: true }), TriggerReRender() }} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
+                    <button onClick={() => { SetActiveEncounter(activeEncounter.reset()), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter} >Reset Encounter</button>
+                </section>
+                <section id="mode-log">
+                    <p>{EditingEncounter?"Editing":""}</p>
+                </section>
+                <section id="buttonSet2" className="five columns">
+                    <button onClick={() => { SetEditingEncounter(false) }} disabled={!EditingEncounter} ></button>
+                    <button onClick={() => { }} disabled={!EditingEncounter} >Add Entity</button>
+                    <button onClick={() => { }} disabled={!EditingEncounter} ></button>
+                </section>
+                <div className="break" />
+            </section>
             <hr />
             <section className="panel">
                 <div>

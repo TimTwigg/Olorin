@@ -12,6 +12,7 @@ export class StatBlockEntity implements Entity {
     MaxHitPoints;
     TempHitPoints = 0;
     ArmorClass;
+    ArmorClassBonus = 0;
     Speed;
     Conditions = new SmartMap<string, number>();
     SpellSaveDC: number;
@@ -98,8 +99,8 @@ export class StatBlockEntity implements Entity {
         this.TempHitPoints = 0;
     }
 
-    setAC(amount: number): void {
-        this.ArmorClass = Math.max(amount, 1);
+    setACBonus(amount: number): void {
+        this.ArmorClassBonus = amount;
     }
 
     addCondition(condition: string): void {
@@ -157,6 +158,12 @@ export class StatBlockEntity implements Entity {
         this.resetReactions();
         this.Conditions.clear();
         this.Concentration = false;
+        this.TempHitPoints = 0;
+        this.Initiative = 0;
+        this.MaxHitPoints = this.StatBlock.Stats.HitPoints.Average;
+        this.CurrentHitPoints = this.MaxHitPoints;
+        this.ArmorClass = this.StatBlock.Stats.ArmorClass;
+        this.ArmorClassBonus = 0;
     }
 
     setHostile(value: boolean): void {

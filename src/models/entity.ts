@@ -14,6 +14,7 @@ export interface Entity {
     TempHitPoints: number
     CurrentHitPoints: number
     ArmorClass: number
+    ArmorClassBonus: number
     Speed: {
         Walk?: number
         Fly?: number
@@ -51,7 +52,7 @@ export interface Entity {
     addTempHP(amount: number): void
     removeTempHP(): void
     kill(): void
-    setAC(amount: number): void
+    setACBonus(amount: number): void
     addCondition(condition: string): void
     removeCondition(condition: string): void
     addSpellSlot(level: number): void

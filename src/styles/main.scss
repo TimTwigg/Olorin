@@ -17,15 +17,10 @@
 *   ================================================================
 */
 
-$darkGreen: #14312C;
-$mediumGreen: #4B6B56;
-$cream: #C7B9B9;
-$gold: #AB8D59;
 $gray: #2f3136;
 $lightGray: #D1D1D1;
 $lightBlue: #33C3F0;
 $red: #861C06;
-$lightGold: #C4AB7E;
 $blue: #2c97de;
 $parchment: #E6D19C;
 
@@ -129,8 +124,6 @@ $parchment: #E6D19C;
 html {
     font-size: 62.5%;
     font-family: Open Sans, sans-serif;
-    -ms-text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%;
     overflow: hidden;
 }
 
@@ -301,6 +294,27 @@ button.delete.button {
     color: $red;
     font-weight: bold;
     font-size: 1.5rem;
+}
+
+#buttonSet1,
+#buttonSet2 {
+    display: flex;
+    justify-content: space-evenly;
+    padding: 0.5rem 0;
+    border-radius: 1rem;
+    background-color: $lightGray;
+    width: 40%;
+    margin: 0;
+
+    button {
+        width: 15rem;
+        padding: 0.25rem;
+        border-radius: 10px;
+    }
+}
+
+#buttonSet2 {
+    float: right;
 }
 
 /*
@@ -570,6 +584,15 @@ button.delete.button {
         display: flex;
         justify-content: space-between;
     }
+}
+
+#mode-log {
+    text-align: center;
+    display: inline-block;
+    width: 20%;
+    margin: 0;
+    padding: 0.5rem 0;
+    font-size: 1.75rem;
 }
 
 /*
