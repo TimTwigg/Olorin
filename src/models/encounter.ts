@@ -1,5 +1,5 @@
-import { Entity } from "@src/models/entity"
-import { SmartMap } from "@src/models/smartMap"
+import { Entity } from "@src/models/entity";
+import { CounterMap } from "./data_structures/counterMap";
 
 export type EncounterMetadata = {
     CreationDate?: Date,
@@ -26,17 +26,14 @@ export class Encounter {
     }
 
     addEntity(entity: Entity): Encounter {
-        let entityCounts = new SmartMap<string, number>();
-        for (let entity of this.Entities) {
-            entityCounts.set(entity.Name, entityCounts.dGet(entity.Name, 0) + 1);
+        let entityCounts = new CounterMap<string>();
+        for (let e of this.Entities) {
+            entityCounts.increment(e.Name);
         }
         if (entityCounts.get(entity.Name) === 1) {
             this.Entities.forEach((e) => {if (e.Name === entity.Name) e.setSuffix("1")});
-            entity.setSuffix("2");
         }
-        else if (entityCounts.get(entity.Name) > 1) {
-            entity.setSuffix((entityCounts.get(entity.Name)+1).toString());
-        }
+        entity.setSuffix((entityCounts.get(entity.Name)+1).toString());
         this.Entities.push(entity);
         return this;
     }

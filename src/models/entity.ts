@@ -1,4 +1,4 @@
-import { SmartMap } from "@src/models/smartMap"
+import { SmartMap } from "@src/models/data_structures/smartMap"
 
 export enum EntityType {
     StatBlock,
@@ -79,4 +79,6 @@ export interface Entity {
     resetAll(): void
     setHostile(value: boolean): void
     setLock(value: boolean): void
+    generateNewId(): void
+    setNotes(notes: string): void
 }

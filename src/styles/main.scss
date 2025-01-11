@@ -530,6 +530,16 @@ input.descriptionEdit {
                 }
             }
 
+            textarea {
+                width: 30rem;
+                resize: none;
+                font-size: inherit;
+                line-height: 1.2;
+                padding: 4px;
+                border-radius: 5px;
+                margin-right: 2rem;
+            }
+
             .conditionCheckBoxes {
                 column-count: 4;
                 font-size: 1.25rem;

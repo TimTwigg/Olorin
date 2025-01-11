@@ -1,18 +1,18 @@
-import * as api from "@src/models/api_responses"
+import * as api from "@src/models/api_responses";
 
-import { encounters } from "@src/temp/encounters"
-import { conditions } from "@src/temp/conditions"
-import { arasta } from "@src/temp/arasta"
-import { aurelia } from "@src/temp/aurelia"
-import { winter_ghoul } from "@src/temp/winter-ghoul"
-import { StatBlockEntity } from "@src/models/statBlockEntity"
-import { EntityOverview } from "@src/models/entity"
+import { encounters } from "@src/temp/encounters";
+import { conditions } from "@src/temp/conditions";
+import { arasta } from "@src/temp/arasta";
+import { aurelia } from "@src/temp/aurelia";
+import { winter_ghoul } from "@src/temp/winter-ghoul";
+import { StatBlockEntity } from "@src/models/statBlockEntity";
+import { EntityOverview } from "@src/models/entity";
+import { StatBlock } from "@src/models/statBlock";
 
-const entities = [
-    new StatBlockEntity(arasta),
-    new StatBlockEntity(aurelia),
-    new StatBlockEntity(winter_ghoul)
-]
+const entities = new Map<string, StatBlock>()
+entities.set(arasta.Name, arasta)
+entities.set(aurelia.Name, aurelia)
+entities.set(winter_ghoul.Name, winter_ghoul)
 
 const entityOverviews = [
     new EntityOverview(arasta.Name, arasta.Description.Type, arasta.Description.Size, arasta.ChallengeRating),
@@ -36,12 +36,16 @@ export async function getConditions(_user: string): Promise<api.ConditionRespons
 
 export async function getEntities(_user: string, _page: number, detailLevel: APIDetailLevel = 1): Promise<api.EntityResponse> {
     return {
-        Entities: detailLevel === 1 ? entityOverviews : entities
+        Entities: detailLevel === 1 ? entityOverviews : Array.from(entities.values()).map((e) => new StatBlockEntity(e))
     }
 }
 
 export async function getEntity(_user: string, entityName: string): Promise<api.SingleEntityResponse> {
-    return {
-        Entity: entities.find(e => e.Name === entityName)
+    if (entities.has(entityName)) {
+        let e = new StatBlockEntity(entities.get(entityName)!);
+        return {
+            Entity: e
+        }
     }
+    throw new Error("Entity not found")
 }

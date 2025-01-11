@@ -1,6 +1,6 @@
-import { Entity, EntityType } from "@src/models/entity"
-import { SmartMap } from "@src/models/smartMap";
-import { StatBlock } from "@src/models/statBlock"
+import { Entity, EntityType } from "@src/models/entity";
+import { SmartMap } from "@src/models/data_structures/smartMap";
+import { StatBlock } from "@src/models/statBlock";
 import { d20, hashCode, modifierOf } from "@src/controllers/utils";
 
 export class StatBlockEntity implements Entity {
@@ -29,7 +29,7 @@ export class StatBlockEntity implements Entity {
     DifficultyRating;
 
     constructor(statBlock: StatBlock, initiative: number = 0, IsHostile: boolean = true) {
-        this.id = (hashCode(statBlock.Name) * Math.random()).toString(16);
+        this.id = (hashCode(statBlock.Name) * Date.now() / 1000).toString(16);
         this.Name = statBlock.Name;
         this.StatBlock = statBlock;
         this.Initiative = initiative;
@@ -172,5 +172,13 @@ export class StatBlockEntity implements Entity {
 
     setLock(value: boolean): void {
         this.EncounterLocked = value;
+    }
+
+    generateNewId(): void {
+        this.id = (hashCode(this.StatBlock.Name) * Date.now() / 1000).toString(16);
+    }
+
+    setNotes(notes: string): void {
+        this.Notes = notes;
     }
 }

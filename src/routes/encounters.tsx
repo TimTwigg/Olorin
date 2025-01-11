@@ -10,12 +10,13 @@ import { StatBlock } from "@src/models/statBlock"
 import { UserOptions } from "@src/models/userOptions"
 
 import { FaAddressCard } from "react-icons/fa"
+import { StatBlockEntity } from "@src/models/statBlockEntity"
 
 export const Route = createFileRoute("/encounters")({
     component: Encounters,
 })
 
-const CACHESIZE = 10;
+const CACHESIZE = 100;
 
 function Encounters() {
     const [encounters, SetEncounters] = React.useState<Encounter[]>([]);
@@ -135,7 +136,6 @@ function Encounters() {
     }
 
     const addMiscEntity = (entityName: string) => {
-        console.log("Adding entity: " + entityName);
         if (!activeEncounter) return;
         let entity = FullEntityList.find((ent) => ent.Name === entityName);
         if (!entity) {
@@ -143,7 +143,10 @@ function Encounters() {
                 if (ent) SetActiveEncounter(activeEncounter.addEntity(ent));
             });
         }
-        else SetActiveEncounter(activeEncounter.addEntity(entity));
+        else {
+            if (entity.EntityType === EntityType.StatBlock) entity = new StatBlockEntity(entity.Displayable as StatBlock);
+            SetActiveEncounter(activeEncounter.addEntity(entity));
+        }
         TriggerReRender();
     }
 
@@ -244,7 +247,7 @@ function Encounters() {
                 <div id="EncounterList">
                     {RenderTrigger && renderEntities(!runningEncounter)}
                 </div>
-                <div id="CreatureList" style={{display:runningEncounter?"none":"block"}}>
+                <div id="CreatureList" style={{ display: runningEncounter ? "none" : "block" }}>
                     {EditingEncounter &&
                         <table>
                             <thead>
@@ -274,7 +277,7 @@ function Encounters() {
                         </table>
                     }
                 </div>
-                <div id="StatBlockDisplay" style={{maxWidth:runningEncounter?"none":"30%", margin:runningEncounter?"0 10rem":"0"}}>
+                <div id="StatBlockDisplay" style={{ maxWidth: runningEncounter ? "none" : "30%", margin: runningEncounter ? "0 10rem" : "0" }}>
                     {DisplayEntity && renderDisplayEntity(DisplayEntity, !runningEncounter)}
                 </div>
             </section>

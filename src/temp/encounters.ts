@@ -10,8 +10,9 @@ let e1 = new Encounter(
     "Campaign 1"
 )
 
-e1.addEntity(new StatBlockEntity(winter_ghoul))
-e1.addEntity(new StatBlockEntity(winter_ghoul))
+for (let i = 0; i < 2; i++) {
+    e1.addEntity(new StatBlockEntity(winter_ghoul))
+}
 
 let e2 = new Encounter(
     "Encounter 2",

@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Entity } from "@src/models/entity"
 import { Card } from "@src/components/card"
-import { SmartMap } from "@src/models/smartMap"
+import { SmartMap } from "@src/models/data_structures/smartMap"
 import { UserOptions } from "@src/models/userOptions"
 
 import {
@@ -63,7 +63,7 @@ function renderSpeed(speed: Entity["Speed"]): JSX.Element {
 function renderConditions(conditions: SmartMap<string, number>): JSX.Element {
     if (conditions.size === 0) return <></>;
     return (<div>
-        <strong>Conditions:</strong> {conditions.map<string>((num, cond) => `${cond} (${num} round${num == 1 ? '' : 's'}) `)}<br />
+        <strong>Conditions:</strong> {conditions.map<string>((num, cond) => `${cond} (${num} round${num == 1 ? '' : 's'})`).join(", ")}<br />
     </div>)
 }
 
@@ -75,6 +75,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
     const [LocalNumericalState, SetLocalNumericalState] = React.useState<number>(0);
     const [LocalNumericalState2, SetLocalNumericalState2] = React.useState<number>(0);
     const [LocalNumericalState3, SetLocalNumericalState3] = React.useState<number>(0);
+    const [LocalStringState, SetLocalStringState] = React.useState<string>("");
     const [MaxHitpoints, SetMaxHitpoints] = React.useState<number>(entity.MaxHitPoints);
     const [CurrentHitpoints, SetCurrentHitpoints] = React.useState<number>(entity.CurrentHitPoints);
     const [TempHitpoints, SetTempHitpoints] = React.useState<number>(entity.TempHitPoints);
@@ -85,17 +86,6 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
     const ConditionTypes: string[] = userOptions?.conditions || [];
     setDisplay = setDisplay || ((entity?: Entity) => { console.log(`No display callback found for entity: ${entity ? entity.Name : "undefined"}`) });
     renderTrigger = renderTrigger || (() => { console.log("No render trigger found") });
-
-    // const ResetAllStates = () => {
-    //     SetLocalNumericalState(0);
-    //     SetLocalNumericalState2(0);
-    //     SetLocalNumericalState3(0);
-    //     SetMaxHitpoints(entity.MaxHitPoints);
-    //     SetCurrentHitpoints(entity.CurrentHitPoints);
-    //     SetTempHitpoints(entity.TempHitPoints);
-    //     SetACBonus(entity.ArmorClassBonus);
-    //     SetConditions(new SmartMap<string, number>());
-    // }
 
     const FlipExpandedState = () => {
         if (ExpandedState && ControlState !== ControlOptions.None) SetControlState(ControlOptions.None);
@@ -121,6 +111,9 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
                     break;
                 case ControlOptions.Display:
                     setDisplay(entity);
+                    break;
+                case ControlOptions.Notes:
+                    SetLocalStringState(entity.Notes);
                     break;
             }
             SetControlState(state);
@@ -183,14 +176,12 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
     }
 
     const renderACControl = () => {
-        return <>
-            <span>
-                <p>Armor Class</p>
-                <button onClick={_ => { entity.setACBonus(-LocalNumericalState), SetACBonus(entity.ArmorClassBonus), SetControlState(ControlOptions.None) }} className="leftButton" disabled={readonly}>-</button>
-                <input type="number" min={0} placeholder="Modify" onChange={e => { SetLocalNumericalState(parseInt(e.target.value)) }} disabled={readonly} />
-                <button onClick={_ => { entity.setACBonus(LocalNumericalState), SetACBonus(entity.ArmorClassBonus), SetControlState(ControlOptions.None) }} className="rightButton" disabled={readonly}>+</button>
-            </span>
-        </>
+        return <span>
+            <p>Armor Class</p>
+            <button onClick={_ => { entity.setACBonus(-LocalNumericalState), SetACBonus(entity.ArmorClassBonus), SetControlState(ControlOptions.None) }} className="leftButton" disabled={readonly}>-</button>
+            <input type="number" min={0} placeholder="Modify" onChange={e => { SetLocalNumericalState(parseInt(e.target.value)) }} disabled={readonly} />
+            <button onClick={_ => { entity.setACBonus(LocalNumericalState), SetACBonus(entity.ArmorClassBonus), SetControlState(ControlOptions.None) }} className="rightButton" disabled={readonly}>+</button>
+        </span>
     }
 
     const renderConditionsControl = () => {
@@ -206,9 +197,10 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
     }
 
     const renderNotesControl = () => {
-        return <>
-            Notes - Not Implemented
-        </>
+        return <span>
+            <textarea title="Notes" value={LocalStringState} onChange={e => SetLocalStringState(e.target.value)} disabled={readonly} />
+            <button onClick={_ => { entity.setNotes(LocalStringState), SetControlState(ControlOptions.None) }} disabled={readonly}><GiCheckMark /></button>
+        </span>
     }
 
     if (overviewOnly) return (
@@ -226,6 +218,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
                 <strong>Challenge Rating:</strong> {entity.DifficultyRating}<br />
                 <strong>Hit Points:</strong> {CurrentHitpoints < MaxHitpoints ? ` ${CurrentHitpoints} / ${MaxHitpoints}` : MaxHitpoints}<br />
                 <strong>Armor Class:</strong> {entity.ArmorClass + ACBonus}{ACBonus === 0 ? "" : ` (${entity.ArmorClass}${ACBonus > 0 ? "+" : ""}${ACBonus})`}<br />
+                {entity.Notes.length > 0 ? <><strong>Notes:</strong> {entity.Notes}<br /></> : null}
             </div>
             <div className="displayCardControls">
                 <div className="controls">
@@ -262,6 +255,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
                         <strong>Saves:</strong> DEX {entity.SavingThrows.Dexterity >= 0 ? "+" : ""}{entity.SavingThrows.Dexterity} WIS {entity.SavingThrows.Wisdom >= 0 ? "+" : ""}{entity.SavingThrows.Wisdom} CON {entity.SavingThrows.Constitution >= 0 ? "+" : ""}{entity.SavingThrows.Constitution}<br />
                         {entity.SpellSaveDC > 0 ? <><strong>Spell Save DC:</strong> {entity.SpellSaveDC}<br /></> : null}
                         {renderConditions(Conditions)}
+                        {entity.Notes.length > 0 ? <><strong>Notes:</strong> {entity.Notes}<br /></> : null}
                     </Card>
                     :
                     <Card className="collapsed">
