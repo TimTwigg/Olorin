@@ -197,10 +197,11 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
     }
 
     const renderNotesControl = () => {
-        return <span>
-            <textarea title="Notes" value={LocalStringState} onChange={e => SetLocalStringState(e.target.value)} disabled={readonly} />
-            <button onClick={_ => { entity.setNotes(LocalStringState), SetControlState(ControlOptions.None) }} disabled={readonly}><GiCheckMark /></button>
-        </span>
+        return <>
+            <textarea title="Notes" placeholder="Notes..." value={LocalStringState} onChange={e => SetLocalStringState(e.target.value)} disabled={readonly} />
+            <span><button onClick={_ => { entity.setNotes(""), SetControlState(ControlOptions.None) }} disabled={readonly}>X</button></span>
+            <span><button onClick={_ => { entity.setNotes(LocalStringState), SetControlState(ControlOptions.None) }} disabled={readonly}><GiCheckMark /></button></span>
+        </>
     }
 
     if (overviewOnly) return (

@@ -78,9 +78,12 @@ function Encounters() {
         let enc = new Encounter();
         enc.Metadata.CreationDate = new Date();
         enc.Metadata.AccessedDate = new Date();
+        SetLocalStringState1("");
+        SetLocalStringState2("");
+        SetLocalStringState3("");
         SetActiveEncounter(enc);
         SetEditingEncounter(true);
-        SetEncounters([...encounters, enc]);
+        SetEncounters([...encounters, enc]); // this needs to happen only when save button is used.
     }
 
     const initializeStatesForEditing = () => {
@@ -189,7 +192,7 @@ function Encounters() {
                     {encounters?.map((encounter, ind) => {
                         return (
                             <tr key={`${encounter.Name}${ind}`}>
-                                <td className="link"><a onClick={() => { SetActiveEncounter(encounter), SetEncounterIsActive(encounter.Metadata.Started || false) }}>{encounter.Name}</a></td>
+                                <td className="link"><a onClick={() => { SetActiveEncounter(encounter), SetEncounterIsActive(encounter.Metadata.Started || false) }}>{encounter.Name.replace(/\s/g, "").length > 0 ? encounter.Name : "<encounter name>"}</a></td>
                                 <td>{encounter.Description}</td>
                                 <td>{encounter.Metadata.Campaign || ""}</td>
                                 <td>{encounter.Metadata.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</td>
