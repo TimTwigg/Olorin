@@ -1,26 +1,30 @@
-import * as React from "react"
-import { createFileRoute } from "@tanstack/react-router"
+import * as React from "react";
+import { createFileRoute } from "@tanstack/react-router";
 
-import * as api from "@src/controllers/api"
-import { Encounter, EncounterMetadata } from "@src/models/encounter"
-import { EntityDisplay } from "@src/components/entityDisplay"
-import { Entity, EntityOverview, EntityType } from "@src/models/entity"
-import { StatBlockDisplay } from "@src/components/statBlockDisplay"
-import { StatBlock } from "@src/models/statBlock"
-import { UserOptions } from "@src/models/userOptions"
+import * as api from "@src/controllers/api";
+import { Encounter, EncounterMetadata } from "@src/models/encounter";
+import { EntityDisplay } from "@src/components/entityDisplay";
+import { Entity, EntityOverview, EntityType } from "@src/models/entity";
+import { StatBlockDisplay } from "@src/components/statBlockDisplay";
+import { StatBlock } from "@src/models/statBlock";
+import { UserOptions } from "@src/models/userOptions";
 
-import { FaAddressCard } from "react-icons/fa"
-import { StatBlockEntity } from "@src/models/statBlockEntity"
+import { FaAddressCard } from "react-icons/fa";
+import { StatBlockEntity } from "@src/models/statBlockEntity";
 
 export const Route = createFileRoute("/encounters")({
     component: Encounters,
 })
 
+/**
+ * Cache Size for Entities List
+ */
 const CACHESIZE = 100;
 
 function Encounters() {
     const [encounters, SetEncounters] = React.useState<Encounter[]>([]);
     const [activeEncounter, SetActiveEncounter] = React.useState<Encounter | null>(null);
+    const [backupEncounter, SetBackupEncounter] = React.useState<Encounter | null>(null);
     const [runningEncounter, SetRunningEncounter] = React.useState<boolean>(false);
     const [DisplayEntity, SetDisplayEntity] = React.useState<Entity | undefined>();
     const [RenderTrigger, SetRenderTrigger] = React.useState<boolean>(true);
@@ -86,16 +90,33 @@ function Encounters() {
         SetEncounters([...encounters, enc]); // this needs to happen only when save button is used.
     }
 
+    /**
+     * Initialize the local states for editing an Encounter.
+     * 
+     * Also resets the Encounter to its original state if the user cancels the edit.
+     */
     const initializeStatesForEditing = () => {
-        if (EditingEncounter) return;
+        if (EditingEncounter) {
+            if (backupEncounter) {
+                SetActiveEncounter(activeEncounter?.withEntities(backupEncounter?.Entities || []) || null);
+                SetBackupEncounter(null);
+                TriggerReRender();
+            }
+            return;
+        }
         SetLocalStringState1(activeEncounter?.Name || "");
         SetLocalStringState2(activeEncounter?.Metadata.Campaign || "");
         SetLocalStringState3(activeEncounter?.Description || "");
+        SetBackupEncounter(activeEncounter ? activeEncounter.copy() : null);
     }
 
+    /**
+     * Save the changes made to the Encounter in Edit Mode
+     */
     const saveEncounterChanges = () => {
         if (!activeEncounter) return;
         SetActiveEncounter(activeEncounter.withName(LocalStringState1));
+        SetBackupEncounter(null);
         updateMetadata({ Campaign: LocalStringState2 });
         SetActiveEncounter(activeEncounter.withDescription(LocalStringState3));
         SetEditingEncounter(false);
@@ -108,19 +129,27 @@ function Encounters() {
         else return <></>;
     }
 
+    /**
+     * Render the Entities in the Encounter
+     */
     const renderEntities = (overviewOnly: boolean) => {
         let entities = activeEncounter?.Entities || [];
         entities.sort((a, b) => b.Initiative - a.Initiative);
         return entities.map((entity, ind) => <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} />);
     }
 
+    /**
+     * Get a list of entities from the API and store them in the CreatureList state
+     * @param page The page number to get entities from
+     * 
+     */
     const getEntities = (page: number) => {
         api.getEntities("dummy", page, 1).then((res) => {
             SetCreatureList(res.Entities.map(e => e as EntityOverview));
         });
     }
 
-    const getEntity = (entityName: string): Promise<Entity | undefined> => {
+    const getEntity = async (entityName: string): Promise<Entity | undefined> => {
         return api.getEntity("dummy", entityName).then((res) => {
             if (res.Entity === undefined) return;
             appendToEntityList(res.Entity);
@@ -209,7 +238,7 @@ function Encounters() {
     return (
         <div className="playScreen container">
             <section className="justify-between">
-                <span className="three columns"><button className="big button" onClick={() => { resetAllStates() }}>Back to Encounters</button></span>
+                <span className="three columns"><button className="big button" onClick={() => { resetAllStates() }} disabled={EditingEncounter}>Back to Encounters</button></span>
                 {EditingEncounter ?
                     <span className="six columns titleEdit"><input type="text" defaultValue={LocalStringState1} onChange={(e) => { SetLocalStringState1(e.target.value) }} /></span>
                     :

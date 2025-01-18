@@ -81,4 +81,5 @@ export interface Entity {
     setLock(value: boolean): void
     generateNewId(): void
     setNotes(notes: string): void
+    copy(): Entity
 }

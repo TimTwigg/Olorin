@@ -181,4 +181,35 @@ export class StatBlockEntity implements Entity {
     setNotes(notes: string): void {
         this.Notes = notes;
     }
+
+    copy(): StatBlockEntity {
+        let copy = new StatBlockEntity(this.StatBlock, this.Initiative, this.IsHostile);
+        copy.Name = this.Name;
+        copy.Suffix = this.Suffix;
+        copy.CurrentHitPoints = this.CurrentHitPoints;
+        copy.MaxHitPoints = this.MaxHitPoints;
+        copy.TempHitPoints = this.TempHitPoints;
+        copy.ArmorClass = this.ArmorClass;
+        copy.ArmorClassBonus = this.ArmorClassBonus;
+        copy.Speed = this.Speed;
+        copy.Conditions = this.Conditions.copy();
+        copy.SpellSaveDC = this.SpellSaveDC;
+        copy.SpellSlots = this.SpellSlots.copy();
+        copy.Concentration = this.Concentration;
+        copy.Reactions = { total: this.Reactions.total, used: this.Reactions.used };
+        copy.Notes = this.Notes;
+        copy.IsHostile = this.IsHostile;
+        copy.EncounterLocked = this.EncounterLocked;
+        copy.Displayable = this.Displayable;
+        copy.SavingThrows = {
+            Strength: this.SavingThrows.Strength,
+            Dexterity: this.SavingThrows.Dexterity,
+            Constitution: this.SavingThrows.Constitution,
+            Intelligence: this.SavingThrows.Intelligence,
+            Wisdom: this.SavingThrows.Wisdom,
+            Charisma: this.SavingThrows.Charisma
+        }
+        copy.DifficultyRating = this.DifficultyRating;
+        return copy;
+    }
 }

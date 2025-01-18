@@ -280,6 +280,12 @@ a {
     &:hover {
         opacity: 0.75;
     }
+
+    &:disabled {
+        background-color: $lightGray;
+        color: $gray;
+        opacity: 1;
+    }
 }
 
 button.delete.button {

@@ -63,4 +63,16 @@ export class Encounter {
         this.Description = description;
         return this;
     }
+
+    withEntities(entities: Entity[]): Encounter {
+        this.Entities = entities;
+        return this;
+    }
+
+    copy(): Encounter {
+        let newEncounter = new Encounter(this.Name, this.Description);
+        newEncounter.Metadata = this.Metadata;
+        newEncounter.Entities = this.Entities.map((e) => e.copy());
+        return newEncounter;
+    }
 }

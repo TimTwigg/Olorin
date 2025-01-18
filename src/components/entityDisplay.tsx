@@ -192,7 +192,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
 
     const renderSpellsControl = () => {
         return <>
-            Spells - Not Implemented
+            Spells - Coming Soon...
         </>
     }
 
