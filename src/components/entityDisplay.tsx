@@ -132,7 +132,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
         } else {
             localConditions.delete(condition);
         }
-        SetConditions(localConditions);
+        SetConditions(localConditions.copy());
     }
 
     const renderSettingsControl = () => {

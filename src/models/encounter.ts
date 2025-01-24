@@ -31,9 +31,10 @@ export class Encounter {
             entityCounts.increment(e.Name);
         }
         if (entityCounts.get(entity.Name) === 1) {
-            this.Entities.forEach((e) => {if (e.Name === entity.Name) e.setSuffix("1")});
+            this.Entities.forEach((e) => { if (e.Name === entity.Name) e.setSuffix("1") });
         }
-        entity.setSuffix((entityCounts.get(entity.Name)+1).toString());
+        let num = entityCounts.get(entity.Name) + 1 || 0;
+        if (num > 0) entity.setSuffix(num.toString());
         this.Entities.push(entity);
         return this;
     }

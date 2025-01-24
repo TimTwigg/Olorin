@@ -1,5 +1,6 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { ToastContainer, toast } from "react-toastify";
 
 import * as api from "@src/controllers/api";
 import { Encounter, EncounterMetadata } from "@src/models/encounter";
@@ -27,10 +28,10 @@ function Encounters() {
     const [backupEncounter, SetBackupEncounter] = React.useState<Encounter | null>(null);
     const [runningEncounter, SetRunningEncounter] = React.useState<boolean>(false);
     const [DisplayEntity, SetDisplayEntity] = React.useState<Entity | undefined>();
-    const [RenderTrigger, SetRenderTrigger] = React.useState<boolean>(true);
     const [Config, SetConfig] = React.useState<UserOptions>(new UserOptions());
     const [EncounterIsActive, SetEncounterIsActive] = React.useState<boolean>(false);
     const [EditingEncounter, SetEditingEncounter] = React.useState<boolean>(false);
+    const [IsNewEncounter, SetIsNewEncounter] = React.useState<boolean>(false);
     const [LocalStringState1, SetLocalStringState1] = React.useState<string>("");
     const [LocalStringState2, SetLocalStringState2] = React.useState<string>("");
     const [LocalStringState3, SetLocalStringState3] = React.useState<string>("");
@@ -44,17 +45,27 @@ function Encounters() {
         SetFullEntityList(list);
     }
 
+    /**
+     * Trigger a re-render of the Encounter Display.
+     */
     async function TriggerReRender() {
-        SetRenderTrigger(false);
-        setTimeout(() => SetRenderTrigger(true), 1);
+        // This is a hack to force a re-render of the Encounter Display
+        // React rerenders if a state changes
+        if (activeEncounter) SetActiveEncounter(activeEncounter.copy());
     }
 
+    /**
+     * Reset all states to their default values.
+     * 
+     * Causes the screen to return to the Encounters Overview.
+     */
     const resetAllStates = () => {
         SetActiveEncounter(null);
         SetRunningEncounter(false);
         SetDisplayEntity(undefined);
         SetEncounterIsActive(false);
         SetEditingEncounter(false);
+        SetIsNewEncounter(false);
     }
 
     const deleteEntity = (entityID: string) => {
@@ -87,7 +98,13 @@ function Encounters() {
         SetLocalStringState3("");
         SetActiveEncounter(enc);
         SetEditingEncounter(true);
-        SetEncounters([...encounters, enc]); // this needs to happen only when save button is used.
+        SetIsNewEncounter(true);
+    }
+
+    const loadEncounterEntitiesFromBackup = () => {
+        if (!backupEncounter || !activeEncounter) return;
+        SetActiveEncounter(activeEncounter.withEntities(backupEncounter.Entities).copy());
+        SetBackupEncounter(null);
     }
 
     /**
@@ -96,14 +113,20 @@ function Encounters() {
      * Also resets the Encounter to its original state if the user cancels the edit.
      */
     const initializeStatesForEditing = () => {
+        // If the user clicked cancel
         if (EditingEncounter) {
-            if (backupEncounter) {
-                SetActiveEncounter(activeEncounter?.withEntities(backupEncounter?.Entities || []) || null);
-                SetBackupEncounter(null);
-                TriggerReRender();
+            // If the user is creating a new Encounter, cancel the creation
+            if (IsNewEncounter) {
+                setTimeout(() => SetActiveEncounter(null), 1);
+                resetAllStates();
+            }
+            // Reset the Encounter to its original state
+            else if (backupEncounter) {
+                loadEncounterEntitiesFromBackup();
             }
             return;
         }
+        // If the user is entering edit mode, load the state of the Encounter
         SetLocalStringState1(activeEncounter?.Name || "");
         SetLocalStringState2(activeEncounter?.Metadata.Campaign || "");
         SetLocalStringState3(activeEncounter?.Description || "");
@@ -115,6 +138,14 @@ function Encounters() {
      */
     const saveEncounterChanges = () => {
         if (!activeEncounter) return;
+        if (IsNewEncounter) {
+            if (LocalStringState1.length === 0) {
+                toast.error("Encounter must have a name", { position: "top-right" });
+                return;
+            }
+            SetEncounters([...encounters, activeEncounter]);
+            SetIsNewEncounter(false);
+        }
         SetActiveEncounter(activeEncounter.withName(LocalStringState1));
         SetBackupEncounter(null);
         updateMetadata({ Campaign: LocalStringState2 });
@@ -240,19 +271,19 @@ function Encounters() {
             <section className="justify-between">
                 <span className="three columns"><button className="big button" onClick={() => { resetAllStates() }} disabled={EditingEncounter}>Back to Encounters</button></span>
                 {EditingEncounter ?
-                    <span className="six columns titleEdit"><input type="text" defaultValue={LocalStringState1} onChange={(e) => { SetLocalStringState1(e.target.value) }} /></span>
+                    <span className="six columns titleEdit"><input type="text" defaultValue={LocalStringState1} placeholder="Name" onChange={(e) => { SetLocalStringState1(e.target.value) }} /></span>
                     :
                     <h3 className="six columns">{activeEncounter.Name}</h3>
                 }
                 <section className="three columns">
                     <span><strong>Created On:</strong> {activeEncounter.Metadata.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</span><br />
-                    <span><strong>Campaign:</strong> {EditingEncounter ? <input type="text" defaultValue={LocalStringState2} onChange={e => { SetLocalStringState2(e.target.value) }} /> : activeEncounter.Metadata.Campaign}</span>
+                    <span><strong>Campaign:</strong> {EditingEncounter ? <input type="text" defaultValue={LocalStringState2} placeholder="Campaign Name" onChange={e => { SetLocalStringState2(e.target.value) }} /> : activeEncounter.Metadata.Campaign}</span>
                 </section>
             </section>
             <div className="break" />
             <hr />
             {EditingEncounter ?
-                <input type="text" className="ten columns descriptionEdit" defaultValue={LocalStringState3} onChange={(e) => { SetLocalStringState3(e.target.value) }} />
+                <input type="text" className="ten columns descriptionEdit" defaultValue={LocalStringState3} placeholder="Encounter Description" onChange={(e) => { SetLocalStringState3(e.target.value) }} />
                 :
                 <p>{activeEncounter.Description}</p>
             }
@@ -261,7 +292,7 @@ function Encounters() {
             <section className="container">
                 <section id="buttonSet1" className="five columns">
                     <button onClick={() => { initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter), updateMetadata({ AccessedDate: new Date() }) }} disabled={runningEncounter} >{EditingEncounter ? "Cancel" : "Edit Mode"}</button>
-                    <button onClick={() => { SetRunningEncounter(!runningEncounter), SetEncounterIsActive(true), updateMetadata({ Started: true, AccessedDate: new Date() }), TriggerReRender() }} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
+                    <button onClick={() => { SetRunningEncounter(!runningEncounter), SetEncounterIsActive(true), updateMetadata({ Started: true, AccessedDate: new Date() }), loadEncounterEntitiesFromBackup() }} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
                     <button onClick={() => { SetActiveEncounter(activeEncounter.reset()), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter} >Reset Encounter</button>
                 </section>
                 <section id="mode-log">
@@ -277,7 +308,7 @@ function Encounters() {
             <hr />
             <section className="panel">
                 <div id="EncounterList">
-                    {RenderTrigger && renderEntities(!runningEncounter)}
+                    {renderEntities(!runningEncounter)}
                 </div>
                 <div id="CreatureList" style={{ display: runningEncounter ? "none" : "block" }}>
                     {EditingEncounter &&
@@ -313,6 +344,7 @@ function Encounters() {
                     {DisplayEntity && renderDisplayEntity(DisplayEntity, !runningEncounter)}
                 </div>
             </section>
+            <ToastContainer />
         </div>
     );
 }
