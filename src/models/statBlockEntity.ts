@@ -29,7 +29,7 @@ export class StatBlockEntity implements Entity {
     DifficultyRating;
 
     constructor(statBlock: StatBlock, initiative: number = 0, IsHostile: boolean = true) {
-        this.id = (hashCode(statBlock.Name) * Date.now() / 1000).toString(16);
+        this.id = (hashCode(statBlock.Name) * Date.now() * Math.random()).toString(16);
         this.Name = statBlock.Name;
         this.StatBlock = statBlock;
         this.Initiative = initiative;
@@ -175,7 +175,7 @@ export class StatBlockEntity implements Entity {
     }
 
     generateNewId(): void {
-        this.id = (hashCode(this.StatBlock.Name) * Date.now() / 1000).toString(16);
+        this.id = (hashCode(this.StatBlock.Name) * Date.now() * Math.random()).toString(16);
     }
 
     setNotes(notes: string): void {

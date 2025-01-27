@@ -38,6 +38,11 @@ function Encounters() {
     const [CreatureList, SetCreatureList] = React.useState<EntityOverview[]>([]);
     const [FullEntityList, SetFullEntityList] = React.useState<Entity[]>([]);
 
+    /**
+     * Add an Entity to the Entity List. Manages caching of entities.
+     * 
+     * @param entity The Entity to add to the list
+     */
     const appendToEntityList = (entity: Entity) => {
         let list = FullEntityList;
         let newLength = list.push(entity);
@@ -69,24 +74,15 @@ function Encounters() {
     }
 
     const deleteEntity = (entityID: string) => {
+        for (let e of activeEncounter?.Entities || []) console.log(e.id);
         if (!activeEncounter) return;
-        let entities = activeEncounter.Entities;
-        entities = entities.filter((ent) => ent.id !== entityID);
-        activeEncounter.Entities = entities;
-        SetActiveEncounter(activeEncounter);
-        TriggerReRender();
+        SetActiveEncounter(activeEncounter.removeEntity(entityID).copy());
+        console.log("Entity Deleted: " + entityID);
     }
 
     const updateMetadata = (data: EncounterMetadata) => {
         if (!activeEncounter) return;
-        let enc = activeEncounter;
-        enc.Metadata = {
-            CreationDate: data.CreationDate === undefined ? enc.Metadata.CreationDate : data.CreationDate,
-            AccessedDate: data.AccessedDate === undefined ? enc.Metadata.AccessedDate : data.AccessedDate,
-            Campaign: data.Campaign === undefined ? enc.Metadata.Campaign : data.Campaign,
-            Started: data.Started === undefined ? enc.Metadata.Started : data.Started,
-        }
-        SetActiveEncounter(enc);
+        SetActiveEncounter(activeEncounter.withMetadata(data));
     }
 
     const createNewEncounter = () => {
@@ -134,7 +130,7 @@ function Encounters() {
     }
 
     /**
-     * Save the changes made to the Encounter in Edit Mode
+     * Save the changes made to the Encounter in Edit Mode. Also saves the Encounter to the API.
      */
     const saveEncounterChanges = () => {
         if (!activeEncounter) return;
@@ -151,6 +147,10 @@ function Encounters() {
         updateMetadata({ Campaign: LocalStringState2 });
         SetActiveEncounter(activeEncounter.withDescription(LocalStringState3));
         SetEditingEncounter(false);
+        api.saveEncounter("dummy", activeEncounter).then((res) => {
+            if (res) toast.success("Encounter saved successfully to server.", { position: "top-right" });
+            else toast.error("Failed to save Encounter to server.", { position: "top-right" });
+        });
     }
 
     const renderDisplayEntity = (ent?: Entity, overviewOnly: boolean = false) => {
@@ -166,7 +166,7 @@ function Encounters() {
     const renderEntities = (overviewOnly: boolean) => {
         let entities = activeEncounter?.Entities || [];
         entities.sort((a, b) => b.Initiative - a.Initiative);
-        return entities.map((entity, ind) => <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} />);
+        return entities.map((entity, ind) => <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={ind === activeEncounter?.Metadata.Index} />);
     }
 
     /**
@@ -293,7 +293,7 @@ function Encounters() {
                 <section id="buttonSet1" className="five columns">
                     <button onClick={() => { initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter), updateMetadata({ AccessedDate: new Date() }) }} disabled={runningEncounter} >{EditingEncounter ? "Cancel" : "Edit Mode"}</button>
                     <button onClick={() => { SetRunningEncounter(!runningEncounter), SetEncounterIsActive(true), updateMetadata({ Started: true, AccessedDate: new Date() }), loadEncounterEntitiesFromBackup() }} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
-                    <button onClick={() => { SetActiveEncounter(activeEncounter.reset()), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter} >Reset Encounter</button>
+                    <button onClick={() => { SetActiveEncounter(activeEncounter.reset()), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter || EditingEncounter} >Reset Encounter</button>
                 </section>
                 <section id="mode-log">
                     <p>{EditingEncounter ? "Editing" : ""}</p>
@@ -307,8 +307,15 @@ function Encounters() {
             </section>
             <hr />
             <section className="panel">
-                <div id="EncounterList">
-                    {renderEntities(!runningEncounter)}
+                <div>
+                    <div id="EncounterList">
+                        {renderEntities(!runningEncounter)}
+                    </div>
+                    <div id="EncounterRunControls">
+                        <section>Round: {activeEncounter.Metadata.Round}</section>
+                        <section>Turn: {activeEncounter.Metadata.Index! + 1}</section>
+                        {runningEncounter && <button onClick={() => { SetActiveEncounter(activeEncounter.tick()), TriggerReRender() }}>NEXT</button>}
+                    </div>
                 </div>
                 <div id="CreatureList" style={{ display: runningEncounter ? "none" : "block" }}>
                     {EditingEncounter &&

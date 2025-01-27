@@ -8,6 +8,7 @@ import { winter_ghoul } from "@src/temp/winter-ghoul";
 import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { EntityOverview } from "@src/models/entity";
 import { StatBlock } from "@src/models/statBlock";
+import { Encounter } from "@src/models/encounter";
 
 const entities = new Map<string, StatBlock>()
 entities.set(arasta.Name, arasta)
@@ -48,4 +49,16 @@ export async function getEntity(_user: string, entityName: string): Promise<api.
         }
     }
     throw new Error("Entity not found")
+}
+
+/**
+ * Save an encounter to the server.
+ * @param _user The user ID.
+ * @param encounter The encounter to save.
+ * 
+ * @returns A boolean indicating whether the save was successful.
+ */
+export async function saveEncounter(_user: string, encounter: Encounter): Promise<boolean> {
+    console.log("Saved Encounter: " + encounter.Name);
+    return true;
 }

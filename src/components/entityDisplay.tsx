@@ -1,8 +1,9 @@
-import * as React from "react"
-import { Entity } from "@src/models/entity"
-import { Card } from "@src/components/card"
-import { SmartMap } from "@src/models/data_structures/smartMap"
-import { UserOptions } from "@src/models/userOptions"
+import * as React from "react";
+import { Entity } from "@src/models/entity";
+import { Card } from "@src/components/card";
+import { SmartMap } from "@src/models/data_structures/smartMap";
+import { UserOptions } from "@src/models/userOptions";
+import "@src/styles/entityDisplay.scss";
 
 import {
     GiCrossedSwords,
@@ -20,21 +21,21 @@ import {
     GiTrashCan,
     GiCheckMark,
     GiDeathSkull,
-} from "react-icons/gi"
-import { FaSwimmer, FaAddressCard } from "react-icons/fa"
-import { SlLockOpen } from "react-icons/sl"
-import { AiFillLock } from "react-icons/ai"
-import { TbPencilOff, TbPencil } from "react-icons/tb"
+} from "react-icons/gi";
+import { FaSwimmer, FaAddressCard } from "react-icons/fa";
+import { SlLockOpen } from "react-icons/sl";
+import { AiFillLock } from "react-icons/ai";
+import { TbPencilOff, TbPencil } from "react-icons/tb";
 
 type EntityDisplayProps = {
     entity: Entity,
     deleteCallback: (id: string) => void,
-    expanded?: boolean,
     userOptions?: UserOptions,
     setDisplay?: (entity?: Entity) => void,
     renderTrigger?: () => void,
-    overviewOnly?: boolean
-    editMode?: boolean
+    overviewOnly?: boolean,
+    editMode?: boolean,
+    isActive?: boolean
 };
 
 enum ControlOptions {
@@ -67,8 +68,8 @@ function renderConditions(conditions: SmartMap<string, number>): JSX.Element {
     </div>)
 }
 
-export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, setDisplay, renderTrigger, overviewOnly, editMode }: EntityDisplayProps) {
-    const [ExpandedState, SetExpandedState] = React.useState<boolean>(expanded || false);
+export function EntityDisplay({ entity, deleteCallback, userOptions, setDisplay, renderTrigger, overviewOnly, editMode, isActive }: EntityDisplayProps) {
+    const [ExpandedState, SetExpandedState] = React.useState<boolean>(false);
     const [ControlState, SetControlState] = React.useState<ControlOptions>(ControlOptions.None);
     const [Locked, SetLocked] = React.useState<boolean>(entity.EncounterLocked);
     const [Initiative, SetInitiative] = React.useState<number>(entity.Initiative);
@@ -89,7 +90,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
 
     const FlipExpandedState = () => {
         if (ExpandedState && ControlState !== ControlOptions.None) SetControlState(ControlOptions.None);
-        SetExpandedState(!ExpandedState);
+        if (!isActive) SetExpandedState(!ExpandedState);
     }
 
     const FlipControlState = (state: ControlOptions) => {
@@ -139,7 +140,7 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
         return <>
             <span><button onClick={_ => LockEntity(!Locked)} className="icon">{Locked ? <AiFillLock /> : <SlLockOpen />}<br />{Locked ? "Locked" : "Unlocked"}</button></span>
             <span><button onClick={_ => SetReadonly(!readonly)} className="icon">{readonly ? <TbPencilOff /> : <TbPencil />}<br />{readonly ? "Read Only" : "Edit"}</button></span>
-            <span><button onClick={_ => deleteCallback(entity.id)} disabled={Locked} className="icon"><GiTrashCan /><br />Delete</button></span>
+            <span><button onClick={_ => deleteCallback(entity.id)} disabled={Locked || (!editMode && overviewOnly)} className="icon"><GiTrashCan /><br />Delete</button></span>
         </>
     }
 
@@ -242,12 +243,12 @@ export function EntityDisplay({ entity, deleteCallback, expanded, userOptions, s
     );
 
     return (
-        <div className="entity">
+        <div className={"entity" + (isActive ? " active" : "")}>
             <div className="displayCardInfo">
                 <section>{Initiative}</section>
             </div>
             <div className="displayCard" onClick={FlipExpandedState}>
-                {ExpandedState ?
+                {(ExpandedState || isActive) ?
                     <Card className="expanded" style={{ columnCount: 2 }}>
                         <h4 style={{ textDecoration: CurrentHitpoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && CurrentHitpoints > 0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix > "" ? ` (${entity.Suffix})` : ""}{entity.EncounterLocked ? <AiFillLock className="m-left" /> : null}</h4>
                         <strong>Hit Points:</strong> {CurrentHitpoints} {TempHitpoints > 0 ? ` (+${TempHitpoints})` : null} / {MaxHitpoints}<br />
