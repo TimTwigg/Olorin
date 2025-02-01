@@ -1,6 +1,6 @@
-import { StatBlock } from "@src/models/statBlock"
+import { Lair } from "@src/models/lair";
 
-export function LairDisplay({ name, lair }: { name: string, lair: StatBlock["Lair"] }) {
+export function LairDisplay({ name, lair }: { name: string, lair: Lair }) {
     if (!lair) return null;
     return (
         <div className="displayCard">

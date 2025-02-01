@@ -1,3 +1,5 @@
+import { Lair } from "@src/models/lair";
+
 export type StatBlock = {
     Name: string;
     ChallengeRating: number;
@@ -106,16 +108,5 @@ export type StatBlock = {
             Cost: number;
         }[];
     },
-    Lair?: {
-        Description: string;
-        Initiative: number;
-        Actions?: {
-            Description: string;
-            Items: string[];
-        },
-        RegionalEffects?: {
-            Description: string;
-            Items: string[];
-        },
-    }
+    Lair?: Lair
 }

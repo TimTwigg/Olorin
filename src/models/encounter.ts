@@ -1,5 +1,6 @@
 import { Entity } from "@src/models/entity";
-import { CounterMap } from "./data_structures/counterMap";
+import { CounterMap } from "@src/models/data_structures/counterMap";
+import { Lair } from "@src/models/lair";
 
 export type EncounterMetadata = {
     CreationDate?: Date,
@@ -15,6 +16,9 @@ export class Encounter {
     Description: string
     Metadata: EncounterMetadata
     Entities: Entity[] = []
+    HasLair: boolean = false
+    Lair?: Lair = undefined
+    LairEntityName: string = ""
     ActiveEntity: number = 0
 
     constructor(name: string = "", description: string = "", Campaign: string = "") {

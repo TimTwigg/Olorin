@@ -8,10 +8,12 @@ import { EntityDisplay } from "@src/components/entityDisplay";
 import { Entity, EntityOverview, EntityType } from "@src/models/entity";
 import { StatBlockDisplay } from "@src/components/statBlockDisplay";
 import { StatBlock } from "@src/models/statBlock";
+import { Lair } from "@src/models/lair";
 import { UserOptions } from "@src/models/userOptions";
 
 import { FaAddressCard } from "react-icons/fa";
 import { StatBlockEntity } from "@src/models/statBlockEntity";
+import { LairDisplay } from "@src/components/lair";
 
 export const Route = createFileRoute("/encounters")({
     component: Encounters,
@@ -153,6 +155,14 @@ function Encounters() {
         });
     }
 
+    /**
+     * Add a Lair to the Encounter
+     */
+    const addLair = () => {
+        if (!activeEncounter) return;
+        // TODO
+    }
+
     const renderDisplayEntity = (ent?: Entity, overviewOnly: boolean = false) => {
         if (!ent) return <></>;
         else if (ent.EntityType === EntityType.StatBlock) return <StatBlockDisplay statBlock={ent.Displayable as StatBlock} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={overviewOnly ? 1 : Config.defaultColumns || 2} />;
@@ -164,9 +174,12 @@ function Encounters() {
      * Render the Entities in the Encounter
      */
     const renderEntities = (overviewOnly: boolean) => {
-        let entities = activeEncounter?.Entities || [];
+        let entities: any[] = activeEncounter?.Entities || [];
+        if (activeEncounter?.HasLair) entities.push(activeEncounter.Lair);
         entities.sort((a, b) => b.Initiative - a.Initiative);
-        return entities.map((entity, ind) => <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={ind === activeEncounter?.Metadata.Index} />);
+        return entities.map((entity, ind) => (entity instanceof Lair)
+            ? <LairDisplay name={activeEncounter!.LairEntityName} lair={activeEncounter!.Lair!} />
+            : <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={ind === activeEncounter?.Metadata.Index} />);
     }
 
     /**
@@ -292,7 +305,7 @@ function Encounters() {
             <section className="container">
                 <section id="buttonSet1" className="five columns">
                     <button onClick={() => { initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter), updateMetadata({ AccessedDate: new Date() }) }} disabled={runningEncounter} >{EditingEncounter ? "Cancel" : "Edit Mode"}</button>
-                    <button onClick={() => { SetRunningEncounter(!runningEncounter), SetEncounterIsActive(true), updateMetadata({ Started: true, AccessedDate: new Date() }), loadEncounterEntitiesFromBackup() }} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
+                    <button onClick={() => { SetRunningEncounter(!runningEncounter), SetEncounterIsActive(true), updateMetadata({ Started: true, AccessedDate: new Date() }), loadEncounterEntitiesFromBackup(), SetDisplayEntity(undefined) }} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
                     <button onClick={() => { SetActiveEncounter(activeEncounter.reset()), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter || EditingEncounter} >Reset Encounter</button>
                 </section>
                 <section id="mode-log">
@@ -300,7 +313,7 @@ function Encounters() {
                 </section>
                 <section id="buttonSet2" className="five columns">
                     <button onClick={saveEncounterChanges} disabled={!EditingEncounter} >Save Changes</button>
-                    <button onClick={() => { }} disabled={!EditingEncounter} >Add Creature</button>
+                    <button onClick={addLair} disabled={!EditingEncounter} >Add Lair</button>
                     <button onClick={() => { }} disabled={!EditingEncounter} >Add Player</button>
                 </section>
                 <div className="break" />
@@ -347,7 +360,7 @@ function Encounters() {
                         </table>
                     }
                 </div>
-                <div id="StatBlockDisplay" style={{ maxWidth: runningEncounter ? "none" : "30%", margin: runningEncounter ? "0 10rem" : "0" }}>
+                <div id="StatBlockDisplay" style={{ maxWidth: runningEncounter ? "60%" : "30%", margin: runningEncounter ? "0 5rem" : "0" }}>
                     {DisplayEntity && renderDisplayEntity(DisplayEntity, !runningEncounter)}
                 </div>
             </section>
