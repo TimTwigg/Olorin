@@ -8,7 +8,7 @@ Custom Encounter Manager for D&D 5E.
 - Concentration
 - Creature table search
 - Move conditions from entityDisplay down into Entity so that round counters can be updated.
-- Lairs
+- Lair Display Overview mode
 
 ## Ideas
 

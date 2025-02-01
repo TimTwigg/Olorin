@@ -13,7 +13,7 @@ import { UserOptions } from "@src/models/userOptions";
 
 import { FaAddressCard } from "react-icons/fa";
 import { StatBlockEntity } from "@src/models/statBlockEntity";
-import { LairDisplay } from "@src/components/lair";
+import { LairDisplay, LairDialog } from "@src/components/lair";
 
 export const Route = createFileRoute("/encounters")({
     component: Encounters,
@@ -39,6 +39,8 @@ function Encounters() {
     const [LocalStringState3, SetLocalStringState3] = React.useState<string>("");
     const [CreatureList, SetCreatureList] = React.useState<EntityOverview[]>([]);
     const [FullEntityList, SetFullEntityList] = React.useState<Entity[]>([]);
+    const [LairDialogVisible, SetLairDialogVisible] = React.useState<boolean>(false);
+    const [LairDialogList, SetLairDialogList] = React.useState<{ Name: string, Lair: Lair }[]>([]);
 
     /**
      * Add an Entity to the Entity List. Manages caching of entities.
@@ -99,9 +101,9 @@ function Encounters() {
         SetIsNewEncounter(true);
     }
 
-    const loadEncounterEntitiesFromBackup = () => {
+    const loadEncounterFromBackup = () => {
         if (!backupEncounter || !activeEncounter) return;
-        SetActiveEncounter(activeEncounter.withEntities(backupEncounter.Entities).copy());
+        SetActiveEncounter(activeEncounter.withEntities(backupEncounter.Entities).withLair(backupEncounter.Lair, backupEncounter.LairEntityName).copy());
         SetBackupEncounter(null);
     }
 
@@ -120,7 +122,7 @@ function Encounters() {
             }
             // Reset the Encounter to its original state
             else if (backupEncounter) {
-                loadEncounterEntitiesFromBackup();
+                loadEncounterFromBackup();
             }
             return;
         }
@@ -138,7 +140,7 @@ function Encounters() {
         if (!activeEncounter) return;
         if (IsNewEncounter) {
             if (LocalStringState1.length === 0) {
-                toast.error("Encounter must have a name", { position: "top-right" });
+                toast.error("Encounter must have a name");
                 return;
             }
             SetEncounters([...encounters, activeEncounter]);
@@ -150,18 +152,29 @@ function Encounters() {
         SetActiveEncounter(activeEncounter.withDescription(LocalStringState3));
         SetEditingEncounter(false);
         api.saveEncounter("dummy", activeEncounter).then((res) => {
-            if (res) toast.success("Encounter saved successfully to server.", { position: "top-right" });
-            else toast.error("Failed to save Encounter to server.", { position: "top-right" });
+            if (res) toast.success("Encounter saved successfully to server.");
+            else toast.error("Failed to save Encounter to server.");
         });
     }
 
     /**
      * Add a Lair to the Encounter
      */
-    const addLair = () => {
+    const openLairDialog = () => {
         if (!activeEncounter) return;
-        // TODO
+        let lairs = activeEncounter.Entities.filter((ent) => ent instanceof StatBlockEntity && ent.StatBlock.Lair).map((ent) => { return { Name: ent.Name, Lair: (ent as StatBlockEntity).StatBlock.Lair! } });
+        if (lairs.length === 0) {
+            toast.error("No lairs found in Encounter");
+            return;
+        }
+        SetLairDialogList(lairs);
+        SetLairDialogVisible(true);
     }
+
+    const getLair = (Lair: Lair | undefined, Name: string) => {
+        if (!activeEncounter) return;
+        SetActiveEncounter(activeEncounter.withLair(Lair, Name));
+    };
 
     const renderDisplayEntity = (ent?: Entity, overviewOnly: boolean = false) => {
         if (!ent) return <></>;
@@ -174,12 +187,27 @@ function Encounters() {
      * Render the Entities in the Encounter
      */
     const renderEntities = (overviewOnly: boolean) => {
-        let entities: any[] = activeEncounter?.Entities || [];
-        if (activeEncounter?.HasLair) entities.push(activeEncounter.Lair);
-        entities.sort((a, b) => b.Initiative - a.Initiative);
-        return entities.map((entity, ind) => (entity instanceof Lair)
-            ? <LairDisplay name={activeEncounter!.LairEntityName} lair={activeEncounter!.Lair!} />
-            : <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={ind === activeEncounter?.Metadata.Index} />);
+        if (!activeEncounter || activeEncounter.Entities.length === 0) return <></>;
+        let entities: (Entity | Lair)[];
+        if (activeEncounter.HasLair && activeEncounter.Lair) {
+            entities = (activeEncounter.Entities as (Entity | Lair)[]).concat([activeEncounter.Lair]);
+        }
+        else {
+            entities = activeEncounter.Entities;
+        }
+
+        const calc_sort_key = (a: Entity | Lair, b: Entity | Lair) => {
+            let a_val = a.Initiative;
+            let b_val = b.Initiative;
+            // Ensure that lairs lose ties in initiative
+            if (a.type === "Lair") a_val -= 0.5;
+            if (b.type === "Lair") b_val -= 0.5;
+            return b_val - a_val;
+        };
+
+        return entities.sort(calc_sort_key).map((entity, ind) => (entity.type == "Entity" && !(entity instanceof Lair))
+            ? <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={ind === activeEncounter?.Metadata.Index} />
+            : <LairDisplay key={`${activeEncounter.LairEntityName}_lair${ind}`} name={activeEncounter.LairEntityName} lair={activeEncounter.Lair!} />);
     }
 
     /**
@@ -305,7 +333,7 @@ function Encounters() {
             <section className="container">
                 <section id="buttonSet1" className="five columns">
                     <button onClick={() => { initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter), updateMetadata({ AccessedDate: new Date() }) }} disabled={runningEncounter} >{EditingEncounter ? "Cancel" : "Edit Mode"}</button>
-                    <button onClick={() => { SetRunningEncounter(!runningEncounter), SetEncounterIsActive(true), updateMetadata({ Started: true, AccessedDate: new Date() }), loadEncounterEntitiesFromBackup(), SetDisplayEntity(undefined) }} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
+                    <button onClick={() => { SetRunningEncounter(!runningEncounter), SetEncounterIsActive(true), updateMetadata({ Started: true, AccessedDate: new Date() }), loadEncounterFromBackup(), SetDisplayEntity(undefined) }} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
                     <button onClick={() => { SetActiveEncounter(activeEncounter.reset()), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter || EditingEncounter} >Reset Encounter</button>
                 </section>
                 <section id="mode-log">
@@ -313,7 +341,7 @@ function Encounters() {
                 </section>
                 <section id="buttonSet2" className="five columns">
                     <button onClick={saveEncounterChanges} disabled={!EditingEncounter} >Save Changes</button>
-                    <button onClick={addLair} disabled={!EditingEncounter} >Add Lair</button>
+                    <button onClick={openLairDialog} disabled={!EditingEncounter} >Set Lair</button>
                     <button onClick={() => { }} disabled={!EditingEncounter} >Add Player</button>
                 </section>
                 <div className="break" />
@@ -364,7 +392,8 @@ function Encounters() {
                     {DisplayEntity && renderDisplayEntity(DisplayEntity, !runningEncounter)}
                 </div>
             </section>
-            <ToastContainer />
+            <ToastContainer position="top-right" />
+            <LairDialog lairs={LairDialogList} visible={LairDialogVisible} onClose={() => { SetLairDialogVisible(false) }} ReturnLair={getLair} />;
         </div>
     );
 }

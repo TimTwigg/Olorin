@@ -1,4 +1,4 @@
-import { SmartMap } from "@src/models/data_structures/smartMap"
+import { SmartMap } from "@src/models/data_structures/smartMap";
 
 export enum EntityType {
     StatBlock,
@@ -20,6 +20,8 @@ export class EntityOverview {
 }
 
 export interface Entity {
+    type: string
+    subType: string
     id: string
     Name: string
     Suffix: string

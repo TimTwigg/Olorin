@@ -176,6 +176,18 @@ export class Encounter {
     }
 
     /**
+     * Update the encounter lair
+     * 
+     * @returns the updated encounter
+     */
+    withLair(lair: Lair | undefined, Name: string): Encounter {
+        this.HasLair = lair !== undefined;
+        this.Lair = lair;
+        this.LairEntityName = Name;
+        return this;
+    }
+
+    /**
      * Make a copy of the encounter
      * 
      * @returns a new encounter

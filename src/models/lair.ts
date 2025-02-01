@@ -1,4 +1,6 @@
 export class Lair {
+    type?: string = "Lair";
+    subType?: string = "Lair";
     Description: string;
     Initiative: number;
     Actions?: {

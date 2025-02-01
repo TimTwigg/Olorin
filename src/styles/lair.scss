@@ -1,0 +1,22 @@
+@use 'variables' as v;
+
+.lairDialog {
+    background-color: v.$gray;
+    color: v.$blue;
+    padding: 2rem;
+}
+
+.dialogButtons {
+    display: flex;
+    justify-content: end;
+
+    button {
+        margin: 0 1rem;
+        width: 10rem;
+        height: 3rem;
+    }
+
+    svg {
+        vertical-align: middle;
+    }
+}

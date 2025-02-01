@@ -4,6 +4,8 @@ import { StatBlock } from "@src/models/statBlock";
 import { d20, hashCode, modifierOf } from "@src/controllers/utils";
 
 export class StatBlockEntity implements Entity {
+    type = "Entity";
+    subType = "StatBlockEntity";
     id;
     Name;
     Suffix = "";
