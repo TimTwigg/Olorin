@@ -4,8 +4,6 @@ import { StatBlock } from "@src/models/statBlock";
 import { d20, hashCode, modifierOf } from "@src/controllers/utils";
 
 export class StatBlockEntity implements Entity {
-    type = "Entity";
-    subType = "StatBlockEntity";
     id;
     Name;
     Suffix = "";
@@ -50,7 +48,7 @@ export class StatBlockEntity implements Entity {
             Wisdom: modifierOf(statBlock.Stats.Wisdom),
             Charisma: modifierOf(statBlock.Stats.Charisma)
         }
-        this.SpellSaveDC = statBlock.Details.SpellSaveDC||0;
+        this.SpellSaveDC = statBlock.Details.SpellSaveDC || 0;
         this.DifficultyRating = statBlock.ChallengeRating;
     }
 
@@ -83,7 +81,7 @@ export class StatBlockEntity implements Entity {
     }
 
     setMaxHP(amount: number): void {
-        let missing = amount>this.MaxHitPoints ? this.MaxHitPoints-this.CurrentHitPoints : 0;
+        let missing = amount > this.MaxHitPoints ? this.MaxHitPoints - this.CurrentHitPoints : 0;
         this.MaxHitPoints = Math.max(amount, 0);
         this.CurrentHitPoints = this.MaxHitPoints - missing;
     }

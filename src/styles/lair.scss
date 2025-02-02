@@ -20,3 +20,37 @@
         vertical-align: middle;
     }
 }
+
+.lair {
+    display: flex;
+
+    .displayCard {
+        display: flex;
+        justify-content: space-between;
+        height: 4rem;
+
+        h4 {
+            padding: 5px 0;
+        }
+
+        button {
+            height: fit-content;
+            margin: auto 0;
+            border: ridge 1px v.$gray;
+            padding: 0 5px;
+
+            svg {
+                height: 3.5rem;
+                width: 3.5rem;
+            }
+        }
+    }
+
+    .displayCardInfo {
+        height: 3rem;
+    }
+
+    &.overview .displayCardInfo {
+        height: 4rem;
+    }
+}

@@ -20,8 +20,6 @@ export class EntityOverview {
 }
 
 export interface Entity {
-    type: string
-    subType: string
     id: string
     Name: string
     Suffix: string
@@ -84,4 +82,8 @@ export interface Entity {
     generateNewId(): void
     setNotes(notes: string): void
     copy(): Entity
+}
+
+export function isEntity(arg: object): arg is Entity {
+    return arg.hasOwnProperty("EntityType");
 }

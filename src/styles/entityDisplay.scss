@@ -7,9 +7,12 @@
     font-size: 1.5rem;
     display: inline-block;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    border-radius: 0 3px 3px 3px;
     column-gap: 0.5rem;
     position: relative;
+    border-top: 5px double v.$red;
+    border-bottom: 5px double v.$red;
+    border-radius: 0 3px 3px 3px;
+    width: 50rem;
 
     h4,
     .h4 {
@@ -67,165 +70,162 @@
 
 .entity {
     margin-bottom: 20px;
+}
 
-    .displayCard {
-        border-top: 5px double v.$red;
-        border-bottom: 5px double v.$red;
-        width: 50rem;
+.displayCardControls {
+    width: 50rem;
+    padding: 0rem 1rem;
+    margin: 0 5px;
+
+    svg {
+        width: 3rem;
+        height: 3rem;
+        margin: 5px;
     }
 
-    .displayCardControls {
-        width: 50rem;
-        padding: 0rem 1rem;
-        margin: 0 5px;
+    .controls {
+        display: flex;
+        justify-content: space-evenly;
+        padding: 0.5rem 0;
+    }
+
+    .suboptions {
+        padding: 1rem 0;
+        display: flex;
+        justify-content: left;
+
+        span {
+            margin: 0 1rem;
+        }
+
+        p {
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            font-size: small;
+        }
 
         svg {
-            width: 3rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            margin: auto;
+        }
+
+        button,
+        input {
             height: 3rem;
-            margin: 5px;
+            margin-top: 0.25rem;
+            vertical-align: top;
+            border: ridge 1px v.$gray;
         }
 
-        .controls {
-            display: flex;
-            justify-content: space-evenly;
-            padding: 0.5rem 0;
-        }
+        button {
+            width: 3rem;
+            font-size: 2.5rem;
 
-        .suboptions {
-            padding: 1rem 0;
-            display: flex;
-            justify-content: left;
-
-            span {
-                margin: 0 1rem;
-            }
-
-            p {
-                margin: 0;
-                padding: 0;
-                text-align: center;
-                font-size: small;
-            }
-
-            svg {
-                width: 1.5rem;
-                height: 1.5rem;
-                margin: auto;
-            }
-
-            button,
-            input {
-                height: 3rem;
-                margin-top: 0.25rem;
-                vertical-align: top;
-                border: ridge 1px v.$gray;
-            }
-
-            button {
-                width: 3rem;
-                font-size: 2.5rem;
-
-                &.icon {
-                    height: 5rem;
-                    width: 6rem;
-                    font-size: 1rem;
-
-                    svg {
-                        width: 2rem;
-                        height: 2rem;
-                    }
-                }
-
-                &.leftButton {
-                    border-top-left-radius: 5px;
-                    border-bottom-left-radius: 5px;
-                }
-
-                &.rightButton {
-                    border-top-right-radius: 5px;
-                    border-bottom-right-radius: 5px;
-                }
-            }
-
-            input {
+            &.icon {
+                height: 5rem;
                 width: 6rem;
-                box-sizing: border-box;
-                padding-left: 5px;
+                font-size: 1rem;
 
-                &.curveLeft {
-                    border-top-left-radius: 5px;
-                    border-bottom-left-radius: 5px;
-                }
-
-                &.curveRight {
-                    border-top-right-radius: 5px;
-                    border-bottom-right-radius: 5px;
+                svg {
+                    width: 2rem;
+                    height: 2rem;
                 }
             }
 
-            textarea {
-                width: 30rem;
-                resize: none;
-                font-size: inherit;
-                line-height: 1.2;
-                padding: 4px;
-                border-radius: 5px;
-                margin-right: 2rem;
+            &.leftButton {
+                border-top-left-radius: 5px;
+                border-bottom-left-radius: 5px;
             }
 
-            .conditionCheckBoxes {
-                column-count: 4;
-                font-size: 1.25rem;
-
-                input {
-                    width: initial;
-                    vertical-align: middle;
-                    margin: 0 2px 0 0;
-                }
+            &.rightButton {
+                border-top-right-radius: 5px;
+                border-bottom-right-radius: 5px;
             }
         }
-    }
 
-    &.overview {
-        .displayCard {
-            border-bottom-left-radius: 0;
+        input {
+            width: 6rem;
+            box-sizing: border-box;
+            padding-left: 5px;
+
+            &.curveLeft {
+                border-top-left-radius: 5px;
+                border-bottom-left-radius: 5px;
+            }
+
+            &.curveRight {
+                border-top-right-radius: 5px;
+                border-bottom-right-radius: 5px;
+            }
         }
 
-        .displayCard, .displayCardControls {
-            width: 40rem;
+        textarea {
+            width: 30rem;
+            resize: none;
+            font-size: inherit;
+            line-height: 1.2;
+            padding: 4px;
+            border-radius: 5px;
+            margin-right: 2rem;
         }
 
-        .displayCard, .displayCardInfo {
-            height: 8rem;
-            border-width: 2px;
-        }
-
-        .displayCardInfo {
-            margin: 5px 0 5px 0;
-            padding: 0.5rem 1rem;
-            width: 4.5rem;
+        .conditionCheckBoxes {
+            column-count: 4;
+            font-size: 1.25rem;
 
             input {
-                width: 3rem;
-                text-align: center;
-                border-radius: 5px;
-                line-height: 3rem;
-            }
-
-            label {
-                opacity: 0.75;
-                font-size: 1.25rem;
+                width: initial;
+                vertical-align: middle;
+                margin: 0 2px 0 0;
             }
         }
     }
+}
 
-    &.active .displayCard {
-        border-top-width: 5px;
-        border-top-style: solid;
-        border-bottom-width: 5px;
-        border-bottom-style: solid;
-        border-left: 1px solid v.$red;
-        border-right: 1px solid v.$red;
-        border-radius: 0 5px 5px 5px;
+
+.active .displayCard {
+    border-top-width: 5px;
+    border-top-style: solid;
+    border-bottom-width: 5px;
+    border-bottom-style: solid;
+    border-left: 1px solid v.$red;
+    border-right: 1px solid v.$red;
+    border-radius: 0 5px 5px 5px;
+}
+
+.overview {
+    .displayCard {
+        border-bottom-left-radius: 0;
+    }
+
+    .displayCard,
+    .displayCardControls {
+        width: 40rem;
+    }
+
+    .displayCard,
+    .displayCardInfo {
+        height: 8rem;
+        border-width: 2px;
+    }
+
+    .displayCardInfo {
+        margin: 5px 0 5px 0;
+        padding: 0.5rem 1rem;
+        width: 4.5rem;
+
+        input {
+            width: 3rem;
+            text-align: center;
+            border-radius: 5px;
+            line-height: 3rem;
+        }
+
+        label {
+            opacity: 0.75;
+            font-size: 1.25rem;
+        }
     }
 }

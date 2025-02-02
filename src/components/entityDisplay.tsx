@@ -28,14 +28,14 @@ import { AiFillLock } from "react-icons/ai";
 import { TbPencilOff, TbPencil } from "react-icons/tb";
 
 type EntityDisplayProps = {
-    entity: Entity,
-    deleteCallback: (id: string) => void,
-    userOptions?: UserOptions,
-    setDisplay?: (entity?: Entity) => void,
-    renderTrigger?: () => void,
-    overviewOnly?: boolean,
-    editMode?: boolean,
-    isActive?: boolean
+    entity: Entity;
+    deleteCallback: (id: string) => void;
+    userOptions?: UserOptions;
+    setDisplay?: (entity?: Entity) => void;
+    renderTrigger?: () => void;
+    overviewOnly?: boolean;
+    editMode?: boolean;
+    isActive?: boolean;
 };
 
 enum ControlOptions {

@@ -207,6 +207,7 @@ export const arasta = {
         ]
     },
     "Lair": {
+        "Name": "Arasta",
         "Description": "Arasta lives in an enormous, gnarled olive tree called Enorasi, which was planted millennia ago by Klothys. It is said that those who eat of its fruit can see glimpses of the future. Eating the fruit brings with it a risk, though, for those who Klothys finds unworthy might be driven mad. There, within Enorasi's hollow trunk, Arasta awaits the next would-be prophet to make her meal. Her webs stretch beyond the branches of the tree and carpet the forest floor of her realm. \n\nTales are told of forlorn souls who, because of grief or madness over the loss of a loved one, have sought out Arasta's lair, as it is rumored that some of the strands of her web are anchored near the edge of the Underworld and can enable a traveler to reach that realm's ashen shores. But those who enter her domain unbidden almost never go unnoticed, for Arasta can sense the slightest vibration along her web hair, and her children act as spies on her behalf.",
         "Initiative": 20,
         "Actions": {

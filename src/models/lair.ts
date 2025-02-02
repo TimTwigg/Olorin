@@ -1,6 +1,5 @@
 export class Lair {
-    type?: string = "Lair";
-    subType?: string = "Lair";
+    Name: string;
     Description: string;
     Initiative: number;
     Actions?: {
@@ -12,10 +11,15 @@ export class Lair {
         Items: string[];
     };
 
-    constructor(description: string, initiative: number, actions?: { Description: string, Items: string[] }, regionalEffects?: { Description: string, Items: string[] }) {
+    constructor(name: string, description: string, initiative: number, actions?: { Description: string, Items: string[] }, regionalEffects?: { Description: string, Items: string[] }) {
+        this.Name = name;
         this.Description = description;
         this.Initiative = initiative;
         this.Actions = actions;
         this.RegionalEffects = regionalEffects;
     }
+}
+
+export function isLair(arg: object): arg is Lair {
+    return (arg.hasOwnProperty("Name") && arg.hasOwnProperty("Description") && arg.hasOwnProperty("Initiative")) && !arg.hasOwnProperty("EntityType");
 }

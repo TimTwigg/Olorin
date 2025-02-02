@@ -4,15 +4,47 @@ import { Dialog } from "primereact/dialog";
 import {
     GiCheckMark
 } from "react-icons/gi";
+import { FaAddressCard } from "react-icons/fa";
 
 import { Lair } from "@src/models/lair";
 import "@src/styles/lair.scss";
 
-export function LairDisplay({ name, lair }: { name: string, lair: Lair }) {
-    if (!lair) return null;
+type LairProps = {
+    lair: Lair;
+    overviewOnly?: boolean;
+    isActive?: boolean;
+    setDisplay?: (lair?: Lair) => void;
+};
+
+export function LairDisplay({ lair, overviewOnly, isActive, setDisplay }: LairProps) {
+    setDisplay = setDisplay || ((lair?: Lair) => { console.log(`No display callback found for entity: ${lair ? lair.Name : "undefined"}`) });
     return (
-        <div className="displayCard">
-            <h4>{name}'s Lair</h4>
+        <div className={"lair" + (overviewOnly ? " overview" : "") + (!overviewOnly && isActive ? " active" : "")}>
+            <div className="displayCardInfo">
+                <section>{lair.Initiative}</section>
+            </div>
+            <div className="displayCard">
+                <h4>{lair.Name}'s Lair</h4>
+                <button onClick={() => setDisplay(lair)} title="Display"><FaAddressCard /></button>
+            </div>
+        </div>
+    );
+}
+
+type LairBlockProps = {
+    lair: Lair;
+    displayColumns?: number;
+    deleteCallback?: () => void;
+};
+
+export function LairBlockDisplay({ lair, displayColumns, deleteCallback }: LairBlockProps) {
+    const dynamicStyles: React.CSSProperties = {
+        columnCount: displayColumns || 2
+    }
+    return (
+        <div className="statblock displayCard" style={dynamicStyles}>
+            {deleteCallback && <button className="delete button" onClick={deleteCallback}>X</button>}
+            <h4>{lair.Name}'s Lair</h4>
             <hr className="thin" />
             {lair.Description} <br />
             {lair.Actions && <>
@@ -33,7 +65,7 @@ export function LairDisplay({ name, lair }: { name: string, lair: Lair }) {
             </>}
         </div>
     );
-}
+};
 
 type LairDialogProps = {
     visible: boolean;

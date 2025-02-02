@@ -8,7 +8,7 @@ export type StatBlock = {
         Size: string;
         Type: string;
         Alignment: string;
-    },
+    };
     Stats: {
         ArmorClass: number;
         HitPoints: {
@@ -29,12 +29,12 @@ export type StatBlock = {
         Intelligence: number;
         Wisdom: number;
         Charisma: number;
-    },
+    };
     DamageModifiers: {
         Vulnerabilities: string[];
         Resistances: string[];
         Immunities: string[];
-    },
+    };
     ConditionImmunities: string[];
     Details: {
         ArmorType: string;
@@ -59,7 +59,7 @@ export type StatBlock = {
             Description: string;
         }[],
         SpellSaveDC?: number;
-    },
+    };
     Actions: {
         Name: string;
         AttackType?: string;
@@ -82,15 +82,15 @@ export type StatBlock = {
             };
         }[];
         AdditionalDescription?: string;
-    }[],
+    }[];
     BonusActions?: {
         Name: string;
         Description: string;
-    }[],
+    }[];
     Reactions?: {
         Name: string;
         Description: string;
-    }[],
+    }[];
     LegendaryActions?: {
         Points: number;
         Description: string;
@@ -99,7 +99,7 @@ export type StatBlock = {
             Description: string;
             Cost: number;
         }[];
-    },
+    };
     MythicActions?: {
         Description: string;
         Actions: {
@@ -107,6 +107,6 @@ export type StatBlock = {
             Description: string;
             Cost: number;
         }[];
-    },
-    Lair?: Lair
+    };
+    Lair?: Lair;
 }

@@ -5,15 +5,15 @@ import { ToastContainer, toast } from "react-toastify";
 import * as api from "@src/controllers/api";
 import { Encounter, EncounterMetadata } from "@src/models/encounter";
 import { EntityDisplay } from "@src/components/entityDisplay";
-import { Entity, EntityOverview, EntityType } from "@src/models/entity";
+import { Entity, EntityOverview, EntityType, isEntity } from "@src/models/entity";
 import { StatBlockDisplay } from "@src/components/statBlockDisplay";
 import { StatBlock } from "@src/models/statBlock";
-import { Lair } from "@src/models/lair";
+import { Lair, isLair } from "@src/models/lair";
 import { UserOptions } from "@src/models/userOptions";
 
 import { FaAddressCard } from "react-icons/fa";
 import { StatBlockEntity } from "@src/models/statBlockEntity";
-import { LairDisplay, LairDialog } from "@src/components/lair";
+import { LairDisplay, LairDialog, LairBlockDisplay } from "@src/components/lair";
 
 export const Route = createFileRoute("/encounters")({
     component: Encounters,
@@ -29,7 +29,7 @@ function Encounters() {
     const [activeEncounter, SetActiveEncounter] = React.useState<Encounter | null>(null);
     const [backupEncounter, SetBackupEncounter] = React.useState<Encounter | null>(null);
     const [runningEncounter, SetRunningEncounter] = React.useState<boolean>(false);
-    const [DisplayEntity, SetDisplayEntity] = React.useState<Entity | undefined>();
+    const [DisplayEntity, SetDisplayEntity] = React.useState<Entity | Lair | undefined>();
     const [Config, SetConfig] = React.useState<UserOptions>(new UserOptions());
     const [EncounterIsActive, SetEncounterIsActive] = React.useState<boolean>(false);
     const [EditingEncounter, SetEditingEncounter] = React.useState<boolean>(false);
@@ -176,10 +176,21 @@ function Encounters() {
         SetActiveEncounter(activeEncounter.withLair(Lair, Name));
     };
 
-    const renderDisplayEntity = (ent?: Entity, overviewOnly: boolean = false) => {
-        if (!ent) return <></>;
-        else if (ent.EntityType === EntityType.StatBlock) return <StatBlockDisplay statBlock={ent.Displayable as StatBlock} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={overviewOnly ? 1 : Config.defaultColumns || 2} />;
-        else if (ent.EntityType === EntityType.Player) return <></>;
+    /**
+     * Render the Entity or Lair in the Display
+     * 
+     * @param item The Entity or Lair to render
+     * @param overviewOnly Whether or not to render the full display
+     */
+    const renderDisplay = (item?: Entity | Lair, overviewOnly: boolean = false) => {
+        if (!item) return <></>;
+        if (isEntity(item) && item.EntityType === EntityType.StatBlock) {
+            return <StatBlockDisplay statBlock={item.Displayable as StatBlock} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={overviewOnly ? 1 : Config.defaultColumns || 2} />;
+        }
+        else if (isEntity(item) && item.EntityType === EntityType.Player) return <></>;
+        else if (isLair(item)) {
+            return <LairBlockDisplay lair={item} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={overviewOnly ? 1 : Config.defaultColumns || 2} />;
+        }
         else return <></>;
     }
 
@@ -200,14 +211,14 @@ function Encounters() {
             let a_val = a.Initiative;
             let b_val = b.Initiative;
             // Ensure that lairs lose ties in initiative
-            if (a.type === "Lair") a_val -= 0.5;
-            if (b.type === "Lair") b_val -= 0.5;
+            if (isLair(a)) a_val -= 0.5;
+            if (isLair(b)) b_val -= 0.5;
             return b_val - a_val;
         };
 
-        return entities.sort(calc_sort_key).map((entity, ind) => (entity.type == "Entity" && !(entity instanceof Lair))
+        return entities.sort(calc_sort_key).map((entity, ind) => (isEntity(entity))
             ? <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={ind === activeEncounter?.Metadata.Index} />
-            : <LairDisplay key={`${activeEncounter.LairEntityName}_lair${ind}`} name={activeEncounter.LairEntityName} lair={activeEncounter.Lair!} />);
+            : <LairDisplay key={`${activeEncounter.LairEntityName}_lair${ind}`} lair={activeEncounter.Lair!} overviewOnly={overviewOnly} isActive={ind === activeEncounter?.Metadata.Index} setDisplay={SetDisplayEntity} />);
     }
 
     /**
@@ -389,11 +400,11 @@ function Encounters() {
                     }
                 </div>
                 <div id="StatBlockDisplay" style={{ maxWidth: runningEncounter ? "60%" : "30%", margin: runningEncounter ? "0 5rem" : "0" }}>
-                    {DisplayEntity && renderDisplayEntity(DisplayEntity, !runningEncounter)}
+                    {DisplayEntity && renderDisplay(DisplayEntity, !runningEncounter)}
                 </div>
             </section>
             <ToastContainer position="top-right" />
-            <LairDialog lairs={LairDialogList} visible={LairDialogVisible} onClose={() => { SetLairDialogVisible(false) }} ReturnLair={getLair} />;
+            <LairDialog lairs={LairDialogList} visible={LairDialogVisible} onClose={() => { SetLairDialogVisible(false) }} ReturnLair={getLair} />
         </div>
     );
 }

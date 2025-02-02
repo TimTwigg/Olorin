@@ -69,7 +69,7 @@ export function StatBlockDisplay({ statBlock, displayColumns, deleteCallback }: 
         columnCount: displayColumns || 2
     }
     return (
-        <div className="displayCard" style={dynamicStyles}>
+        <div className="statblock displayCard" style={dynamicStyles}>
             {deleteCallback && <button className="delete button" onClick={deleteCallback}>X</button>}
             <Card>
                 <h4>{statBlock.Name}</h4>
