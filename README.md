@@ -6,7 +6,6 @@ Custom Encounter Manager for D&D 5E.
 
 - Entity Display Spells Control
 - Concentration
-- Next button move scrollbar to creature
 
 ## Ideas
 
