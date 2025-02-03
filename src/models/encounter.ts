@@ -221,8 +221,11 @@ export class Encounter {
      */
     copy(): Encounter {
         let newEncounter = new Encounter(this.Name, this.Description);
-        // newEncounter.Entities = this.Entities.map((e) => e.copy());
         Object.assign(newEncounter, this);
+        newEncounter.Entities = this.Entities.map((e) => e.copy());
+        newEncounter.setInitiativeOrder();
+        let index = this.InitiativeOrder.findIndex(item => item[0] === this.ActiveID);
+        newEncounter.ActiveID = index === -1 ? "" : newEncounter.InitiativeOrder[index][0];
         return newEncounter;
     }
 

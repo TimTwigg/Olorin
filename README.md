@@ -6,7 +6,6 @@ Custom Encounter Manager for D&D 5E.
 
 - Entity Display Spells Control
 - Concentration
-- Add creature doesn't undo on cancel
 - Next button move scrollbar to creature
 
 ## Ideas
@@ -22,3 +21,4 @@ Custom Encounter Manager for D&D 5E.
 ## Long Term
 
 - Reduce frequency of saves to server (for performance / network)?
+    - Already minimized save on encounter changes. Could batch changes and only save once per minute?

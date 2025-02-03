@@ -42,6 +42,8 @@ function Encounters() {
     const [LairDialogVisible, SetLairDialogVisible] = React.useState<boolean>(false);
     const [LairDialogList, SetLairDialogList] = React.useState<{ Name: string, Lair: Lair }[]>([]);
 
+    var refs: Map<string, React.RefObject<HTMLDivElement>> = new Map();
+
     const SetActiveEncounter = (encounter: Encounter | null, save: boolean = true) => {
         _SetActiveEncounter(encounter);
         if (save) saveEncounter(false);
@@ -99,7 +101,7 @@ function Encounters() {
         SetLocalStringState1("");
         SetLocalStringState2("");
         SetLocalStringState3("");
-        SetActiveEncounter(enc);
+        SetActiveEncounter(enc, false);
         SetEditingEncounter(true);
         SetIsNewEncounter(true);
     }
@@ -111,7 +113,7 @@ function Encounters() {
             .withLair(backupEncounter.Lair, backupEncounter.LairEntityName)
             .setInitiativeOrder()
             .copy()
-        );
+        , false);
         SetBackupEncounter(null);
     }
 
@@ -218,11 +220,17 @@ function Encounters() {
     const renderEntities = (overviewOnly: boolean) => {
         if (!activeEncounter || activeEncounter.Entities.length === 0) return <></>;
         let ids = activeEncounter.InitiativeOrder.sort(Encounter.InitiativeSortKey);
+        refs = new Map();
         return ids.map((id, ind) => {
-            if (id[0] === `${activeEncounter.LairEntityName}_lair`) return <LairDisplay key={`${activeEncounter.LairEntityName}_lair${ind}`} lair={activeEncounter.Lair!} overviewOnly={overviewOnly} isActive={activeEncounter.ActiveID === `${activeEncounter.LairEntityName}_lair`} setDisplay={SetDisplayEntity} />;
+            let ref = React.createRef<HTMLDivElement>();
+            refs.set(id[0], ref);
+            if (id[0] === `${activeEncounter.LairEntityName}_lair`) return <LairDisplay key={`${activeEncounter.LairEntityName}_lair${ind}`} ref={ref} lair={activeEncounter.Lair!} overviewOnly={overviewOnly} isActive={activeEncounter.ActiveID === `${activeEncounter.LairEntityName}_lair`} setDisplay={SetDisplayEntity} />;
             let entity = activeEncounter.Entities.find((ent) => ent.id === id[0]);
-            if (!entity) throw new Error("Entity not found in Encounter");
-            return <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={entity.id === activeEncounter.ActiveID} />;
+            if (!entity) {
+                console.log(activeEncounter.Entities, id);
+                throw new Error("Entity not found in Encounter");
+            }
+            return <EntityDisplay key={`${entity.Name}${ind}`} ref={ref} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={entity.id === activeEncounter.ActiveID} />;
         });
     }
 
@@ -262,13 +270,13 @@ function Encounters() {
         // Entity is not in cache
         if (!entity) {
             getEntity(entityName).then((ent) => {
-                if (ent) SetActiveEncounter(activeEncounter.addEntity(ent));
+                if (ent) SetActiveEncounter(activeEncounter.addEntity(ent), false);
             });
         }
         // Entity is in cache
         else {
             if (entity.EntityType === EntityType.StatBlock) entity = new StatBlockEntity(entity.Displayable as StatBlock);
-            SetActiveEncounter(activeEncounter.addEntity(entity));
+            SetActiveEncounter(activeEncounter.addEntity(entity), false);
         }
         TriggerReRender();
     }
@@ -280,6 +288,16 @@ function Encounters() {
         SetActiveEncounter(activeEncounter.setInitiativeOrder().withMetadata({ Started: true, AccessedDate: new Date() }));
         loadEncounterFromBackup();
         SetDisplayEntity(undefined);
+    }
+
+    /**
+     * Scroll the entity list to the entity with the given ID
+     * @param entityID The ID of the active entity
+     */
+    const ScrollToEntity = (entityID: string) => {
+        if (!refs.has(entityID)) return;
+        let ref = refs.get(entityID);
+        if (ref && ref.current) ref.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
     React.useEffect(() => {
@@ -321,7 +339,7 @@ function Encounters() {
                     {encounters?.map((encounter, ind) => {
                         return (
                             <tr key={`${encounter.Name}${ind}`}>
-                                <td className="link"><a onClick={() => { SetActiveEncounter(encounter), SetEncounterIsActive(encounter.Metadata.Started || false) }}>{encounter.Name.replace(/\s/g, "").length > 0 ? encounter.Name : "<encounter name>"}</a></td>
+                                <td className="link"><a onClick={() => { SetActiveEncounter(encounter, false), SetEncounterIsActive(encounter.Metadata.Started || false) }}>{encounter.Name.replace(/\s/g, "").length > 0 ? encounter.Name : "<encounter name>"}</a></td>
                                 <td>{encounter.Description}</td>
                                 <td>{encounter.Metadata.Campaign || ""}</td>
                                 <td>{encounter.Metadata.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</td>
@@ -383,11 +401,11 @@ function Encounters() {
                     <div id="EncounterRunControls">
                         <section>Round: {activeEncounter.Metadata.Round}</section>
                         <section>Turn: {activeEncounter.Metadata.Turn}</section>
-                        {runningEncounter && <button onClick={() => { SetActiveEncounter(activeEncounter.tick()), TriggerReRender() }}>NEXT</button>}
+                        {runningEncounter && <button onClick={() => { SetActiveEncounter(activeEncounter.tick()), ScrollToEntity(activeEncounter.ActiveID), TriggerReRender() }}>NEXT</button>}
                     </div>
                 </div>
                 <div id="CreatureList" style={{ display: runningEncounter ? "none" : "block" }}>
-                    {EditingEncounter && <EntityTable creatures={CreatureList} displayCallback={displayMiscEntity} addCallback={addMiscEntity} />}
+                    {EditingEncounter && <EntityTable creatures={CreatureList} displayCallback={displayMiscEntity} addCallback={(name: string) => {addMiscEntity(name)}} />}
                 </div>
                 <div id="StatBlockDisplay" style={{ maxWidth: EditingEncounter ? "30%" : "60%", margin: runningEncounter ? "0 5rem" : "0" }}>
                     {DisplayEntity && renderDisplay(DisplayEntity, !runningEncounter)}

@@ -10,16 +10,17 @@ import { Lair } from "@src/models/lair";
 import "@src/styles/lair.scss";
 
 type LairProps = {
+    ref?: React.RefObject<HTMLDivElement>;
     lair: Lair;
     overviewOnly?: boolean;
     isActive?: boolean;
     setDisplay?: (lair?: Lair) => void;
 };
 
-export function LairDisplay({ lair, overviewOnly, isActive, setDisplay }: LairProps) {
+export function LairDisplay({ ref, lair, overviewOnly, isActive, setDisplay }: LairProps) {
     setDisplay = setDisplay || ((lair?: Lair) => { console.log(`No display callback found for entity: ${lair ? lair.Name : "undefined"}`) });
     return (
-        <div className={"lair" + (overviewOnly ? " overview" : "") + (!overviewOnly && isActive ? " active" : "")}>
+        <div ref={ref} className={"lair" + (overviewOnly ? " overview" : "") + (!overviewOnly && isActive ? " active" : "")}>
             <div className="displayCardInfo">
                 <section>{lair.Initiative}</section>
             </div>

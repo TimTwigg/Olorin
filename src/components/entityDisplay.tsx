@@ -28,6 +28,7 @@ import { AiFillLock } from "react-icons/ai";
 import { TbPencilOff, TbPencil } from "react-icons/tb";
 
 type EntityDisplayProps = {
+    ref?: React.RefObject<HTMLDivElement>;
     entity: Entity;
     deleteCallback: (id: string) => void;
     userOptions?: UserOptions;
@@ -68,7 +69,7 @@ function renderConditions(conditions: SmartMap<string, number>): JSX.Element {
     </div>)
 }
 
-export function EntityDisplay({ entity, deleteCallback, userOptions, setDisplay, renderTrigger, overviewOnly, editMode, isActive }: EntityDisplayProps) {
+export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDisplay, renderTrigger, overviewOnly, editMode, isActive }: EntityDisplayProps) {
     const [ExpandedState, SetExpandedState] = React.useState<boolean>(false);
     const [ControlState, SetControlState] = React.useState<ControlOptions>(ControlOptions.None);
     const [LocalNumericalState, SetLocalNumericalState] = React.useState<number>(0);
@@ -233,7 +234,7 @@ export function EntityDisplay({ entity, deleteCallback, userOptions, setDisplay,
     );
 
     return (
-        <div className={"entity" + (isActive ? " active" : "")}>
+        <div className={"entity" + (isActive ? " active" : "")} ref={ref}>
             <div className="displayCardInfo">
                 <section>{entity.Initiative}</section>
             </div>
