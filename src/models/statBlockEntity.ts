@@ -105,7 +105,7 @@ export class StatBlockEntity implements Entity {
 
     addCondition(condition: string): void {
         if (!this.Conditions.has(condition)) {
-            this.Conditions.set(condition, 1);
+            this.Conditions.set(condition, 0);
         }
     }
 
@@ -161,7 +161,7 @@ export class StatBlockEntity implements Entity {
         this.TempHitPoints = 0;
         this.Initiative = 0;
         this.MaxHitPoints = this.StatBlock.Stats.HitPoints.Average;
-        this.CurrentHitPoints = this.MaxHitPoints;
+        this.CurrentHitPoints = this.StatBlock.Stats.HitPoints.Average;
         this.ArmorClass = this.StatBlock.Stats.ArmorClass;
         this.ArmorClassBonus = 0;
     }

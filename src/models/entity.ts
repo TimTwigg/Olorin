@@ -5,7 +5,14 @@ export enum EntityType {
     Player
 }
 
-export class EntityOverview {
+export type EntityOverviewT = {
+    Name: string
+    Type: string
+    Size: string
+    DifficultyRating: number
+}
+
+export class EntityOverview implements EntityOverviewT {
     Name: string
     Type: string
     Size: string

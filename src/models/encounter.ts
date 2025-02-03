@@ -8,7 +8,7 @@ export type EncounterMetadata = {
     Campaign?: string,
     Started?: boolean,
     Round?: number,
-    Index?: number
+    Turn?: number
 }
 
 export class Encounter {
@@ -19,7 +19,8 @@ export class Encounter {
     HasLair: boolean = false
     Lair?: Lair = undefined
     LairEntityName: string = ""
-    ActiveEntity: number = 0
+    ActiveID: string = ""
+    InitiativeOrder: [string, number][] = []
 
     constructor(name: string = "", description: string = "", Campaign: string = "") {
         this.Name = name
@@ -30,7 +31,7 @@ export class Encounter {
             Campaign: Campaign,
             Started: false,
             Round: 1,
-            Index: 0
+            Turn: 1
         };
     }
 
@@ -51,7 +52,7 @@ export class Encounter {
         let num = entityCounts.get(entity.Name) + 1 || 0;
         if (num > 0) entity.setSuffix(num.toString());
         this.Entities.push(entity);
-        return this;
+        return this.setInitiativeOrder();
     }
 
     /**
@@ -62,10 +63,13 @@ export class Encounter {
      */
     removeEntity(entityID: string): Encounter {
         this.Entities = this.Entities.filter((e) => e.id !== entityID);
-        if (this.Metadata.Started && this.Entities.length > 1) {
-            if (this.Entities.findIndex((e) => e.id === entityID) < this.ActiveEntity) this.ActiveEntity = this.ActiveEntity - 1;
+        if (entityID === this.ActiveID) {
+            let pos = this.InitiativeOrder.findIndex((id) => id[0] === entityID);
+            this.ActiveID = this.InitiativeOrder[pos + 1][0] || this.InitiativeOrder[0][0] || "";
         }
-        return this.recalculateEntitySuffixes();
+        this.InitiativeOrder = this.InitiativeOrder.filter((id) => id[0] !== entityID);
+        this.recalculateEntitySuffixes();
+        return this;
     }
 
     /**
@@ -95,13 +99,19 @@ export class Encounter {
      * @returns the updated encounter
      */
     tick(): Encounter {
-        this.Entities[this.Metadata.Index!].tick();
-        let num = this.Metadata.Index! + 1;
-        if (num === this.Entities.length) {
+        for (let ent of this.Entities) {
+            if (ent.id === this.ActiveID) {
+                ent.tick();
+                break;
+            }
+        }
+        let num = this.Metadata.Turn!;
+        if (num === this.InitiativeOrder.length) {
             this.Metadata.Round!++;
             num = 0;
         }
-        this.Metadata.Index = num;
+        this.Metadata.Turn = num + 1;
+        this.ActiveID = this.InitiativeOrder[num][0];
         return this;
     }
 
@@ -122,10 +132,26 @@ export class Encounter {
      */
     reset(): Encounter {
         this.Entities.forEach((e) => e.resetAll());
-        this.Metadata.Index = 0;
+        this.Metadata.Turn = 1;
         this.Metadata.Round = 1;
         this.Metadata.Started = false;
-        return this.recalculateEntitySuffixes();
+        this.ActiveID = "";
+        this.setInitiativeOrder();
+        this.recalculateEntitySuffixes();
+        return this;
+    }
+
+    /**
+     * Set the initiative order of the encounter
+     * 
+     * @returns the updated encounter
+     */
+    setInitiativeOrder(): Encounter {
+        this.InitiativeOrder = this.Entities.map((e) => [e.id, e.Initiative]);
+        if (this.HasLair) this.InitiativeOrder.push([`${this.LairEntityName}_lair`, this.Lair?.Initiative || 20]);
+        this.InitiativeOrder.sort(Encounter.InitiativeSortKey);
+        if (!this.Metadata.Started) this.ActiveID = this.InitiativeOrder[0][0];
+        return this;
     }
 
     /**
@@ -159,7 +185,7 @@ export class Encounter {
             AccessedDate: metadata.AccessedDate === undefined ? this.Metadata.AccessedDate : metadata.AccessedDate,
             Campaign: metadata.Campaign === undefined ? this.Metadata.Campaign : metadata.Campaign,
             Started: metadata.Started === undefined ? this.Metadata.Started : metadata.Started,
-            Index: metadata.Index === undefined ? this.Metadata.Index : metadata.Index,
+            Turn: metadata.Turn === undefined ? this.Metadata.Turn : metadata.Turn,
             Round: metadata.Round === undefined ? this.Metadata.Round : metadata.Round,
         }
         return this;
@@ -184,6 +210,7 @@ export class Encounter {
         this.HasLair = lair !== undefined;
         this.Lair = lair;
         this.LairEntityName = Name;
+        if (lair && this.InitiativeOrder.length === this.Entities.length) this.InitiativeOrder.push([`${Name}_lair`, lair.Initiative]);
         return this;
     }
 
@@ -194,8 +221,14 @@ export class Encounter {
      */
     copy(): Encounter {
         let newEncounter = new Encounter(this.Name, this.Description);
-        newEncounter.Metadata = this.Metadata;
-        newEncounter.Entities = this.Entities.map((e) => e.copy());
+        // newEncounter.Entities = this.Entities.map((e) => e.copy());
+        Object.assign(newEncounter, this);
         return newEncounter;
+    }
+
+    public static InitiativeSortKey(a: [string, number], b: [string, number]): number {
+        let num_a = a[0].endsWith("lair") ? a[1] - 0.5 : a[1];
+        let num_b = b[0].endsWith("lair") ? b[1] - 0.5 : b[1];
+        return num_b - num_a;
     }
 }

@@ -11,9 +11,9 @@ import { StatBlock } from "@src/models/statBlock";
 import { Lair, isLair } from "@src/models/lair";
 import { UserOptions } from "@src/models/userOptions";
 
-import { FaAddressCard } from "react-icons/fa";
 import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { LairDisplay, LairDialog, LairBlockDisplay } from "@src/components/lair";
+import { EntityTable } from "@src/components/entityTable";
 
 export const Route = createFileRoute("/encounters")({
     component: Encounters,
@@ -26,7 +26,7 @@ const CACHESIZE = 100;
 
 function Encounters() {
     const [encounters, SetEncounters] = React.useState<Encounter[]>([]);
-    const [activeEncounter, SetActiveEncounter] = React.useState<Encounter | null>(null);
+    const [activeEncounter, _SetActiveEncounter] = React.useState<Encounter | null>(null);
     const [backupEncounter, SetBackupEncounter] = React.useState<Encounter | null>(null);
     const [runningEncounter, SetRunningEncounter] = React.useState<boolean>(false);
     const [DisplayEntity, SetDisplayEntity] = React.useState<Entity | Lair | undefined>();
@@ -41,6 +41,11 @@ function Encounters() {
     const [FullEntityList, SetFullEntityList] = React.useState<Entity[]>([]);
     const [LairDialogVisible, SetLairDialogVisible] = React.useState<boolean>(false);
     const [LairDialogList, SetLairDialogList] = React.useState<{ Name: string, Lair: Lair }[]>([]);
+
+    const SetActiveEncounter = (encounter: Encounter | null, save: boolean = true) => {
+        _SetActiveEncounter(encounter);
+        if (save) saveEncounter(false);
+    }
 
     /**
      * Add an Entity to the Entity List. Manages caching of entities.
@@ -60,7 +65,7 @@ function Encounters() {
     async function TriggerReRender() {
         // This is a hack to force a re-render of the Encounter Display
         // React rerenders if a state changes
-        if (activeEncounter) SetActiveEncounter(activeEncounter.copy());
+        if (activeEncounter) SetActiveEncounter(activeEncounter.copy(), false);
     }
 
     /**
@@ -78,10 +83,8 @@ function Encounters() {
     }
 
     const deleteEntity = (entityID: string) => {
-        for (let e of activeEncounter?.Entities || []) console.log(e.id);
         if (!activeEncounter) return;
         SetActiveEncounter(activeEncounter.removeEntity(entityID).copy());
-        console.log("Entity Deleted: " + entityID);
     }
 
     const updateMetadata = (data: EncounterMetadata) => {
@@ -103,7 +106,12 @@ function Encounters() {
 
     const loadEncounterFromBackup = () => {
         if (!backupEncounter || !activeEncounter) return;
-        SetActiveEncounter(activeEncounter.withEntities(backupEncounter.Entities).withLair(backupEncounter.Lair, backupEncounter.LairEntityName).copy());
+        SetActiveEncounter(activeEncounter
+            .withEntities(backupEncounter.Entities)
+            .withLair(backupEncounter.Lair, backupEncounter.LairEntityName)
+            .setInitiativeOrder()
+            .copy()
+        );
         SetBackupEncounter(null);
     }
 
@@ -124,6 +132,8 @@ function Encounters() {
             else if (backupEncounter) {
                 loadEncounterFromBackup();
             }
+            // Clear the display
+            SetDisplayEntity(undefined);
             return;
         }
         // If the user is entering edit mode, load the state of the Encounter
@@ -131,6 +141,18 @@ function Encounters() {
         SetLocalStringState2(activeEncounter?.Metadata.Campaign || "");
         SetLocalStringState3(activeEncounter?.Description || "");
         SetBackupEncounter(activeEncounter ? activeEncounter.copy() : null);
+    }
+
+    /**
+     * Save the Encounter to the API
+     */
+    const saveEncounter = (notify: boolean) => {
+        if (!activeEncounter) return;
+        api.saveEncounter("dummy", activeEncounter).then((res) => {
+            if (!notify) return;
+            if (res) toast.success("Encounter saved successfully to server.");
+            else toast.error("Failed to save Encounter to server.");
+        });
     }
 
     /**
@@ -146,15 +168,11 @@ function Encounters() {
             SetEncounters([...encounters, activeEncounter]);
             SetIsNewEncounter(false);
         }
-        SetActiveEncounter(activeEncounter.withName(LocalStringState1));
         SetBackupEncounter(null);
         updateMetadata({ Campaign: LocalStringState2 });
-        SetActiveEncounter(activeEncounter.withDescription(LocalStringState3));
+        SetActiveEncounter(activeEncounter.withName(LocalStringState1).withDescription(LocalStringState3).setInitiativeOrder());
         SetEditingEncounter(false);
-        api.saveEncounter("dummy", activeEncounter).then((res) => {
-            if (res) toast.success("Encounter saved successfully to server.");
-            else toast.error("Failed to save Encounter to server.");
-        });
+        saveEncounter(true);
     }
 
     /**
@@ -185,7 +203,7 @@ function Encounters() {
     const renderDisplay = (item?: Entity | Lair, overviewOnly: boolean = false) => {
         if (!item) return <></>;
         if (isEntity(item) && item.EntityType === EntityType.StatBlock) {
-            return <StatBlockDisplay statBlock={item.Displayable as StatBlock} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={overviewOnly ? 1 : Config.defaultColumns || 2} />;
+            return <StatBlockDisplay statBlock={item.Displayable as StatBlock} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={EditingEncounter ? 1 : Config.defaultColumns || 2} />;
         }
         else if (isEntity(item) && item.EntityType === EntityType.Player) return <></>;
         else if (isLair(item)) {
@@ -199,26 +217,13 @@ function Encounters() {
      */
     const renderEntities = (overviewOnly: boolean) => {
         if (!activeEncounter || activeEncounter.Entities.length === 0) return <></>;
-        let entities: (Entity | Lair)[];
-        if (activeEncounter.HasLair && activeEncounter.Lair) {
-            entities = (activeEncounter.Entities as (Entity | Lair)[]).concat([activeEncounter.Lair]);
-        }
-        else {
-            entities = activeEncounter.Entities;
-        }
-
-        const calc_sort_key = (a: Entity | Lair, b: Entity | Lair) => {
-            let a_val = a.Initiative;
-            let b_val = b.Initiative;
-            // Ensure that lairs lose ties in initiative
-            if (isLair(a)) a_val -= 0.5;
-            if (isLair(b)) b_val -= 0.5;
-            return b_val - a_val;
-        };
-
-        return entities.sort(calc_sort_key).map((entity, ind) => (isEntity(entity))
-            ? <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={ind === activeEncounter?.Metadata.Index} />
-            : <LairDisplay key={`${activeEncounter.LairEntityName}_lair${ind}`} lair={activeEncounter.Lair!} overviewOnly={overviewOnly} isActive={ind === activeEncounter?.Metadata.Index} setDisplay={SetDisplayEntity} />);
+        let ids = activeEncounter.InitiativeOrder.sort(Encounter.InitiativeSortKey);
+        return ids.map((id, ind) => {
+            if (id[0] === `${activeEncounter.LairEntityName}_lair`) return <LairDisplay key={`${activeEncounter.LairEntityName}_lair${ind}`} lair={activeEncounter.Lair!} overviewOnly={overviewOnly} isActive={activeEncounter.ActiveID === `${activeEncounter.LairEntityName}_lair`} setDisplay={SetDisplayEntity} />;
+            let entity = activeEncounter.Entities.find((ent) => ent.id === id[0]);
+            if (!entity) throw new Error("Entity not found in Encounter");
+            return <EntityDisplay key={`${entity.Name}${ind}`} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={entity.id === activeEncounter.ActiveID} />;
+        });
     }
 
     /**
@@ -252,17 +257,29 @@ function Encounters() {
 
     const addMiscEntity = (entityName: string) => {
         if (!activeEncounter) return;
+        // Check if entity is in the cache
         let entity = FullEntityList.find((ent) => ent.Name === entityName);
+        // Entity is not in cache
         if (!entity) {
             getEntity(entityName).then((ent) => {
                 if (ent) SetActiveEncounter(activeEncounter.addEntity(ent));
             });
         }
+        // Entity is in cache
         else {
             if (entity.EntityType === EntityType.StatBlock) entity = new StatBlockEntity(entity.Displayable as StatBlock);
             SetActiveEncounter(activeEncounter.addEntity(entity));
         }
         TriggerReRender();
+    }
+
+    const startEncounter = () => {
+        if (!activeEncounter) return;
+        SetRunningEncounter(!runningEncounter);
+        SetEncounterIsActive(true);
+        SetActiveEncounter(activeEncounter.setInitiativeOrder().withMetadata({ Started: true, AccessedDate: new Date() }));
+        loadEncounterFromBackup();
+        SetDisplayEntity(undefined);
     }
 
     React.useEffect(() => {
@@ -344,7 +361,7 @@ function Encounters() {
             <section className="container">
                 <section id="buttonSet1" className="five columns">
                     <button onClick={() => { initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter), updateMetadata({ AccessedDate: new Date() }) }} disabled={runningEncounter} >{EditingEncounter ? "Cancel" : "Edit Mode"}</button>
-                    <button onClick={() => { SetRunningEncounter(!runningEncounter), SetEncounterIsActive(true), updateMetadata({ Started: true, AccessedDate: new Date() }), loadEncounterFromBackup(), SetDisplayEntity(undefined) }} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
+                    <button onClick={startEncounter} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
                     <button onClick={() => { SetActiveEncounter(activeEncounter.reset()), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter || EditingEncounter} >Reset Encounter</button>
                 </section>
                 <section id="mode-log">
@@ -365,41 +382,14 @@ function Encounters() {
                     </div>
                     <div id="EncounterRunControls">
                         <section>Round: {activeEncounter.Metadata.Round}</section>
-                        <section>Turn: {activeEncounter.Metadata.Index! + 1}</section>
+                        <section>Turn: {activeEncounter.Metadata.Turn}</section>
                         {runningEncounter && <button onClick={() => { SetActiveEncounter(activeEncounter.tick()), TriggerReRender() }}>NEXT</button>}
                     </div>
                 </div>
                 <div id="CreatureList" style={{ display: runningEncounter ? "none" : "block" }}>
-                    {EditingEncounter &&
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Type</th>
-                                    <th>Size</th>
-                                    <th>CR</th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {CreatureList.map((creature, ind) => {
-                                    return (
-                                        <tr key={`${creature.Name}${ind}`}>
-                                            <td>{creature.Name}</td>
-                                            <td>{creature.Type}</td>
-                                            <td>{creature.Size}</td>
-                                            <td>{creature.DifficultyRating}</td>
-                                            <td><button className="iconButton" onClick={() => { displayMiscEntity(creature.Name) }}><FaAddressCard /></button></td>
-                                            <td><button className="iconButton" onClick={() => { addMiscEntity(creature.Name) }}>+</button></td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    }
+                    {EditingEncounter && <EntityTable creatures={CreatureList} displayCallback={displayMiscEntity} addCallback={addMiscEntity} />}
                 </div>
-                <div id="StatBlockDisplay" style={{ maxWidth: runningEncounter ? "60%" : "30%", margin: runningEncounter ? "0 5rem" : "0" }}>
+                <div id="StatBlockDisplay" style={{ maxWidth: EditingEncounter ? "30%" : "60%", margin: runningEncounter ? "0 5rem" : "0" }}>
                     {DisplayEntity && renderDisplay(DisplayEntity, !runningEncounter)}
                 </div>
             </section>

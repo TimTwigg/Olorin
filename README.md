@@ -6,10 +6,8 @@ Custom Encounter Manager for D&D 5E.
 
 - Entity Display Spells Control
 - Concentration
-- Creature table search
-- Move conditions from entityDisplay down into Entity so that round counters can be updated.
-- Lairs
-    - run state bug
+- Add creature doesn't undo on cancel
+- Next button move scrollbar to creature
 
 ## Ideas
 
@@ -20,3 +18,7 @@ Custom Encounter Manager for D&D 5E.
         - Wildshape would act in a certain way
         - Default behavior for other uses
             - What other use cases are there?
+
+## Long Term
+
+- Reduce frequency of saves to server (for performance / network)?

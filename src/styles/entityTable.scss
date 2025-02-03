@@ -1,0 +1,47 @@
+@use 'variables' as v;
+
+.entityTable {
+    font-size: 1.6rem;
+
+    input {
+        margin: 0 5px;
+        border-radius: 2px;
+        padding: 2px;
+    }
+
+    input[type="text"] {
+        width: 10rem;
+    }
+
+    input[type="number"] {
+        width: 3rem;
+        text-align: center;
+    }
+
+    select {
+        width: 10rem;
+    }
+
+    th,
+    tr,
+    td {
+        padding: 2px 5px;
+    }
+
+    #tableMeta {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+
+        section {
+            display: flex;
+            gap: 3px;
+        }
+    }
+}
+
+.smalltext {
+    font-size: 1.5rem;
+    color: v.$gray;
+    font-weight: normal;
+}
