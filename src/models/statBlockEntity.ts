@@ -63,7 +63,7 @@ export class StatBlockEntity implements Entity {
     }
 
     randomizeInitiative(): void {
-        this.Initiative = d20() + modifierOf(this.StatBlock.Stats.Dexterity);
+        if (this.Initiative === 0) this.Initiative = d20() + modifierOf(this.StatBlock.Stats.Dexterity);
     }
 
     setInitiative(value: number): void {

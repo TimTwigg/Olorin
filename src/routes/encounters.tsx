@@ -398,11 +398,15 @@ function Encounters() {
                     <div id="EncounterList">
                         {renderEntities(!runningEncounter)}
                     </div>
-                    <div id="EncounterRunControls">
+                    {runningEncounter && <div id="EncounterRunControls">
                         <section>Round: {activeEncounter.Metadata.Round}</section>
                         <section>Turn: {activeEncounter.Metadata.Turn}</section>
-                        {runningEncounter && <button onClick={() => { SetActiveEncounter(activeEncounter.tick()), ScrollToEntity(activeEncounter.ActiveID), TriggerReRender() }}>NEXT</button>}
-                    </div>
+                        <button onClick={() => { SetActiveEncounter(activeEncounter.tick()), ScrollToEntity(activeEncounter.ActiveID), TriggerReRender() }}>NEXT</button>
+                    </div>}
+                    {!runningEncounter && <div id="EncounterEditControls">
+                        <button onClick={() => { SetActiveEncounter(activeEncounter.randomizeInitiative()), TriggerReRender() }}>Random Initiative</button>
+                        <button onClick={() => { SetActiveEncounter(activeEncounter.clear()), TriggerReRender() }} disabled={!EditingEncounter} >Clear Encounter</button>
+                    </div>}
                 </div>
                 <div id="CreatureList" style={{ display: runningEncounter ? "none" : "block" }}>
                     {EditingEncounter && <EntityTable creatures={CreatureList} displayCallback={displayMiscEntity} addCallback={(name: string) => { addMiscEntity(name) }} />}

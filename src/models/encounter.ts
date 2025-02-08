@@ -121,7 +121,11 @@ export class Encounter {
      * @returns the updated encounter
      */
     clear(): Encounter {
-        this.Entities.filter((e) => (e.EncounterLocked));
+        let ents: Entity[] = [];
+        this.Entities.forEach((e) => {
+            if (e.EncounterLocked) ents.push(e);
+        });
+        this.Entities = ents;
         return this;
     }
 
@@ -138,6 +142,17 @@ export class Encounter {
         this.ActiveID = "";
         this.setInitiativeOrder();
         this.recalculateEntitySuffixes();
+        return this;
+    }
+
+    /**
+     * Randomize the initiative of all entities in the encounter
+     * 
+     * @returns the updated encounter
+     */
+    randomizeInitiative(): Encounter {
+        this.Entities.forEach((e) => e.randomizeInitiative());
+        this.setInitiativeOrder();
         return this;
     }
 
@@ -223,6 +238,7 @@ export class Encounter {
         let newEncounter = new Encounter(this.Name, this.Description);
         Object.assign(newEncounter, this);
         newEncounter.Entities = this.Entities.map((e) => e.copy());
+        if (newEncounter.Entities.length === 0) return newEncounter;
         newEncounter.setInitiativeOrder();
         let index = this.InitiativeOrder.findIndex(item => item[0] === this.ActiveID);
         newEncounter.ActiveID = index === -1 ? "" : newEncounter.InitiativeOrder[index][0];

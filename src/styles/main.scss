@@ -197,6 +197,12 @@ button {
     &:hover {
         opacity: 0.75;
     }
+
+    &:disabled {
+        background-color: v.$lightGray !important;
+        color: v.$gray;
+        opacity: 1;
+    }
 }
 
 /*
@@ -277,12 +283,6 @@ a {
     display: inline-block;
     transition: 0.25s ease;
     width: 20rem;
-
-    &:disabled {
-        background-color: v.$lightGray;
-        color: v.$gray;
-        opacity: 1;
-    }
 }
 
 button.delete.button {
@@ -438,7 +438,8 @@ input.descriptionEdit {
     border: 10px groove v.$lightGray;
 }
 
-#EncounterRunControls {
+#EncounterRunControls,
+#EncounterEditControls {
     display: flex;
     justify-content: space-between;
     margin: 0.5rem 2rem;
@@ -447,7 +448,7 @@ input.descriptionEdit {
         float: right;
         font-size: 1.5rem;
         padding: 5px 10px;
-        width: 8rem;
+        min-width: 8rem;
         background-color: v.$gray;
         color: v.$blue;
         transition: 0.25s ease;
