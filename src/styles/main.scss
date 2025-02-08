@@ -339,12 +339,22 @@ button.iconButton {
 input {
     padding: 2px;
     border: ridge 1px v.$gray;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
 
     &:focus {
         outline: none;
         border-color: v.$lightBlue;
     }
+}
+
+input[type="text"],
+input[type="number"] {
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+input[type="checkbox"] {
+    width: initial;
+    vertical-align: middle;
+    margin: 0 2px 0 0;
 }
 
 .titleEdit {
