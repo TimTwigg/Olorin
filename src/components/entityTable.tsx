@@ -71,7 +71,7 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
                 enableSorting: false,
             }),
             factory.accessor("Name", {
-                cell: props => <button className="iconButton" onClick={() => addCallback(props.row.original.Name)}>+</button>,
+                cell: props => <button className="iconButton" onClick={() => { addCallback(props.row.original.Name) }}>+</button>,
                 header: "Add",
                 id: "add",
                 enableSorting: false,
@@ -243,7 +243,7 @@ function Filter({ column }: { column: Column<any, unknown> }) {
             ))}
         </select>
     ) : filterVariant === undefined ? (
-        <div className = "space"/>
+        <div className="space" />
     ) : (
         <DebouncedInput
             type="text"

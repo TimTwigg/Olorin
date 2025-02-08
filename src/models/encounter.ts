@@ -150,7 +150,7 @@ export class Encounter {
         this.InitiativeOrder = this.Entities.map((e) => [e.id, e.Initiative]);
         if (this.HasLair) this.InitiativeOrder.push([`${this.LairEntityName}_lair`, this.Lair?.Initiative || 20]);
         this.InitiativeOrder.sort(Encounter.InitiativeSortKey);
-        if (!this.Metadata.Started) this.ActiveID = this.InitiativeOrder[0][0];
+        if (!this.Metadata.Started && this.InitiativeOrder.length > 0) this.ActiveID = this.InitiativeOrder[0][0];
         return this;
     }
 

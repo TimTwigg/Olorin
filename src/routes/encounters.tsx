@@ -113,7 +113,7 @@ function Encounters() {
             .withLair(backupEncounter.Lair, backupEncounter.LairEntityName)
             .setInitiativeOrder()
             .copy()
-        , false);
+            , false);
         SetBackupEncounter(null);
     }
 
@@ -378,7 +378,7 @@ function Encounters() {
             <hr />
             <section className="container">
                 <section id="buttonSet1" className="five columns">
-                    <button onClick={() => { initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter), updateMetadata({ AccessedDate: new Date() }) }} disabled={runningEncounter} >{EditingEncounter ? "Cancel" : "Edit Mode"}</button>
+                    <button onClick={() => { initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter), updateMetadata({ AccessedDate: new Date() }), TriggerReRender() }} disabled={runningEncounter} >{EditingEncounter ? "Cancel" : "Edit Mode"}</button>
                     <button onClick={startEncounter} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
                     <button onClick={() => { SetActiveEncounter(activeEncounter.reset()), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter || EditingEncounter} >Reset Encounter</button>
                 </section>
@@ -405,7 +405,7 @@ function Encounters() {
                     </div>
                 </div>
                 <div id="CreatureList" style={{ display: runningEncounter ? "none" : "block" }}>
-                    {EditingEncounter && <EntityTable creatures={CreatureList} displayCallback={displayMiscEntity} addCallback={(name: string) => {addMiscEntity(name)}} />}
+                    {EditingEncounter && <EntityTable creatures={CreatureList} displayCallback={displayMiscEntity} addCallback={(name: string) => { addMiscEntity(name) }} />}
                 </div>
                 <div id="StatBlockDisplay" style={{ maxWidth: EditingEncounter ? "30%" : "60%", margin: runningEncounter ? "0 5rem" : "0" }}>
                     {DisplayEntity && renderDisplay(DisplayEntity, !runningEncounter)}
