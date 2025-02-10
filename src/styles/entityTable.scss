@@ -10,11 +10,11 @@
     }
 
     input[type="text"] {
-        width: 10rem;
+        width: 8rem;
     }
 
     input[type="number"] {
-        width: 3rem;
+        width: 2.5rem;
         text-align: center;
     }
 
@@ -26,6 +26,11 @@
     tr,
     td {
         padding: 2px 5px;
+        max-width: 10rem;
+    }
+
+    td {
+        font-size: 1.25rem;
     }
 
     #tableMeta {

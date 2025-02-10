@@ -347,7 +347,8 @@ input {
 }
 
 input[type="text"],
-input[type="number"] {
+input[type="number"],
+select {
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -431,10 +432,10 @@ input.descriptionEdit {
 }
 
 #EncounterList {
-    min-width: fit-content;
+    min-width: 28rem;
     height: 65vh;
     overflow-y: auto;
-    padding: 0 15px;
+    padding: 0 10px;
     border: 10px groove v.$lightGray;
 }
 
@@ -459,7 +460,7 @@ input.descriptionEdit {
 #CreatureList {
     max-width: 40%;
     min-width: fit-content;
-    margin: 0 30px;
+    margin: 0 15px;
 }
 
 .statblock.displayCard {

@@ -2,6 +2,7 @@ export const arasta = {
     "Name": "Arasta",
     "ChallengeRating": 21,
     "ProficiencyBonus": 7,
+    "Source": "Mythic Odysseys of Theros",
     "Description": {
         "Size": "Huge",
         "Type": "Monstrosity",

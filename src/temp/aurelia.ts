@@ -2,6 +2,7 @@ export const aurelia = {
     "Name": "Aurelia",
     "ChallengeRating": 23,
     "ProficiencyBonus": 7,
+    "Source": "Guildmaster's Guide to Ravnica",
     "Description": {
         "Size": "Medium",
         "Type": "Celestial",

@@ -61,12 +61,14 @@ function MythicActionsDisplay({ mythicActions }: { mythicActions: StatBlock["Myt
 type StatBlockDisplayProps = {
     statBlock: StatBlock;
     displayColumns?: number;
+    size: "small" | "medium" | "large";
     deleteCallback?: () => void;
 }
 
-export function StatBlockDisplay({ statBlock, displayColumns, deleteCallback }: StatBlockDisplayProps) {
+export function StatBlockDisplay({ statBlock, displayColumns, size, deleteCallback }: StatBlockDisplayProps) {
     const dynamicStyles: React.CSSProperties = {
-        columnCount: displayColumns || 2
+        columnCount: displayColumns || 2,
+        fontSize: size === "small" ? "1.25rem" : size === "medium" ? "1.5rem" : "1.75rem"
     }
     return (
         <div className="statblock displayCard" style={dynamicStyles}>

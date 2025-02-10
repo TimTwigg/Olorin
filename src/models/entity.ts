@@ -10,6 +10,7 @@ export type EntityOverviewT = {
     Type: string
     Size: string
     DifficultyRating: number
+    Source: string
 }
 
 export class EntityOverview implements EntityOverviewT {
@@ -17,12 +18,14 @@ export class EntityOverview implements EntityOverviewT {
     Type: string
     Size: string
     DifficultyRating: number
+    Source: string
 
-    constructor(Name: string, Type: string, Size: string, DifficultyRating: number) {
-        this.Name = Name
-        this.Type = Type
-        this.Size = Size
-        this.DifficultyRating = DifficultyRating
+    constructor(Name: string, Type: string, Size: string, DifficultyRating: number, Source: string) {
+        this.Name = Name;
+        this.Type = Type;
+        this.Size = Size;
+        this.DifficultyRating = DifficultyRating;
+        this.Source = Source;
     }
 }
 

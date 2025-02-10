@@ -64,6 +64,11 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
                 header: () => "CR",
                 meta: { filterVariant: "range" },
             }),
+            factory.accessor("Source", {
+                cell: info => info.getValue(),
+                header: () => "Source",
+                meta: { filterVariant: "select" },
+            }),
             factory.accessor("Name", {
                 cell: props => <button className="iconButton" onClick={() => displayCallback(props.row.original.Name)}><FaAddressCard /></button>,
                 header: () => "Display",

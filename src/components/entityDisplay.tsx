@@ -131,9 +131,9 @@ export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDis
 
     const renderSettingsControl = () => {
         return <>
-            <span><button onClick={_ => LockEntity(!locked)} className="icon">{locked ? <AiFillLock /> : <SlLockOpen />}<br />{locked ? "Locked" : "Unlocked"}</button></span>
-            <span><button onClick={_ => SetReadonly(!readonly)} className="icon">{readonly ? <TbPencilOff /> : <TbPencil />}<br />{readonly ? "Read Only" : "Edit"}</button></span>
-            <span><button onClick={_ => deleteCallback(entity.id)} disabled={locked || (!editMode && overviewOnly)} className="icon"><GiTrashCan /><br />Delete</button></span>
+            <span><button onClick={_ => LockEntity(!locked)} className="icon">{locked ? <AiFillLock /> : <SlLockOpen />}<br />{overviewOnly ? "" : locked ? "Locked" : "Unlocked"}</button></span>
+            <span><button onClick={_ => SetReadonly(!readonly)} className="icon">{readonly ? <TbPencilOff /> : <TbPencil />}<br />{overviewOnly ? "" : readonly ? "Read Only" : "Edit"}</button></span>
+            <span><button onClick={_ => deleteCallback(entity.id)} disabled={locked || (!editMode && overviewOnly)} className="icon"><GiTrashCan /><br />{overviewOnly ? "" : "Delete"}</button></span>
         </>
     }
 
@@ -141,8 +141,8 @@ export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDis
         return <>
             <span>
                 <p>Initiative</p>
-                <input type="number" min={0} placeholder="Set" onChange={e => SetLocalNumericalState(parseInt(e.target.value))} className="curveLeft" />
-                <button onClick={_ => { entity.setInitiative(LocalNumericalState), SetControlState(ControlOptions.None), renderTrigger() }} className="rightButton iconButton"><GiCheckMark /></button>
+                <input type="number" min={0} placeholder="Set" onChange={e => SetLocalNumericalState(parseInt(e.target.value))} className="curveLeft" disabled={readonly} />
+                <button onClick={_ => { entity.setInitiative(LocalNumericalState), SetControlState(ControlOptions.None), renderTrigger() }} className="rightButton iconButton" disabled={readonly}><GiCheckMark /></button>
             </span>
         </>
     }
@@ -201,33 +201,23 @@ export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDis
     if (overviewOnly) return (
         <div className="entity overview">
             <div className="displayCardInfo">
-                <label>Initiative</label>
-                {editMode ?
-                    <input type="number" min={0} defaultValue={entity.Initiative === 0 ? undefined : entity.Initiative} onChange={e => { entity.setInitiative(parseInt(e.target.value)) }} />
-                    :
-                    <section>{entity.Initiative}</section>
-                }
+                <input type="number" min={0} defaultValue={entity.Initiative === 0 ? undefined : entity.Initiative} onChange={e => { entity.setInitiative(parseInt(e.target.value)) ?? 0 }} />
             </div>
-            <div className="displayCard" style={{ columnCount: 2 }}>
+            <div className="displayCard" style={{ columnCount: 3 }}>
                 <h4 style={{ textDecoration: entity.CurrentHitPoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && entity.CurrentHitPoints > 0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix > "" ? ` (${entity.Suffix})` : ""}{locked ? <AiFillLock className="m-left" /> : null}</h4>
-                <strong>Challenge Rating:</strong> {entity.DifficultyRating}<br />
-                <strong>Hit Points:</strong> {entity.CurrentHitPoints < entity.MaxHitPoints ? ` ${entity.CurrentHitPoints} / ${entity.MaxHitPoints}` : entity.MaxHitPoints}<br />
-                <strong>Armor Class:</strong> {entity.ArmorClass + entity.ArmorClassBonus}{entity.ArmorClassBonus === 0 ? "" : ` (${entity.ArmorClass}${entity.ArmorClassBonus > 0 ? "+" : ""}${entity.ArmorClassBonus})`}<br />
-                {entity.Notes.length > 0 ? <><strong>Notes:</strong> {entity.Notes}<br /></> : null}
+                <section><strong>CR:</strong> {entity.DifficultyRating}<br /></section>
+                <section><strong>HP:</strong> {entity.CurrentHitPoints < entity.MaxHitPoints ? ` ${entity.CurrentHitPoints} / ${entity.MaxHitPoints}` : entity.MaxHitPoints}<br /></section>
+                <section><strong>AC:</strong> {entity.ArmorClass + entity.ArmorClassBonus}{entity.ArmorClassBonus === 0 ? "" : ` (${entity.ArmorClass}${entity.ArmorClassBonus > 0 ? "+" : ""}${entity.ArmorClassBonus})`}<br /></section>
+                {entity.Notes.length > 0 ? <section><strong>Notes:</strong> {entity.Notes}<br /></section> : null}
             </div>
             <div className="displayCardControls">
                 <div className="controls">
-                    <button onClick={_ => FlipControlState(ControlOptions.Settings)} title="Settings"><GiCog /></button>
-                    <button onClick={_ => FlipControlState(ControlOptions.Hitpoints)} title="HitPoints"><GiHalfHeart /></button>
-                    <button onClick={_ => FlipControlState(ControlOptions.AC)} title="AC"><GiShield /></button>
-                    <button onClick={_ => FlipControlState(ControlOptions.Notes)} title="Notes"><GiPencil /></button>
+                    <button onClick={_ => deleteCallback(entity.id)} disabled={locked || (!editMode && overviewOnly)} className="icon"><GiTrashCan /><br />{overviewOnly ? "" : "Delete"}</button>
                     <button onClick={_ => FlipControlState(ControlOptions.Display)} title="Display"><FaAddressCard /></button>
                 </div>
                 {(ControlState === ControlOptions.None || ControlState === ControlOptions.Display) ? null :
                     <div className="suboptions">
                         {ControlState === ControlOptions.Settings ? renderSettingsControl() : null}
-                        {ControlState === ControlOptions.Hitpoints ? renderHitpointsControl() : null}
-                        {ControlState === ControlOptions.AC ? renderACControl() : null}
                         {ControlState === ControlOptions.Notes ? renderNotesControl() : null}
                     </div>
                 }

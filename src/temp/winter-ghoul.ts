@@ -3,6 +3,7 @@ export const winter_ghoul =
     "Name": "Winter Ghoul",
     "ChallengeRating": 1,
     "ProficiencyBonus": 2,
+    "Source": "Homebrew",
     "Description": {
         "Size": "Medium",
         "Type": "Undead",

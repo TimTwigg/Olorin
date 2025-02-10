@@ -205,7 +205,7 @@ function Encounters() {
     const renderDisplay = (item?: Entity | Lair, overviewOnly: boolean = false) => {
         if (!item) return <></>;
         if (isEntity(item) && item.EntityType === EntityType.StatBlock) {
-            return <StatBlockDisplay statBlock={item.Displayable as StatBlock} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={EditingEncounter ? 1 : Config.defaultColumns || 2} />;
+            return <StatBlockDisplay statBlock={item.Displayable as StatBlock} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={EditingEncounter ? 1 : Config.defaultColumns || 2} size={EditingEncounter ? "small" : "medium"} />;
         }
         else if (isEntity(item) && item.EntityType === EntityType.Player) return <></>;
         else if (isLair(item)) {
@@ -411,7 +411,7 @@ function Encounters() {
                 <div id="CreatureList" style={{ display: runningEncounter ? "none" : "block" }}>
                     {EditingEncounter && <EntityTable creatures={CreatureList} displayCallback={displayMiscEntity} addCallback={(name: string) => { addMiscEntity(name) }} />}
                 </div>
-                <div id="StatBlockDisplay" style={{ maxWidth: EditingEncounter ? "30%" : "60%", margin: runningEncounter ? "0 5rem" : "0" }}>
+                <div id="StatBlockDisplay" style={{ maxWidth: EditingEncounter ? "30%" : "55%", marginLeft: runningEncounter ? "2.5rem" : "0" }}>
                     {DisplayEntity && renderDisplay(DisplayEntity, !runningEncounter)}
                 </div>
             </section>

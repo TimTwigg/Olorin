@@ -4,6 +4,7 @@ export type StatBlock = {
     Name: string;
     ChallengeRating: number;
     ProficiencyBonus: number;
+    Source?: string;
     Description: {
         Size: string;
         Type: string;
