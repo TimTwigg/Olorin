@@ -111,3 +111,7 @@ export type StatBlock = {
     };
     Lair?: Lair;
 }
+
+export function parseDataAsStatBlock(data: any): StatBlock {
+    return data as StatBlock;
+}

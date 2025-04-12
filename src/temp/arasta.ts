@@ -214,15 +214,27 @@ export const arasta = {
         "Actions": {
             "Description": "On initiative count 20 (losing initiative ties), Arasta can take a lair action to cause one of the following effects. She can't use the same effect two rounds in a row.",
             "Items": [
-                "Arasta learns about any creature touching her webs. Each creature restrained by a web or Arasta's Web of Hair must make a DC 21 Intelligence saving throw. On a failed save, Arasta gains knowledge of a creature's name, race, where they consider home, and what brought them to her web.",
-                "Arasta casts the giant insect spell (spiders only). It lasts until she uses this lair action again or until she dies."
+                {
+                    "Name": "",
+                    "Description": "Arasta learns about any creature touching her webs. Each creature restrained by a web or Arasta's Web of Hair must make a DC 21 Intelligence saving throw. On a failed save, Arasta gains knowledge of a creature's name, race, where they consider home, and what brought them to her web."
+                },
+                {
+                    "Name": "",
+                    "Description": "Arasta casts the giant insect spell (spiders only). It lasts until she uses this lair action again or until she dies."
+                }
             ]
         },
         "RegionalEffects": {
             "Description": "The region containing Arasta's lair is warped by her presence, which creates one or more of the following effects. If Arasta dies, the spiders and insects lose their supernatural link to her. The webs remain, but they dissolve within 1d10 days.",
             "Items": [
-                "Spiders and insects within 1 mile of Arasta's lair serve as her eyes and ears. Birds and other flying creatures are absent from the skies and occasionally found trapped in webs.",
-                "Within 1 mile of Arasta's lair, webs fill all 10-foot cubes of open space, so long as the webs can be anchored between two solid masses (such as walls or trees). The webs are flammable. Any webs exposed to fire burn away in 1 round. Any destroyed webs are magically repaired at the next dawn."
+                {
+                    "Name": "",
+                    "Description": "Spiders and insects within 1 mile of Arasta's lair serve as her eyes and ears. Birds and other flying creatures are absent from the skies and occasionally found trapped in webs."
+                },
+                {
+                    "Name": "",
+                    "Description": "Within 1 mile of Arasta's lair, webs fill all 10-foot cubes of open space, so long as the webs can be anchored between two solid masses (such as walls or trees). The webs are flammable. Any webs exposed to fire burn away in 1 round. Any destroyed webs are magically repaired at the next dawn."
+                }
             ]
         }
     }

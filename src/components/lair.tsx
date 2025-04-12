@@ -53,7 +53,7 @@ export function LairBlockDisplay({ lair, displayColumns, deleteCallback }: LairB
                 <hr />
                 {lair.Actions.Description} <br />
                 {lair.Actions.Items.map((a, k) => <ul key={k}>
-                    <li>{a}</li>
+                    <li><b>{a.Name}</b> {a.Description}</li>
                 </ul>)}
             </>}
             {lair.RegionalEffects && <>
@@ -61,7 +61,7 @@ export function LairBlockDisplay({ lair, displayColumns, deleteCallback }: LairB
                 <hr />
                 {lair.RegionalEffects.Description} <br />
                 {lair.RegionalEffects.Items.map((a, k) => <ul key={k}>
-                    <li>{a}</li>
+                    <li><b>{a.Name}</b> {a.Description}</li>
                 </ul>)}
             </>}
         </div>

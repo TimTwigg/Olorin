@@ -4,14 +4,20 @@ export class Lair {
     Initiative: number;
     Actions?: {
         Description: string;
-        Items: string[];
+        Items: {
+            Name: string;
+            Description: string;
+        }[];
     };
     RegionalEffects?: {
         Description: string;
-        Items: string[];
+        Items: {
+            Name: string;
+            Description: string;
+        }[];
     };
 
-    constructor(name: string, description: string, initiative: number, actions?: { Description: string, Items: string[] }, regionalEffects?: { Description: string, Items: string[] }) {
+    constructor(name: string, description: string, initiative: number, actions?: { Description: string, Items: {Name: string, Description: string}[] }, regionalEffects?: { Description: string, Items: {Name: string, Description: string}[] }) {
         this.Name = name;
         this.Description = description;
         this.Initiative = initiative;
