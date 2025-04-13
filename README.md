@@ -4,7 +4,6 @@ Custom Encounter Manager for D&D 5E.
 
 ## To Do
 
-- ISSUE - Encounter edit mode changes are not being saved
 - Continue to rework api calls to use backend endpoints instead of local temp hardcoded
 - Entity Display Spells Control
 

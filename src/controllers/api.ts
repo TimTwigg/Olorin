@@ -46,6 +46,31 @@ async function request(url: string, body: any): Promise<any> {
     return response.json();
 }
 
+/**
+ * Send data to the server using a POST request.
+ * 
+ * @param url The endpoint to send data to.
+ * @param body The data to send in the request body.
+ * 
+ * @returns The response data from the server.
+ */
+async function push(url: string, body: any): Promise<number> {
+    const response = await fetch(BASE_URL + url, {
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+    }
+
+    return response.status;
+}
+
 export async function getEncounters(_user: string): Promise<api.EncounterResponse> {
     return {
         Encounters: encounters
@@ -98,6 +123,10 @@ export async function getEntity(_user: string, entityName: string): Promise<api.
  * @returns A boolean indicating whether the save was successful.
  */
 export async function saveEncounter(_user: string, encounter: Encounter): Promise<boolean> {
-    console.log("Saved Encounter: " + encounter.Name);
-    return true;
+    if (!encounter) {
+        throw new Error("Encounter is null or undefined.");
+    }
+    return push("/encounter/save", encounter).then((status: number) => {
+        return status === 200;
+    });
 }

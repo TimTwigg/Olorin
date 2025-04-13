@@ -27,6 +27,7 @@ const CACHESIZE = 100;
 function Encounters() {
     const [encounters, SetEncounters] = React.useState<Encounter[]>([]);
     const [activeEncounter, _SetActiveEncounter] = React.useState<Encounter | null>(null);
+    const [activeEncounterIndex, SetActiveEncounterIndex] = React.useState<number>(0);
     const [backupEncounter, SetBackupEncounter] = React.useState<Encounter | null>(null);
     const [runningEncounter, SetRunningEncounter] = React.useState<boolean>(false);
     const [DisplayEntity, SetDisplayEntity] = React.useState<Entity | Lair | undefined>();
@@ -44,9 +45,9 @@ function Encounters() {
 
     var refs: Map<string, React.RefObject<HTMLDivElement>> = new Map();
 
-    const SetActiveEncounter = (encounter: Encounter | null, save: boolean = true) => {
+    const SetActiveEncounter = (encounter: Encounter | null, save: boolean = false) => {
         _SetActiveEncounter(encounter);
-        if (save) saveEncounter(false);
+        if (save && encounter) saveEncounter(false);
     }
 
     /**
@@ -150,6 +151,9 @@ function Encounters() {
      */
     const saveEncounter = (notify: boolean) => {
         if (!activeEncounter) return;
+        let encs = encounters;
+        encs.splice(activeEncounterIndex, 1, activeEncounter);
+        SetEncounters(encs);
         api.saveEncounter("dummy", activeEncounter).then((res) => {
             if (!notify) return;
             if (res) toast.success("Encounter saved successfully to server.");
@@ -336,10 +340,10 @@ function Encounters() {
                     </tr>
                 </thead>
                 <tbody>
-                    {encounters?.map((encounter, ind) => {
+                    {(encounters ? encounters : []).map((encounter, ind) => {
                         return (
                             <tr key={`${encounter.Name}${ind}`}>
-                                <td className="link"><a onClick={() => { SetActiveEncounter(encounter, false), SetEncounterIsActive(encounter.Metadata.Started || false) }}>{encounter.Name.replace(/\s/g, "").length > 0 ? encounter.Name : "<encounter name>"}</a></td>
+                                <td className="link"><a onClick={() => { SetActiveEncounter(encounter, false), SetActiveEncounterIndex(ind), SetEncounterIsActive(encounter.Metadata.Started || false) }}>{encounter.Name.replace(/\s/g, "").length > 0 ? encounter.Name : "<encounter name>"}</a></td>
                                 <td>{encounter.Description}</td>
                                 <td>{encounter.Metadata.Campaign || ""}</td>
                                 <td>{encounter.Metadata.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</td>
@@ -401,7 +405,7 @@ function Encounters() {
                     {runningEncounter && <div id="EncounterRunControls">
                         <section>Round: {activeEncounter.Metadata.Round}</section>
                         <section>Turn: {activeEncounter.Metadata.Turn}</section>
-                        <button onClick={() => { SetActiveEncounter(activeEncounter.tick()), ScrollToEntity(activeEncounter.ActiveID), TriggerReRender() }}>NEXT</button>
+                        <button onClick={() => { SetActiveEncounter(activeEncounter.tick(), true), ScrollToEntity(activeEncounter.ActiveID), TriggerReRender() }}>NEXT</button>
                     </div>}
                     {!runningEncounter && <div id="EncounterEditControls">
                         <button onClick={() => { SetActiveEncounter(activeEncounter.randomizeInitiative()), TriggerReRender() }}>Random Initiative</button>
