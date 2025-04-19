@@ -105,7 +105,7 @@ export async function getEntities(_user: string, _page: number, detailLevel: API
  * @returns The entity data.
  */
 export async function getEntity(_user: string, entityName: string): Promise<api.SingleEntityResponse> {
-    return request("/data/statblock", {
+    return request("/statblock", {
         name: entityName,
         detail_level: 2,
     }).then((data: any) => {
@@ -126,7 +126,7 @@ export async function saveEncounter(_user: string, encounter: Encounter): Promis
     if (!encounter) {
         throw new Error("Encounter is null or undefined.");
     }
-    return push("/encounter/save", encounter).then((status: number) => {
+    return push("/encounter", encounter).then((status: number) => {
         return status === 200;
     });
 }
