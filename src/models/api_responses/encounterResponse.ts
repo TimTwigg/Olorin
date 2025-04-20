@@ -1,5 +1,9 @@
-import { Encounter } from "@src/models/encounter"
+import { Encounter, EncounterOverview } from "@src/models/encounter"
 
 export type EncounterResponse = {
-    Encounters: Encounter[]
+    Encounters: Encounter[]|EncounterOverview[]
+}
+
+export type SingleEncounterResponse = {
+    Encounter: Encounter|undefined
 }

@@ -11,6 +11,12 @@ export type EncounterMetadata = {
     Turn?: number
 }
 
+export type EncounterOverview = {
+    Name: string,
+    Description: string,
+    Metadata: EncounterMetadata
+}
+
 export class Encounter {
     Name: string
     Description: string
