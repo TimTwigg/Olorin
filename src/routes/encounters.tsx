@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ToastContainer, toast } from "react-toastify";
 
 import * as api from "@src/controllers/api";
-import { Encounter, EncounterMetadata } from "@src/models/encounter";
+import { Encounter, EncounterMetadata, EncounterOverview } from "@src/models/encounter";
 import { EntityDisplay } from "@src/components/entityDisplay";
 import { Entity, EntityOverview, EntityType, isEntity } from "@src/models/entity";
 import { StatBlockDisplay } from "@src/components/statBlockDisplay";
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/encounters")({
 const CACHESIZE = 100;
 
 function Encounters() {
-    const [encounters, SetEncounters] = React.useState<Encounter[]>([]);
+    const [encounters, SetEncounters] = React.useState<EncounterOverview[]>([]);
     const [activeEncounter, _SetActiveEncounter] = React.useState<Encounter | null>(null);
     const [activeEncounterIndex, SetActiveEncounterIndex] = React.useState<number>(0);
     const [backupEncounter, SetBackupEncounter] = React.useState<Encounter | null>(null);
@@ -96,7 +96,7 @@ function Encounters() {
     }
 
     const createNewEncounter = () => {
-        let enc = new Encounter();
+        let enc = new Encounter(0);
         enc.Metadata.CreationDate = new Date();
         enc.Metadata.AccessedDate = new Date();
         SetLocalStringState1("");
@@ -152,11 +152,14 @@ function Encounters() {
     const saveEncounter = (notify: boolean) => {
         if (!activeEncounter) return;
         let encs = encounters;
-        encs.splice(activeEncounterIndex, 1, activeEncounter);
-        SetEncounters(encs);
         api.saveEncounter("dummy", activeEncounter).then((res) => {
             if (!notify) return;
-            if (res) toast.success("Encounter saved successfully to server.");
+            if (res) {
+                encs.splice(activeEncounterIndex, 1, res.toOverview());
+                SetActiveEncounter(res, false);
+                SetEncounters(encs);
+                toast.success("Encounter saved successfully to server.");
+            }
             else toast.error("Failed to save Encounter to server.");
         });
     }
@@ -171,7 +174,7 @@ function Encounters() {
                 toast.error("Encounter must have a name");
                 return;
             }
-            SetEncounters([...encounters, activeEncounter]);
+            SetEncounters([...encounters, activeEncounter.toOverview()]);
             SetIsNewEncounter(false);
         }
         SetBackupEncounter(null);
@@ -294,6 +297,13 @@ function Encounters() {
         SetDisplayEntity(undefined);
     }
 
+    const getEncounter = (id: number) => {
+        api.getEncounter("dummy", id).then((res) => {
+            if (!res.Encounter) return;
+            SetActiveEncounter(res.Encounter);
+        });
+    }
+
     /**
      * Scroll the entity list to the entity with the given ID
      * @param entityID The ID of the active entity
@@ -343,7 +353,7 @@ function Encounters() {
                     {(encounters ? encounters : []).map((encounter, ind) => {
                         return (
                             <tr key={`${encounter.Name}${ind}`}>
-                                <td className="link"><a onClick={() => { SetActiveEncounter(encounter, false), SetActiveEncounterIndex(ind), SetEncounterIsActive(encounter.Metadata.Started || false) }}>{encounter.Name.replace(/\s/g, "").length > 0 ? encounter.Name : "<encounter name>"}</a></td>
+                                <td className="link"><a onClick={() => { getEncounter(encounter.id), SetActiveEncounterIndex(ind), SetEncounterIsActive(encounter.Metadata.Started || false) }}>{encounter.Name.replace(/\s/g, "").length > 0 ? encounter.Name : "<encounter name>"}</a></td>
                                 <td>{encounter.Description}</td>
                                 <td>{encounter.Metadata.Campaign || ""}</td>
                                 <td>{encounter.Metadata.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</td>

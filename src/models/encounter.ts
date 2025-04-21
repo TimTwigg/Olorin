@@ -1,6 +1,7 @@
 import { Entity } from "@src/models/entity";
 import { CounterMap } from "@src/models/data_structures/counterMap";
 import { Lair } from "@src/models/lair";
+import { deepCopy } from "@src/controllers/utils";
 
 export type EncounterMetadata = {
     CreationDate?: Date,
@@ -12,12 +13,14 @@ export type EncounterMetadata = {
 }
 
 export type EncounterOverview = {
+    id: number,
     Name: string,
     Description: string,
     Metadata: EncounterMetadata
 }
 
 export class Encounter {
+    id: number
     Name: string
     Description: string
     Metadata: EncounterMetadata
@@ -28,9 +31,10 @@ export class Encounter {
     ActiveID: string = ""
     InitiativeOrder: [string, number][] = []
 
-    constructor(name: string = "", description: string = "", Campaign: string = "") {
-        this.Name = name
-        this.Description = description
+    constructor(id: number, name: string = "", description: string = "", Campaign: string = "") {
+        this.id = id;
+        this.Name = name;
+        this.Description = description;
         this.Metadata = {
             CreationDate: new Date(),
             AccessedDate: new Date(),
@@ -241,7 +245,7 @@ export class Encounter {
      * @returns a new encounter
      */
     copy(): Encounter {
-        let newEncounter = new Encounter(this.Name, this.Description);
+        let newEncounter = new Encounter(this.id, this.Name, this.Description);
         Object.assign(newEncounter, this);
         newEncounter.Entities = this.Entities.map((e) => e.copy());
         if (newEncounter.Entities.length === 0) return newEncounter;
@@ -249,6 +253,20 @@ export class Encounter {
         let index = this.InitiativeOrder.findIndex(item => item[0] === this.ActiveID);
         newEncounter.ActiveID = index === -1 ? "" : newEncounter.InitiativeOrder[index][0];
         return newEncounter;
+    }
+
+    /**
+     * Get a summary of the encounter
+     * 
+     * @returns a summary of the encounter
+     */
+    toOverview(): EncounterOverview {
+        return {
+            id: this.id,
+            Name: this.Name,
+            Description: this.Description,
+            Metadata: deepCopy(this.Metadata)
+        };
     }
 
     public static InitiativeSortKey(a: [string, number], b: [string, number]): number {

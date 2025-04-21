@@ -54,7 +54,7 @@ async function request(url: string, body: any): Promise<any> {
  * 
  * @returns The response data from the server.
  */
-async function push(url: string, body: any): Promise<number> {
+async function push(url: string, body: any): Promise<any> {
     const response = await fetch(BASE_URL + url, {
         method: "POST",
         headers: {
@@ -68,12 +68,22 @@ async function push(url: string, body: any): Promise<number> {
         throw new Error(`Error: ${response.statusText}`);
     }
 
-    return response.status;
+    return response.json();
 }
 
 export async function getEncounters(_user: string): Promise<api.EncounterResponse> {
     return {
         Encounters: encounters
+    }
+}
+
+export async function getEncounter(_user: string, encounterID: number): Promise<api.SingleEncounterResponse> {
+    const encounter = encounters.find((e) => e.id === encounterID);
+    if (!encounter) {
+        throw new Error(`Encounter with ID ${encounterID} not found.`);
+    }
+    return {
+        Encounter: encounter
     }
 }
 
@@ -120,13 +130,13 @@ export async function getEntity(_user: string, entityName: string): Promise<api.
  * @param _user The user ID.
  * @param encounter The encounter to save.
  * 
- * @returns A boolean indicating whether the save was successful.
+ * @returns The saved encounter data.
  */
-export async function saveEncounter(_user: string, encounter: Encounter): Promise<boolean> {
+export async function saveEncounter(_user: string, encounter: Encounter): Promise<Encounter> {
     if (!encounter) {
         throw new Error("Encounter is null or undefined.");
     }
-    return push("/encounter", encounter).then((status: number) => {
-        return status === 200;
+    return push("/encounter", encounter).then((data: any) => {
+        return data as Encounter;
     });
 }
