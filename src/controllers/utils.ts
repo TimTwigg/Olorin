@@ -50,3 +50,7 @@ export function deepCopy<T>(obj: T): T {
 
     throw new Error("Unable to copy obj! Its type isn't supported.");
 }
+
+export function dateFromString(dateString: string): Date {
+    return new Date(Date.parse(dateString));
+}

@@ -12,11 +12,25 @@ export type EncounterMetadata = {
     Turn?: number
 }
 
-export type EncounterOverview = {
+export type EncounterOverviewT = {
     id: number,
     Name: string,
     Description: string,
     Metadata: EncounterMetadata
+}
+
+export class EncounterOverview implements EncounterOverviewT {
+    id: number
+    Name: string
+    Description: string
+    Metadata: EncounterMetadata
+
+    constructor(id: number, name: string, description: string, metadata: EncounterMetadata) {
+        this.id = id;
+        this.Name = name;
+        this.Description = description;
+        this.Metadata = metadata;
+    }
 }
 
 export class Encounter {
@@ -273,5 +287,19 @@ export class Encounter {
         let num_a = a[0].endsWith("lair") ? a[1] - 0.5 : a[1];
         let num_b = b[0].endsWith("lair") ? b[1] - 0.5 : b[1];
         return num_b - num_a;
+    }
+
+    public static loadFromJSON(json: any): Encounter {
+        let encounter = new Encounter(json.id, json.Name, json.Description, json.Metadata.Campaign || "");
+        encounter.Metadata = {
+            CreationDate: json.Metadata.CreationDate,
+            AccessedDate: json.Metadata.AccessedDate,
+            Campaign: json.Metadata.Campaign,
+            Started: json.Metadata.Started,
+            Round: json.Metadata.Round,
+            Turn: json.Metadata.Turn
+        };
+        // encounter.Entities = json.Entities.map((e: any) => Entity.loadFromJSON(e)); // TODO
+        return encounter;
     }
 }

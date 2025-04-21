@@ -1,6 +1,5 @@
 import * as api from "@src/models/api_responses";
 
-import { encounters } from "@src/temp/encounters";
 import { conditions } from "@src/temp/conditions";
 import { arasta } from "@src/temp/arasta";
 import { aurelia } from "@src/temp/aurelia";
@@ -8,7 +7,8 @@ import { winter_ghoul } from "@src/temp/winter-ghoul";
 import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { EntityOverview } from "@src/models/entity";
 import { StatBlock, parseDataAsStatBlock } from "@src/models/statBlock";
-import { Encounter } from "@src/models/encounter";
+import { Encounter, EncounterOverview } from "@src/models/encounter";
+import { dateFromString } from "@src/controllers/utils";
 
 const entities = new Map<string, StatBlock>()
 entities.set(arasta.Name, arasta)
@@ -72,19 +72,49 @@ async function push(url: string, body: any): Promise<any> {
 }
 
 export async function getEncounters(_user: string): Promise<api.EncounterResponse> {
-    return {
-        Encounters: encounters
-    }
+    return request("/encounter/all", {}).then((data: any) => {
+        return {
+            Encounters: data.map((encounter: any) => {
+                return new EncounterOverview(
+                    encounter.ID,
+                    encounter.Name,
+                    encounter.Description,
+                    {
+                        CreationDate: dateFromString(encounter.Metadata.CreationDate),
+                        AccessedDate: dateFromString(encounter.Metadata.AccessedDate),
+                        Campaign: encounter.Metadata.Campaign,
+                        Started: encounter.Metadata.Started,
+                        Round: encounter.Metadata.Round,
+                        Turn: encounter.Metadata.Turn,
+                    }
+                )
+            })
+        }
+    })
 }
 
 export async function getEncounter(_user: string, encounterID: number): Promise<api.SingleEncounterResponse> {
-    const encounter = encounters.find((e) => e.id === encounterID);
-    if (!encounter) {
-        throw new Error(`Encounter with ID ${encounterID} not found.`);
-    }
-    return {
-        Encounter: encounter
-    }
+    // return request("/encounter", {
+    //     id: encounterID,
+    //     detailLevel: 2,
+    // }).then((data: any) => {
+    //     return {
+    //         Encounter: new Encounter(
+    //             encounterID,
+    //             data.Name,
+    //             data.Description,
+    //             {
+    //                 CreationDate: dateFromString(data.Metadata.CreationDate),
+    //                 AccessedDate: dateFromString(data.Metadata.AccessedDate),
+    //                 Campaign: data.Metadata.Campaign,
+    //                 Started: data.Metadata.Started,
+    //                 Round: data.Metadata.Round,
+    //                 Turn: data.Metadata.Turn,
+    //             }
+    //         )
+    //     }
+    // })
+    return null as any;
 }
 
 export async function getConditions(_user: string): Promise<api.ConditionResponse> {
