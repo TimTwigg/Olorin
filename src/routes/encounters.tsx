@@ -42,6 +42,7 @@ function Encounters() {
     const [FullEntityList, SetFullEntityList] = React.useState<Entity[]>([]);
     const [LairDialogVisible, SetLairDialogVisible] = React.useState<boolean>(false);
     const [LairDialogList, SetLairDialogList] = React.useState<{ Name: string, Lair: Lair }[]>([]);
+    const getEncountersRef = React.useRef(0);
 
     var refs: Map<string, React.RefObject<HTMLDivElement>> = new Map();
 
@@ -315,20 +316,23 @@ function Encounters() {
     }
 
     React.useEffect(() => {
-        api.getEncounters("dummy").then((res) => { SetEncounters(res.Encounters) });
-    }, []);
+        if (getEncountersRef.current === 0) {
+            getEncountersRef.current = 1;
+            api.getEncounters("dummy").then((res) => { SetEncounters(res.Encounters) });
+        }
+    }, [getEncountersRef]);
 
-    React.useEffect(() => {
-        api.getConditions("dummy").then((res) => {
-            let user = Config;
-            user.conditions = res.Conditions;
-            SetConfig(user);
-        });
-    }, []);
+    // React.useEffect(() => {
+    //     api.getConditions("dummy").then((res) => {
+    //         let user = Config;
+    //         user.conditions = res.Conditions;
+    //         SetConfig(user);
+    //     });
+    // }, []); // TODO - when should this run?
 
-    React.useEffect(() => {
-        getEntities(1);
-    }, []);
+    // React.useEffect(() => {
+    //     getEntities(1);
+    // }, []); // TODO - when should this run?
 
     // Encounters Overview
     if (!activeEncounter) return (

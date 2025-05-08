@@ -212,4 +212,9 @@ export class StatBlockEntity implements Entity {
         copy.DifficultyRating = this.DifficultyRating;
         return copy;
     }
+
+    public static loadFromJSON(json: any): Entity {
+        console.log("Loading StatBlockEntity from JSON", json);
+        return null as any; // TODO: Implement this method to load from JSON
+    }
 }

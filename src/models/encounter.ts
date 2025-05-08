@@ -1,4 +1,5 @@
 import { Entity } from "@src/models/entity";
+import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { CounterMap } from "@src/models/data_structures/counterMap";
 import { Lair } from "@src/models/lair";
 import { deepCopy } from "@src/controllers/utils";
@@ -45,18 +46,22 @@ export class Encounter {
     ActiveID: string = ""
     InitiativeOrder: [string, number][] = []
 
-    constructor(id: number, name: string = "", description: string = "", Campaign: string = "") {
+    constructor(id: number, name: string = "", description: string = "", Campaign: string = "", Metadata: EncounterMetadata = {}) {
         this.id = id;
         this.Name = name;
         this.Description = description;
         this.Metadata = {
-            CreationDate: new Date(),
-            AccessedDate: new Date(),
-            Campaign: Campaign,
-            Started: false,
-            Round: 1,
-            Turn: 1
-        };
+            CreationDate: Metadata.CreationDate === undefined ? new Date() : Metadata.CreationDate,
+            AccessedDate: Metadata.AccessedDate === undefined ? new Date() : Metadata.AccessedDate,
+            Campaign: Metadata.Campaign === undefined ? Campaign : Metadata.Campaign,
+            Started: Metadata.Started === undefined ? false : Metadata.Started,
+            Turn: Metadata.Turn === undefined ? 1 : Metadata.Turn,
+            Round: Metadata.Round === undefined ? 1 : Metadata.Round,
+        }
+
+        if (Campaign !== "") {
+            console.log("[WARNING] Encounter created with campaign: " + Campaign);
+        }
     }
 
     /**
@@ -290,7 +295,7 @@ export class Encounter {
     }
 
     public static loadFromJSON(json: any): Encounter {
-        let encounter = new Encounter(json.id, json.Name, json.Description, json.Metadata.Campaign || "");
+        let encounter = new Encounter(json.id, json.Name, json.Description, "", json.Metadata);
         encounter.Metadata = {
             CreationDate: json.Metadata.CreationDate,
             AccessedDate: json.Metadata.AccessedDate,
@@ -299,7 +304,7 @@ export class Encounter {
             Round: json.Metadata.Round,
             Turn: json.Metadata.Turn
         };
-        // encounter.Entities = json.Entities.map((e: any) => Entity.loadFromJSON(e)); // TODO
+        encounter.Entities = json.Entities.map((e: any) => StatBlockEntity.loadFromJSON(e)); // TODO - should this bifurcate to different entity types? Or Players/Temps ARE statblock entities?
         return encounter;
     }
 }

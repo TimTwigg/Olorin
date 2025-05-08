@@ -9,6 +9,7 @@ import { EntityOverview } from "@src/models/entity";
 import { StatBlock, parseDataAsStatBlock } from "@src/models/statBlock";
 import { Encounter, EncounterOverview } from "@src/models/encounter";
 import { dateFromString } from "@src/controllers/utils";
+import { deepCopy } from "@src/controllers/utils";
 
 const entities = new Map<string, StatBlock>()
 entities.set(arasta.Name, arasta)
@@ -21,10 +22,61 @@ const entityOverviews = [
     new EntityOverview(winter_ghoul.Name, winter_ghoul.Description.Type, winter_ghoul.Description.Size, winter_ghoul.ChallengeRating, winter_ghoul.Source)
 ]
 
-
 export type APIDetailLevel = 1 | 2
 
+/**
+ * Base URL for the API server.
+ */
 const BASE_URL = "http://localhost:8080"
+
+/**
+ * Cache for API functions to avoid redundant calls.
+ */
+var FUNCTION_CACHE = new Map<string, any>()
+
+/**
+ * Wrapper for API functions to handle caching
+ * 
+ * @param func function name to call
+ * @param args arguments to pass to the function
+ * 
+ * @returns Promise<any> - the result of the function call
+ */
+async function api_wrapper(func: string, ...args: any): Promise<any> {
+    let cache_key = func + JSON.stringify(args);
+    if (FUNCTION_CACHE.has(cache_key)) {
+        console.log("Cache hit for " + cache_key);
+        return deepCopy(FUNCTION_CACHE.get(cache_key));
+    }
+    else {
+        let data: any;
+        if (func === "request") data = await _request(args[0], args[1]).then((data) => data);
+        else if (func === "push") data = _push(args[0], args[1]).then((data) => data);
+        else return null;
+        FUNCTION_CACHE.set(cache_key, data);
+        return data;
+    }
+}
+
+/** 
+ * [INTERNAL] Fetch data from the server using a GET request.
+ * 
+ * @param url The endpoint to fetch data from.
+ * @param body The request parameters.
+ * 
+ * @returns The response data from the server.
+ */
+async function _request(url: string, body: any): Promise<any> {
+    const response = await fetch(BASE_URL + url + "?" + new URLSearchParams({
+        ...body,
+    }).toString());
+
+    if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+    }
+
+    return response.json();
+}
 
 /** 
  * Fetch data from the server using a GET request.
@@ -35,9 +87,26 @@ const BASE_URL = "http://localhost:8080"
  * @returns The response data from the server.
  */
 async function request(url: string, body: any): Promise<any> {
-    const response = await fetch(BASE_URL + url + "?" + new URLSearchParams({
-        ...body,
-    }).toString());
+    return api_wrapper("request", url, body).then((data) => data)
+}
+
+/**
+ * [INTERNAL] Send data to the server using a POST request.
+ * 
+ * @param url The endpoint to send data to.
+ * @param body The data to send in the request body.
+ * 
+ * @returns The response data from the server.
+ */
+async function _push(url: string, body: any): Promise<any> {
+    const response = await fetch(BASE_URL + url, {
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+    });
 
     if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
@@ -55,22 +124,16 @@ async function request(url: string, body: any): Promise<any> {
  * @returns The response data from the server.
  */
 async function push(url: string, body: any): Promise<any> {
-    const response = await fetch(BASE_URL + url, {
-        method: "POST",
-        headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-    }
-
-    return response.json();
+    return api_wrapper("push", url, body).then((data) => data)
 }
 
+/**
+ * Retrieve all encounters from the server.
+ * 
+ * @param _user The user ID.
+ * 
+ * @returns Promise<api.EncounterResponse> - A list of encounters.
+ */
 export async function getEncounters(_user: string): Promise<api.EncounterResponse> {
     return request("/encounter/all", {}).then((data: any) => {
         return {
@@ -93,28 +156,23 @@ export async function getEncounters(_user: string): Promise<api.EncounterRespons
     })
 }
 
+/**
+ * Retrieve a single encounter from the server.
+ * 
+ * @param _user The user ID.
+ * @param encounterID The ID of the encounter to retrieve.
+ * 
+ * @returns Promise<api.SingleEncounterResponse> - The encounter data.
+ */
 export async function getEncounter(_user: string, encounterID: number): Promise<api.SingleEncounterResponse> {
-    // return request("/encounter", {
-    //     id: encounterID,
-    //     detailLevel: 2,
-    // }).then((data: any) => {
-    //     return {
-    //         Encounter: new Encounter(
-    //             encounterID,
-    //             data.Name,
-    //             data.Description,
-    //             {
-    //                 CreationDate: dateFromString(data.Metadata.CreationDate),
-    //                 AccessedDate: dateFromString(data.Metadata.AccessedDate),
-    //                 Campaign: data.Metadata.Campaign,
-    //                 Started: data.Metadata.Started,
-    //                 Round: data.Metadata.Round,
-    //                 Turn: data.Metadata.Turn,
-    //             }
-    //         )
-    //     }
-    // })
-    return null as any;
+    return request("/encounter", {
+        id: encounterID,
+        detail_level: 2,
+    }).then((data: any) => {
+        return {
+            Encounter: Encounter.loadFromJSON(data)
+        }
+    })
 }
 
 export async function getConditions(_user: string): Promise<api.ConditionResponse> {
