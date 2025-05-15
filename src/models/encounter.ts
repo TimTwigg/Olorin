@@ -2,7 +2,7 @@ import { Entity } from "@src/models/entity";
 import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { CounterMap } from "@src/models/data_structures/counterMap";
 import { Lair } from "@src/models/lair";
-import { deepCopy } from "@src/controllers/utils";
+import { deepCopy, dateFromString } from "@src/controllers/utils";
 
 export type EncounterMetadata = {
     CreationDate?: Date,
@@ -30,7 +30,14 @@ export class EncounterOverview implements EncounterOverviewT {
         this.id = id;
         this.Name = name;
         this.Description = description;
-        this.Metadata = metadata;
+        this.Metadata = {
+            CreationDate: metadata.CreationDate === undefined ? new Date() : metadata.CreationDate,
+            AccessedDate: metadata.AccessedDate === undefined ? new Date() : metadata.AccessedDate,
+            Campaign: metadata.Campaign === undefined ? "" : metadata.Campaign,
+            Started: metadata.Started === undefined ? false : metadata.Started,
+            Turn: metadata.Turn === undefined ? 1 : metadata.Turn,
+            Round: metadata.Round === undefined ? 1 : metadata.Round,
+        };
     }
 }
 
@@ -46,18 +53,18 @@ export class Encounter {
     ActiveID: string = ""
     InitiativeOrder: [string, number][] = []
 
-    constructor(id: number, name: string = "", description: string = "", Campaign: string = "", Metadata: EncounterMetadata = {}) {
+    constructor(id: number, name: string = "", description: string = "", Campaign: string = "", metadata: EncounterMetadata = {}) {
         this.id = id;
         this.Name = name;
         this.Description = description;
         this.Metadata = {
-            CreationDate: Metadata.CreationDate === undefined ? new Date() : Metadata.CreationDate,
-            AccessedDate: Metadata.AccessedDate === undefined ? new Date() : Metadata.AccessedDate,
-            Campaign: Metadata.Campaign === undefined ? Campaign : Metadata.Campaign,
-            Started: Metadata.Started === undefined ? false : Metadata.Started,
-            Turn: Metadata.Turn === undefined ? 1 : Metadata.Turn,
-            Round: Metadata.Round === undefined ? 1 : Metadata.Round,
-        }
+            CreationDate: metadata.CreationDate === undefined ? new Date() : metadata.CreationDate,
+            AccessedDate: metadata.AccessedDate === undefined ? new Date() : metadata.AccessedDate,
+            Campaign: metadata.Campaign === undefined ? Campaign : metadata.Campaign,
+            Started: metadata.Started === undefined ? false : metadata.Started,
+            Turn: metadata.Turn === undefined ? 1 : metadata.Turn,
+            Round: metadata.Round === undefined ? 1 : metadata.Round,
+        };
 
         if (Campaign !== "") {
             console.log("[WARNING] Encounter created with campaign: " + Campaign);
@@ -297,12 +304,12 @@ export class Encounter {
     public static loadFromJSON(json: any): Encounter {
         let encounter = new Encounter(json.id, json.Name, json.Description, "", json.Metadata);
         encounter.Metadata = {
-            CreationDate: json.Metadata.CreationDate,
-            AccessedDate: json.Metadata.AccessedDate,
-            Campaign: json.Metadata.Campaign,
-            Started: json.Metadata.Started,
-            Round: json.Metadata.Round,
-            Turn: json.Metadata.Turn
+            CreationDate: json.Metadata.CreationDate === undefined ? new Date() : dateFromString(json.Metadata.CreationDate),
+            AccessedDate: json.Metadata.AccessedDate === undefined ? new Date() : dateFromString(json.Metadata.AccessedDate),
+            Campaign: json.Metadata.Campaign === undefined ? "" : json.Metadata.Campaign,
+            Started: json.Metadata.Started === undefined ? false : json.Metadata.Started,
+            Round: json.Metadata.Round === undefined ? 1 : json.Metadata.Round,
+            Turn: json.Metadata.Turn === undefined ? 1 : json.Metadata.Turn
         };
         encounter.Entities = json.Entities.map((e: any) => StatBlockEntity.loadFromJSON(e)); // TODO - should this bifurcate to different entity types? Or Players/Temps ARE statblock entities?
         return encounter;

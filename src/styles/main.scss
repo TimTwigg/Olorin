@@ -205,6 +205,28 @@ button {
     }
 }
 
+.errorComponent {
+    height: 100vh;
+    overflow-y: auto;
+
+    pre {
+        background-color: v.$lightGray;
+        width: min-content;
+        margin-left: 20px;
+        padding: 0 5px;
+    }
+
+    button {
+        margin: 10px 20px;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        font-size: 1.5rem;
+        background-color: v.$gray;
+        color: v.$blue;
+        transition: 0.25s ease;
+    }
+}
+
 /*
 *   Nav bar
 *   ================================================================

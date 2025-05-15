@@ -13,6 +13,38 @@ const TanStackRouterDevtools =
             })),
         )
 
+type ErrorComponentProps = {
+    error: any
+    reset: () => void
+}
+
+const ErrorComponent = ({ error, reset }: ErrorComponentProps) => {
+    return (
+        <div className="errorComponent">
+            <nav>
+                <h4>Encounter Manager</h4>
+                <span>
+                    <Link to="/">
+                        Home
+                    </Link>
+                    <Link to="/encounters">
+                        Encounters
+                    </Link>
+                    <Link to="/library">
+                        Library
+                    </Link>
+                </span>
+            </nav>
+            <span className = "errorBody">
+                <h2>Something went wrong</h2>
+                <pre><code>{error.message}</code></pre>
+                <p>Please take a screenshot of this page and share with the developer via the contact page so that the error can be addressed.</p>
+                <button onClick={reset}>Try again</button>
+            </span>
+        </div>
+    )
+}
+
 export const Route = createRootRouteWithContext<RouterContext>()({
     component: () => (
         <div className="pageDiv">
@@ -36,4 +68,5 @@ export const Route = createRootRouteWithContext<RouterContext>()({
             </Suspense>
         </div>
     ),
+    errorComponent: ErrorComponent,
 })

@@ -52,5 +52,8 @@ export function deepCopy<T>(obj: T): T {
 }
 
 export function dateFromString(dateString: string): Date {
-    return new Date(Date.parse(dateString));
+    let year = parseInt(dateString.substring(0, 4));
+    let month = parseInt(dateString.substring(5, 7)) - 1;
+    let day = parseInt(dateString.substring(8, 10));
+    return new Date(year, month, day);
 }
