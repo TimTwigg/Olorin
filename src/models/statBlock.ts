@@ -2,6 +2,7 @@ import { Lair } from "@src/models/lair";
 import { SmartMap } from "@src/models/data_structures/smartMap";
 
 export type StatBlock = {
+    ID: number;
     Name: string;
     ChallengeRating: number;
     ProficiencyBonus: number;

@@ -57,3 +57,7 @@ export function dateFromString(dateString: string): Date {
     let day = parseInt(dateString.substring(8, 10));
     return new Date(year, month, day);
 }
+
+export function newLocalDate(): Date {
+    return new Date(Date.now() - new Date().getTimezoneOffset()*60000);
+}

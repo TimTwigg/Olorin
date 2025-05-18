@@ -32,8 +32,8 @@ declare module "@tanstack/react-table" {
 
 type EntityTableProps = {
     creatures: EntityOverviewT[],
-    displayCallback: (name: string) => void,
-    addCallback: (name: string) => void,
+    displayCallback: (id: number) => void,
+    addCallback: (id: number) => void,
 }
 
 export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityTableProps) => {
@@ -70,13 +70,13 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
                 meta: { filterVariant: "select" },
             }),
             factory.accessor("Name", {
-                cell: props => <button className="iconButton" onClick={() => displayCallback(props.row.original.Name)}><FaAddressCard /></button>,
+                cell: props => <button className="iconButton" onClick={() => displayCallback(props.row.original.ID)}><FaAddressCard /></button>,
                 header: () => "Display",
                 id: "display",
                 enableSorting: false,
             }),
             factory.accessor("Name", {
-                cell: props => <button className="iconButton" onClick={() => { addCallback(props.row.original.Name) }}>+</button>,
+                cell: props => <button className="iconButton" onClick={() => { addCallback(props.row.original.ID) }}>+</button>,
                 header: "Add",
                 id: "add",
                 enableSorting: false,
@@ -171,6 +171,10 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
                     <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>{">"}</button>
                     <button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}>{">>"}</button>
                 </section>
+                <section>
+                    {table.getRowCount()} rows loaded
+                </section>
+                |
                 <section>
                     Page
                     <strong>

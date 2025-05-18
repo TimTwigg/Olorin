@@ -4,6 +4,7 @@ import { StatBlock } from "@src/models/statBlock";
 import { d20, hashCode, modifierOf } from "@src/controllers/utils";
 
 export class StatBlockEntity implements Entity {
+    DBID;
     ID;
     Name;
     Suffix = "";
@@ -28,6 +29,7 @@ export class StatBlockEntity implements Entity {
     DifficultyRating;
 
     constructor(statBlock: StatBlock, initiative: number = 0, IsHostile: boolean = true) {
+        this.DBID = statBlock.ID;
         this.ID = (hashCode(statBlock.Name) * Date.now() * Math.random()).toString(16);
         this.Name = statBlock.Name;
         this.StatBlock = statBlock;

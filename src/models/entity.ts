@@ -6,6 +6,7 @@ export enum EntityType {
 }
 
 export type EntityOverviewT = {
+    ID: number
     Name: string
     Type: string
     Size: string
@@ -14,13 +15,15 @@ export type EntityOverviewT = {
 }
 
 export class EntityOverview implements EntityOverviewT {
+    ID: number
     Name: string
     Type: string
     Size: string
     DifficultyRating: number
     Source: string
 
-    constructor(Name: string, Type: string, Size: string, DifficultyRating: number, Source: string) {
+    constructor(ID: number, Name: string, Type: string, Size: string, DifficultyRating: number, Source: string) {
+        this.ID = ID;
         this.Name = Name;
         this.Type = Type;
         this.Size = Size;
@@ -30,6 +33,7 @@ export class EntityOverview implements EntityOverviewT {
 }
 
 export interface Entity {
+    DBID: number
     ID: string
     Name: string
     Suffix: string

@@ -2,14 +2,9 @@ import * as api from "@src/models/api_responses";
 
 import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { EntityOverview } from "@src/models/entity";
-import { StatBlock, parseDataAsStatBlock } from "@src/models/statBlock";
 import { Encounter, EncounterOverview } from "@src/models/encounter";
 import { dateFromString } from "@src/controllers/utils";
 import { deepCopy } from "@src/controllers/utils";
-
-const entities = new Map<string, StatBlock>()
-
-const entityOverviews: EntityOverview[] = []
 
 export type APIDetailLevel = 1 | 2
 
@@ -187,25 +182,40 @@ export async function getConditions(_user: string): Promise<api.ConditionRespons
  * @returns A list of entities.
  */
 export async function getEntities(_user: string, _page: number, detailLevel: APIDetailLevel = 1): Promise<api.EntityResponse> {
-    return {
-        Entities: detailLevel === 1 ? entityOverviews : Array.from(entities.values()).map((e) => new StatBlockEntity(e))
-    }
+    return request("/statblock/all", {
+        page: _page,
+        detail_level: detailLevel,
+    }).then((data: any) => {
+        return {
+            Entities: data.map((entity: any) => {
+                if (detailLevel == 1) return new EntityOverview(
+                    entity.ID,
+                    entity.Name,
+                    entity.Type,
+                    entity.Size,
+                    entity.DifficultyRating,
+                    entity.Source
+                );
+                else return StatBlockEntity.loadFromJSON(entity);
+            })
+        }
+    })
 }
 
 /**
  * Fetch a single entity from the server.
  * @param _user The user ID.
- * @param entityName The name of the entity to fetch.
+ * @param entityID The id of the entity to fetch.
  * 
  * @returns The entity data.
  */
-export async function getEntity(_user: string, entityName: string): Promise<api.SingleEntityResponse> {
+export async function getEntity(_user: string, entityID: number): Promise<api.SingleEntityResponse> {
     return request("/statblock", {
-        name: entityName,
+        id: entityID,
         detail_level: 2,
     }).then((data: any) => {
         return {
-            Entity: new StatBlockEntity(parseDataAsStatBlock(data))
+            Entity: StatBlockEntity.loadFromJSON(data)
         }
     })
 }

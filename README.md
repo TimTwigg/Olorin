@@ -5,7 +5,7 @@ Custom Encounter Manager for D&D 5E.
 ## To Do
 
 - Continue to rework api calls to use backend endpoints instead of local temp hardcoded
-    - Load entity from json
+    - Load entity overviews for table
 - Entity Display Spells Control
 - Contact page - referenced in error component
 

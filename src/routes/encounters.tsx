@@ -10,6 +10,7 @@ import { StatBlockDisplay } from "@src/components/statBlockDisplay";
 import { StatBlock } from "@src/models/statBlock";
 import { Lair, isLair } from "@src/models/lair";
 import { UserOptions } from "@src/models/userOptions";
+import { newLocalDate } from "@src/controllers/utils";
 
 import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { LairDisplay, LairDialog, LairBlockDisplay } from "@src/components/lair";
@@ -99,8 +100,8 @@ function Encounters() {
 
     const createNewEncounter = () => {
         let enc = new Encounter(0);
-        enc.Metadata.CreationDate = new Date();
-        enc.Metadata.AccessedDate = new Date();
+        enc.Metadata.CreationDate = newLocalDate();
+        enc.Metadata.AccessedDate = newLocalDate();
         SetLocalStringState1("");
         SetLocalStringState2("");
         SetLocalStringState3("");
@@ -141,6 +142,15 @@ function Encounters() {
             SetDisplayEntity(undefined);
             return;
         }
+        else {
+            // load entities if needed
+            if (CreatureList.length === 0) {
+                console.log("Loading entities");
+                api.getEntities("dummy", 1, 1).then((res) => {
+                    SetCreatureList(res.Entities.map(e => e as EntityOverview)); // TODO - fix this
+                });
+            }
+        }
         // If the user is entering edit mode, load the state of the Encounter
         SetLocalStringState1(activeEncounter?.Name || "");
         SetLocalStringState2(activeEncounter?.Metadata.Campaign || "");
@@ -180,7 +190,7 @@ function Encounters() {
             SetIsNewEncounter(false);
         }
         SetBackupEncounter(null);
-        updateMetadata({ Campaign: LocalStringState2 });
+        updateMetadata({ Campaign: LocalStringState2, AccessedDate: newLocalDate() });
         SetActiveEncounter(activeEncounter.withName(LocalStringState1).withDescription(LocalStringState3).setInitiativeOrder());
         SetEditingEncounter(false);
         saveEncounter(true);
@@ -243,42 +253,31 @@ function Encounters() {
         });
     }
 
-    /**
-     * Get a list of entities from the API and store them in the CreatureList state
-     * @param page The page number to get entities from
-     * 
-     */
-    const getEntities = (page: number) => {
-        api.getEntities("dummy", page, 1).then((res) => {
-            SetCreatureList(res.Entities.map(e => e as EntityOverview));
-        });
-    }
-
-    const getEntity = async (entityName: string): Promise<Entity | undefined> => {
-        return api.getEntity("dummy", entityName).then((res) => {
+    const getEntity = async (entityID: number): Promise<Entity | undefined> => {
+        return api.getEntity("dummy", entityID).then((res) => {
             if (res.Entity === undefined) return;
             appendToEntityList(res.Entity);
             return res.Entity;
         });
     }
 
-    const displayMiscEntity = (entityName: string) => {
-        let entity = FullEntityList.find((ent) => ent.Name === entityName);
+    const displayMiscEntity = (entityID: number) => {
+        let entity = FullEntityList.find((ent) => ent.DBID === entityID);
         if (entity) SetDisplayEntity(entity);
         else {
-            getEntity(entityName).then((ent) => {
+            getEntity(entityID).then((ent) => {
                 if (ent) SetDisplayEntity(ent);
             });
         }
     }
 
-    const addMiscEntity = (entityName: string) => {
+    const addMiscEntity = (entityID: number) => {
         if (!activeEncounter) return;
         // Check if entity is in the cache
-        let entity = FullEntityList.find((ent) => ent.Name === entityName);
+        let entity = FullEntityList.find((ent) => ent.DBID === entityID);
         // Entity is not in cache
         if (!entity) {
-            getEntity(entityName).then((ent) => {
+            getEntity(entityID).then((ent) => {
                 if (ent) SetActiveEncounter(activeEncounter.addEntity(ent), false);
             });
         }
@@ -298,7 +297,7 @@ function Encounters() {
             meta.Turn = 1;
             meta.Round = 1;
         }
-        SetActiveEncounter(activeEncounter.setInitiativeOrder().withMetadata({ Started: true, AccessedDate: new Date(Date.now() - new Date().getTimezoneOffset()*60000), Turn: meta.Turn, Round: meta.Round }).copy(), runningEncounter);
+        SetActiveEncounter(activeEncounter.setInitiativeOrder().withMetadata({ Started: true, AccessedDate: newLocalDate(), Turn: meta.Turn, Round: meta.Round }).copy(), runningEncounter);
         SetRunningEncounter(!runningEncounter);
         loadEncounterFromBackup();
         SetDisplayEntity(undefined);
@@ -334,10 +333,6 @@ function Encounters() {
     //         user.conditions = res.Conditions;
     //         SetConfig(user);
     //     });
-    // }, []); // TODO - when should this run?
-
-    // React.useEffect(() => {
-    //     getEntities(1);
     // }, []); // TODO - when should this run?
 
     // Encounters Overview
@@ -402,7 +397,7 @@ function Encounters() {
             <hr />
             <section className="container">
                 <section id="buttonSet1" className="five columns">
-                    <button onClick={() => { initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter), updateMetadata({ AccessedDate: new Date() }), TriggerReRender() }} disabled={runningEncounter} >{EditingEncounter ? "Cancel" : "Edit Mode"}</button>
+                    <button onClick={() => { initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter), TriggerReRender() }} disabled={runningEncounter} >{EditingEncounter ? "Cancel" : "Edit Mode"}</button>
                     <button onClick={startEncounter} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
                     <button onClick={() => { SetActiveEncounter(activeEncounter.reset()), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter || EditingEncounter} >Reset Encounter</button>
                 </section>
@@ -433,7 +428,7 @@ function Encounters() {
                     </div>}
                 </div>
                 <div id="CreatureList" style={{ display: runningEncounter ? "none" : "block" }}>
-                    {EditingEncounter && <EntityTable creatures={CreatureList} displayCallback={displayMiscEntity} addCallback={(name: string) => { addMiscEntity(name) }} />}
+                    {EditingEncounter && <EntityTable creatures={CreatureList} displayCallback={displayMiscEntity} addCallback={(id: number) => { addMiscEntity(id) }} />}
                 </div>
                 <div id="StatBlockDisplay" style={{ maxWidth: EditingEncounter ? "30%" : "55%", marginLeft: runningEncounter ? "2.5rem" : "0" }}>
                     {DisplayEntity && renderDisplay(DisplayEntity, !runningEncounter)}
