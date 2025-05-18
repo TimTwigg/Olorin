@@ -1,9 +1,5 @@
 import * as api from "@src/models/api_responses";
 
-import { conditions } from "@src/temp/conditions";
-import { arasta } from "@src/temp/arasta";
-import { aurelia } from "@src/temp/aurelia";
-import { winter_ghoul } from "@src/temp/winter-ghoul";
 import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { EntityOverview } from "@src/models/entity";
 import { StatBlock, parseDataAsStatBlock } from "@src/models/statBlock";
@@ -12,15 +8,8 @@ import { dateFromString } from "@src/controllers/utils";
 import { deepCopy } from "@src/controllers/utils";
 
 const entities = new Map<string, StatBlock>()
-entities.set(arasta.Name, arasta)
-entities.set(aurelia.Name, aurelia)
-entities.set(winter_ghoul.Name, winter_ghoul)
 
-const entityOverviews = [
-    new EntityOverview(arasta.Name, arasta.Description.Type, arasta.Description.Size, arasta.ChallengeRating, arasta.Source),
-    new EntityOverview(aurelia.Name, aurelia.Description.Type, aurelia.Description.Size, aurelia.ChallengeRating, aurelia.Source),
-    new EntityOverview(winter_ghoul.Name, winter_ghoul.Description.Type, winter_ghoul.Description.Size, winter_ghoul.ChallengeRating, winter_ghoul.Source)
-]
+const entityOverviews: EntityOverview[] = []
 
 export type APIDetailLevel = 1 | 2
 
@@ -35,6 +24,14 @@ const BASE_URL = "http://localhost:8080"
 var FUNCTION_CACHE = new Map<string, any>()
 
 /**
+ * Excluded routes from caching.
+ */
+const CACHE_EXCLUDED_ROUTES = [
+    "/encounter/all",
+    "/encounter",
+]
+
+/**
  * Wrapper for API functions to handle caching
  * 
  * @param func function name to call
@@ -44,7 +41,7 @@ var FUNCTION_CACHE = new Map<string, any>()
  */
 async function api_wrapper(func: string, ...args: any): Promise<any> {
     let cache_key = func + JSON.stringify(args);
-    if (FUNCTION_CACHE.has(cache_key)) {
+    if (FUNCTION_CACHE.has(cache_key) && !CACHE_EXCLUDED_ROUTES.some((route) => args[0] == (route))) {
         console.log("Cache hit for " + cache_key);
         return deepCopy(FUNCTION_CACHE.get(cache_key));
     }
@@ -177,7 +174,7 @@ export async function getEncounter(_user: string, encounterID: number): Promise<
 
 export async function getConditions(_user: string): Promise<api.ConditionResponse> {
     return {
-        Conditions: conditions
+        Conditions: []
     }
 }
 
@@ -225,6 +222,6 @@ export async function saveEncounter(_user: string, encounter: Encounter): Promis
         throw new Error("Encounter is null or undefined.");
     }
     return push("/encounter", encounter).then((data: any) => {
-        return data as Encounter;
+        return Encounter.loadFromJSON(data);
     });
 }

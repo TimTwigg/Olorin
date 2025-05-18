@@ -18,4 +18,12 @@ export class SmartMap<keyType, valueType> extends Map {
         }
         return _copy;
     }
+
+    public static fromMap<K extends string | number | symbol, V>(obj: Record<K, V>): SmartMap<K, V> {
+        const map = new SmartMap<K, V>();
+        for (const [key, value] of Object.entries(obj)) {
+            map.set(key as K, value);
+        }
+        return map;
+    }
 }

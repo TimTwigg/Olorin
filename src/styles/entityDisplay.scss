@@ -16,7 +16,7 @@
 
     h4,
     .h4 {
-        font-size: 1.5em;
+        font-size: 2rem;
         margin: 0;
         color: #861C06;
         font-weight: bold;
@@ -24,7 +24,7 @@
     }
 
     h5 {
-        font-size: 1.5em;
+        font-size: 2rem;
         margin: 0;
         color: #861C06;
     }
@@ -194,6 +194,8 @@
 .overview {
     .displayCard {
         border-bottom-left-radius: 0;
+        font-size: 1.4rem;
+        column-gap: 0;
 
         section {
             margin-top: 0;
@@ -202,12 +204,12 @@
 
     .displayCard,
     .displayCardControls {
-        width: 20rem;
+        max-width: 30rem;
     }
 
     .displayCard,
     .displayCardInfo {
-        height: 6rem;
+        max-height: 10rem;
         border-width: 2px;
     }
 

@@ -84,6 +84,7 @@ function Encounters() {
         SetEncounterIsActive(false);
         SetEditingEncounter(false);
         SetIsNewEncounter(false);
+        api.getEncounters("dummy").then((res) => { SetEncounters(res.Encounters) });
     }
 
     const deleteEntity = (entityID: string) => {
@@ -233,12 +234,12 @@ function Encounters() {
             let ref = React.createRef<HTMLDivElement>();
             refs.set(id[0], ref);
             if (id[0] === `${activeEncounter.LairEntityName}_lair`) return <LairDisplay key={`${activeEncounter.LairEntityName}_lair${ind}`} ref={ref} lair={activeEncounter.Lair!} overviewOnly={overviewOnly} isActive={activeEncounter.ActiveID === `${activeEncounter.LairEntityName}_lair`} setDisplay={SetDisplayEntity} />;
-            let entity = activeEncounter.Entities.find((ent) => ent.id === id[0]);
+            let entity = activeEncounter.Entities.find((ent) => ent.ID === id[0]);
             if (!entity) {
                 console.log(activeEncounter.Entities, id);
                 throw new Error("Entity not found in Encounter");
             }
-            return <EntityDisplay key={`${entity.Name}${ind}`} ref={ref} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={entity.id === activeEncounter.ActiveID} />;
+            return <EntityDisplay key={`${entity.Name}${ind}`} ref={ref} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={entity.ID === activeEncounter.ActiveID} />;
         });
     }
 
@@ -291,9 +292,14 @@ function Encounters() {
 
     const startEncounter = () => {
         if (!activeEncounter) return;
-        SetRunningEncounter(!runningEncounter);
         SetEncounterIsActive(true);
-        SetActiveEncounter(activeEncounter.setInitiativeOrder().withMetadata({ Started: true, AccessedDate: new Date() }));
+        let meta = activeEncounter.Metadata;
+        if (!activeEncounter.Metadata.Started) {
+            meta.Turn = 1;
+            meta.Round = 1;
+        }
+        SetActiveEncounter(activeEncounter.setInitiativeOrder().withMetadata({ Started: true, AccessedDate: new Date(Date.now() - new Date().getTimezoneOffset()*60000), Turn: meta.Turn, Round: meta.Round }).copy(), runningEncounter);
+        SetRunningEncounter(!runningEncounter);
         loadEncounterFromBackup();
         SetDisplayEntity(undefined);
     }
@@ -301,7 +307,7 @@ function Encounters() {
     const getEncounter = (id: number) => {
         api.getEncounter("dummy", id).then((res) => {
             if (!res.Encounter) return;
-            SetActiveEncounter(res.Encounter);
+            SetActiveEncounter(res.Encounter.copy());
         });
     }
 
@@ -419,7 +425,7 @@ function Encounters() {
                     {runningEncounter && <div id="EncounterRunControls">
                         <section>Round: {activeEncounter.Metadata.Round}</section>
                         <section>Turn: {activeEncounter.Metadata.Turn}</section>
-                        <button onClick={() => { SetActiveEncounter(activeEncounter.tick(), true), ScrollToEntity(activeEncounter.ActiveID), TriggerReRender() }}>NEXT</button>
+                        <button onClick={() => { SetActiveEncounter(activeEncounter.tick(), activeEncounter.Metadata.Turn === 1), ScrollToEntity(activeEncounter.ActiveID), TriggerReRender() }}>NEXT</button>
                     </div>}
                     {!runningEncounter && <div id="EncounterEditControls">
                         <button onClick={() => { SetActiveEncounter(activeEncounter.randomizeInitiative()), TriggerReRender() }}>Random Initiative</button>

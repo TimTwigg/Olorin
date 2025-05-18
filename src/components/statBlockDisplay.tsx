@@ -18,7 +18,7 @@ function ActionsDisplay({ actions }: { actions: StatBlock["Actions"] }) {
             {actions.map((a, k) => <section key={k}>
                 <strong>{a.Name} </strong>
                 {a.AttackType && <i>{a.AttackType}: </i>}
-                {a.ToHitModifier && <>{a.ToHitModifier} to hit, {a.AttackType?.startsWith("Melee") ? "reach" : "range"} {a.Reach} ft., {a.Targets} creature{a.Targets && a.Targets > 1 ? "s" : ""}. </>}
+                {a.ToHitModifier && <>{a.ToHitModifier > 0 ? "+" : ""}{a.ToHitModifier} to hit, {a.AttackType?.startsWith("Melee") ? "reach" : "range"} {a.Reach} ft., {a.Targets} creature{a.Targets && a.Targets > 1 ? "s" : ""}. </>}
                 {a.Damage && <><i>Hit:</i> {a.Damage.map(d => d.Amount + " " + d.Type + " damage").join(", ")}. </>}
                 {a.AdditionalDescription}
                 <br />
@@ -80,20 +80,28 @@ export function StatBlockDisplay({ statBlock, displayColumns, size, deleteCallba
                 <strong>Armor Class:</strong> {statBlock.Stats.ArmorClass} <br />
                 <strong>Hit Points:</strong> {statBlock.Stats.HitPoints.Average} {statBlock.Stats.HitPoints.Dice.length>0 && <>({statBlock.Stats.HitPoints.Dice})</>} <br />
                 <strong>Speed:</strong> {Object.entries(statBlock.Stats.Speed).map(([key, value]) => {
-                    return <span key={key}>{key}: {value} ft. </span>
+                    return value !== 0 ? <span key={key}>{key}: {value} ft. </span> : null
                 })}
                 <hr />
                 <section className="justify-between">
-                    <StatDisplay name="STR" value={statBlock.Stats.Strength} />
-                    <StatDisplay name="DEX" value={statBlock.Stats.Dexterity} />
-                    <StatDisplay name="CON" value={statBlock.Stats.Constitution} />
-                    <StatDisplay name="INT" value={statBlock.Stats.Intelligence} />
-                    <StatDisplay name="WIS" value={statBlock.Stats.Wisdom} />
-                    <StatDisplay name="CHA" value={statBlock.Stats.Charisma} />
+                    <StatDisplay name="STR" value={statBlock.Stats.Abilities.dGet("Strength", 10)} />
+                    <StatDisplay name="DEX" value={statBlock.Stats.Abilities.dGet("Dexterity", 10)} />
+                    <StatDisplay name="CON" value={statBlock.Stats.Abilities.dGet("Constitution", 10)} />
+                    <StatDisplay name="INT" value={statBlock.Stats.Abilities.dGet("Intelligence", 10)} />
+                    <StatDisplay name="WIS" value={statBlock.Stats.Abilities.dGet("Wisdom", 10)} />
+                    <StatDisplay name="CHA" value={statBlock.Stats.Abilities.dGet("Charisma", 10)} />
                 </section>
                 <hr />
             </Card>
             <Card>
+                {statBlock.Details.Skills.length > 0 && <><strong>Skills:</strong> {statBlock.Details.Skills.map(({ Name, Level, Override }) => {
+                    let num = Override !== 0 ? Override : modifierOf(statBlock.Stats.Abilities.dGet(Name, 10)) + (Level * statBlock.ProficiencyBonus);
+                    return <span key={Name}>{Name} {num > 0 ? "+" : ""}{num} </span>
+                })} <br /></>}
+                {statBlock.Details.SavingThrows.length > 0 && <><strong>Saving Throws:</strong> {statBlock.Details.SavingThrows.map(({ Name, Level, Override }) => {
+                    let num = Override !== 0 ? Override : modifierOf(statBlock.Stats.Abilities.dGet(Name, 10)) + (Level * statBlock.ProficiencyBonus);
+                    return <span key={Name}>{Name} {num > 0 ? "+" : ""}{num} </span>
+                })} <br /></>}
                 {statBlock.DamageModifiers.Immunities.length > 0 && <><strong>Damage Immunities:</strong> {statBlock.DamageModifiers.Immunities.join(", ")}<br /></>}
                 {statBlock.DamageModifiers.Resistances.length > 0 && <><strong>Damage Resistances:</strong> {statBlock.DamageModifiers.Resistances.join(", ")}<br /></>}
                 {statBlock.DamageModifiers.Vulnerabilities.length > 0 && <><strong>Damage Vulnerabilities:</strong> {statBlock.DamageModifiers.Vulnerabilities.join(", ")}<br /></>}

@@ -54,11 +54,11 @@ enum ControlOptions {
 function renderSpeed(speed: Entity["Speed"]): JSX.Element {
     return <div>
         <strong>Speed: </strong>
-        {speed.Walk && <span><GiRun /> {speed.Walk} ft.</span>}
-        {speed.Fly && <span><GiLibertyWing /> {speed.Fly} ft.</span>}
-        {speed.Climb && <span><GiMountainClimbing /> {speed.Climb} ft.</span>}
-        {speed.Swim && <span><FaSwimmer /> {speed.Swim} ft.</span>}
-        {speed.Burrow && <span><GiDigDug /> {speed.Burrow} ft.</span>}
+        {speed.Walk !== 0 && <span><GiRun /> {speed.Walk} ft.</span>}
+        {speed.Fly !== 0 && <span><GiLibertyWing /> {speed.Fly} ft.</span>}
+        {speed.Climb !== 0 && <span><GiMountainClimbing /> {speed.Climb} ft.</span>}
+        {speed.Swim !== 0 && <span><FaSwimmer /> {speed.Swim} ft.</span>}
+        {speed.Burrow !== 0 && <span><GiDigDug /> {speed.Burrow} ft.</span>}
     </div>
 }
 
@@ -204,11 +204,11 @@ export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDis
                 <input type="number" min={0} defaultValue={entity.Initiative === 0 ? undefined : entity.Initiative} onChange={e => { entity.setInitiative(parseInt(e.target.value)) ?? 0 }} />
             </div>
             <div className="displayCard" style={{ columnCount: 3 }}>
-                <h4 style={{ textDecoration: entity.CurrentHitPoints > 0 ? "" : "line-through 3px" }}>{entity.IsHostile && entity.CurrentHitPoints > 0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix > "" ? ` (${entity.Suffix})` : ""}{locked ? <AiFillLock className="m-left" /> : null}</h4>
-                <section><strong>CR:</strong> {entity.DifficultyRating}<br /></section>
-                <section><strong>HP:</strong> {entity.CurrentHitPoints < entity.MaxHitPoints ? ` ${entity.CurrentHitPoints} / ${entity.MaxHitPoints}` : entity.MaxHitPoints}<br /></section>
-                <section><strong>AC:</strong> {entity.ArmorClass + entity.ArmorClassBonus}{entity.ArmorClassBonus === 0 ? "" : ` (${entity.ArmorClass}${entity.ArmorClassBonus > 0 ? "+" : ""}${entity.ArmorClassBonus})`}<br /></section>
-                {entity.Notes.length > 0 ? <section><strong>Notes:</strong> {entity.Notes}<br /></section> : null}
+                <h4 style={{ textDecoration: entity.CurrentHitPoints > 0 ? "" : "line-through 3px", columnSpan: "all" }}>{entity.IsHostile && entity.CurrentHitPoints > 0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix > "" ? ` (${entity.Suffix})` : ""}{locked ? <AiFillLock className="m-left" /> : null}</h4>
+                <section><strong>CR:</strong> {entity.DifficultyRating}</section>
+                <section><strong>HP:</strong> {entity.CurrentHitPoints < entity.MaxHitPoints ? entity.CurrentHitPoints : entity.MaxHitPoints}</section>
+                <section><strong>AC:</strong> {entity.ArmorClass + entity.ArmorClassBonus}{entity.ArmorClassBonus === 0 ? "" : ` (${entity.ArmorClass}${entity.ArmorClassBonus > 0 ? "+" : ""}${entity.ArmorClassBonus})`}</section>
+                {entity.Notes.length > 0 ? <section style={{ columnSpan: "all" }}><strong>Notes:</strong> {entity.Notes}<br /></section> : null}
             </div>
             <div className="displayCardControls">
                 <div className="controls">
@@ -238,7 +238,7 @@ export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDis
                         <strong>Hit Points:</strong> {entity.CurrentHitPoints} {entity.TempHitPoints > 0 ? ` (+${entity.TempHitPoints})` : null} / {entity.MaxHitPoints}<br />
                         <strong>Armor Class:</strong> {entity.ArmorClass + entity.ArmorClassBonus}{entity.ArmorClassBonus === 0 ? "" : ` (${entity.ArmorClass}${entity.ArmorClassBonus > 0 ? "+" : ""}${entity.ArmorClassBonus})`}<br />
                         {renderSpeed(entity.Speed)}
-                        <strong>Saves:</strong> DEX {entity.SavingThrows.Dexterity >= 0 ? "+" : ""}{entity.SavingThrows.Dexterity} WIS {entity.SavingThrows.Wisdom >= 0 ? "+" : ""}{entity.SavingThrows.Wisdom} CON {entity.SavingThrows.Constitution >= 0 ? "+" : ""}{entity.SavingThrows.Constitution}<br />
+                        <strong>Saves:</strong> DEX {entity.SavingThrows.get("Dexterity") >= 0 ? "+" : ""}{entity.SavingThrows.get("Dexterity")} WIS {entity.SavingThrows.get("Wisdom") >= 0 ? "+" : ""}{entity.SavingThrows.get("Wisdom")} CON {entity.SavingThrows.get("Constitution") >= 0 ? "+" : ""}{entity.SavingThrows.get("Constitution")}<br />
                         {entity.SpellSaveDC > 0 ? <><strong>Spell Save DC:</strong> {entity.SpellSaveDC}<br /></> : null}
                         {renderConditions(entity.Conditions)}
                         {entity.Notes.length > 0 ? <><strong>Notes:</strong> {entity.Notes}<br /></> : null}

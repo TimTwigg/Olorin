@@ -30,7 +30,7 @@ export class EntityOverview implements EntityOverviewT {
 }
 
 export interface Entity {
-    id: string
+    ID: string
     Name: string
     Suffix: string
     Initiative: number
@@ -50,20 +50,12 @@ export interface Entity {
     SpellSaveDC: number
     SpellSlots: SmartMap<number, { total: number, used: number }>
     Concentration: boolean
-    Reactions: { total: number, used: number }
     Notes: string
     IsHostile: boolean
     EncounterLocked: boolean
     Displayable: any
     EntityType: EntityType
-    SavingThrows: {
-        Strength: number
-        Dexterity: number
-        Constitution: number
-        Intelligence: number
-        Wisdom: number
-        Charisma: number
-    }
+    SavingThrows: SmartMap<string, number>
     DifficultyRating: number
 
     tick(): void
@@ -84,8 +76,6 @@ export interface Entity {
     useSpellSlot(level: number): void
     resetSpellSlots(): void
     setConcentration(value: boolean): void
-    useReaction(): void
-    resetReactions(): void
     resetAll(): void
     setHostile(value: boolean): void
     setLock(value: boolean): void

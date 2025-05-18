@@ -98,7 +98,7 @@ export class Encounter {
      * @returns the updated encounter
      */
     removeEntity(entityID: string): Encounter {
-        this.Entities = this.Entities.filter((e) => e.id !== entityID);
+        this.Entities = this.Entities.filter((e) => e.ID !== entityID);
         if (entityID === this.ActiveID) {
             let pos = this.InitiativeOrder.findIndex((id) => id[0] === entityID);
             this.ActiveID = this.InitiativeOrder[pos + 1][0] || this.InitiativeOrder[0][0] || "";
@@ -136,7 +136,7 @@ export class Encounter {
      */
     tick(): Encounter {
         for (let ent of this.Entities) {
-            if (ent.id === this.ActiveID) {
+            if (ent.ID === this.ActiveID) {
                 ent.tick();
                 break;
             }
@@ -198,7 +198,7 @@ export class Encounter {
      * @returns the updated encounter
      */
     setInitiativeOrder(): Encounter {
-        this.InitiativeOrder = this.Entities.map((e) => [e.id, e.Initiative]);
+        this.InitiativeOrder = this.Entities.map((e) => [e.ID, e.Initiative]);
         if (this.HasLair) this.InitiativeOrder.push([`${this.LairEntityName}_lair`, this.Lair?.Initiative || 20]);
         this.InitiativeOrder.sort(Encounter.InitiativeSortKey);
         if (!this.Metadata.Started && this.InitiativeOrder.length > 0) this.ActiveID = this.InitiativeOrder[0][0];
@@ -275,9 +275,17 @@ export class Encounter {
         Object.assign(newEncounter, this);
         newEncounter.Entities = this.Entities.map((e) => e.copy());
         if (newEncounter.Entities.length === 0) return newEncounter;
+        newEncounter.ActiveID = this.ActiveID;
         newEncounter.setInitiativeOrder();
-        let index = this.InitiativeOrder.findIndex(item => item[0] === this.ActiveID);
-        newEncounter.ActiveID = index === -1 ? "" : newEncounter.InitiativeOrder[index][0];
+        if (!this.Metadata.Started) this.ActiveID = this.InitiativeOrder[0][0];
+        else {
+            let index = this.InitiativeOrder.findIndex((item) => item[0] === this.ActiveID);
+            if (index === -1) {
+                newEncounter.ActiveID = this.InitiativeOrder[0][0];
+            } else {
+                newEncounter.ActiveID = this.InitiativeOrder[index][0];
+            }
+        }
         return newEncounter;
     }
 
@@ -302,7 +310,7 @@ export class Encounter {
     }
 
     public static loadFromJSON(json: any): Encounter {
-        let encounter = new Encounter(json.id, json.Name, json.Description, "", json.Metadata);
+        let encounter = new Encounter(json.ID, json.Name, json.Description, "", json.Metadata);
         encounter.Metadata = {
             CreationDate: json.Metadata.CreationDate === undefined ? new Date() : dateFromString(json.Metadata.CreationDate),
             AccessedDate: json.Metadata.AccessedDate === undefined ? new Date() : dateFromString(json.Metadata.AccessedDate),
@@ -312,6 +320,8 @@ export class Encounter {
             Turn: json.Metadata.Turn === undefined ? 1 : json.Metadata.Turn
         };
         encounter.Entities = json.Entities.map((e: any) => StatBlockEntity.loadFromJSON(e)); // TODO - should this bifurcate to different entity types? Or Players/Temps ARE statblock entities?
+        encounter.setInitiativeOrder();
+        encounter.ActiveID = json.ActiveID;
         return encounter;
     }
 }

@@ -1,4 +1,5 @@
 import { Lair } from "@src/models/lair";
+import { SmartMap } from "@src/models/data_structures/smartMap";
 
 export type StatBlock = {
     Name: string;
@@ -23,13 +24,7 @@ export type StatBlock = {
             Burrow?: number;
             Climb?: number;
         };
-        ReactionCount: number;
-        Strength: number;
-        Dexterity: number;
-        Constitution: number;
-        Intelligence: number;
-        Wisdom: number;
-        Charisma: number;
+        Abilities: SmartMap<string, number>;
     };
     DamageModifiers: {
         Vulnerabilities: string[];
@@ -41,11 +36,13 @@ export type StatBlock = {
         ArmorType: string;
         Skills: {
             Name: string;
-            Modifier: number;
+            Level: number;
+            Override: number;
         }[],
         SavingThrows: {
             Name: string;
-            Modifier: number;
+            Level: number;
+            Override: number;
         }[],
         Senses: {
             Name: string;

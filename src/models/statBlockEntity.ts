@@ -4,7 +4,7 @@ import { StatBlock } from "@src/models/statBlock";
 import { d20, hashCode, modifierOf } from "@src/controllers/utils";
 
 export class StatBlockEntity implements Entity {
-    id;
+    ID;
     Name;
     Suffix = "";
     Initiative;
@@ -18,7 +18,6 @@ export class StatBlockEntity implements Entity {
     SpellSaveDC: number;
     SpellSlots = new SmartMap<number, { total: number, used: number }>();
     Concentration = false;
-    Reactions;
     Notes = "";
     IsHostile;
     EncounterLocked = false;
@@ -29,27 +28,25 @@ export class StatBlockEntity implements Entity {
     DifficultyRating;
 
     constructor(statBlock: StatBlock, initiative: number = 0, IsHostile: boolean = true) {
-        this.id = (hashCode(statBlock.Name) * Date.now() * Math.random()).toString(16);
+        this.ID = (hashCode(statBlock.Name) * Date.now() * Math.random()).toString(16);
         this.Name = statBlock.Name;
         this.StatBlock = statBlock;
         this.Initiative = initiative;
-        this.Reactions = { total: statBlock.Stats.ReactionCount, used: 0 };
         this.IsHostile = IsHostile;
         this.CurrentHitPoints = statBlock.Stats.HitPoints.Average;
         this.MaxHitPoints = statBlock.Stats.HitPoints.Average;
         this.ArmorClass = statBlock.Stats.ArmorClass;
         this.Speed = statBlock.Stats.Speed;
         this.Displayable = statBlock;
-        this.SavingThrows = {
-            Strength: modifierOf(statBlock.Stats.Strength),
-            Dexterity: modifierOf(statBlock.Stats.Dexterity),
-            Constitution: modifierOf(statBlock.Stats.Constitution),
-            Intelligence: modifierOf(statBlock.Stats.Intelligence),
-            Wisdom: modifierOf(statBlock.Stats.Wisdom),
-            Charisma: modifierOf(statBlock.Stats.Charisma)
-        }
+        this.SavingThrows = new SmartMap<string, number>();
         this.SpellSaveDC = statBlock.Details.SpellSaveDC || 0;
         this.DifficultyRating = statBlock.ChallengeRating;
+
+        for (let stat of statBlock.Stats.Abilities.keysAsArray()) {
+            let item = statBlock.Details.SavingThrows.find((s) => s.Name === stat);
+            let mod = item ? item.Override !== 0 ? item.Override : modifierOf(statBlock.Stats.Abilities.dGet(stat, 10)) + (item.Level * statBlock.ProficiencyBonus) : modifierOf(statBlock.Stats.Abilities.get(stat));
+            this.SavingThrows.set(stat, mod);
+        }
     }
 
     tick(): void {
@@ -63,7 +60,7 @@ export class StatBlockEntity implements Entity {
     }
 
     randomizeInitiative(): void {
-        if (this.Initiative === 0) this.Initiative = d20() + modifierOf(this.StatBlock.Stats.Dexterity);
+        if (this.Initiative === 0) this.Initiative = d20() + modifierOf(this.StatBlock.Stats.Abilities.dGet("Dexterity", 10));
     }
 
     setInitiative(value: number): void {
@@ -144,18 +141,8 @@ export class StatBlockEntity implements Entity {
         this.Concentration = value;
     }
 
-    useReaction(): void {
-        if (this.Reactions.used >= this.Reactions.total) throw new Error("No More Reactions");
-        this.Reactions.used++;
-    }
-
-    resetReactions(): void {
-        this.Reactions.used = 0;
-    }
-
     resetAll(): void {
         this.resetSpellSlots();
-        this.resetReactions();
         this.Conditions.clear();
         this.Concentration = false;
         this.TempHitPoints = 0;
@@ -175,7 +162,7 @@ export class StatBlockEntity implements Entity {
     }
 
     generateNewId(): void {
-        this.id = (hashCode(this.StatBlock.Name) * Date.now() * Math.random()).toString(16);
+        this.ID = (hashCode(this.StatBlock.Name) * Date.now() * Math.random()).toString(16);
     }
 
     setNotes(notes: string): void {
@@ -184,6 +171,7 @@ export class StatBlockEntity implements Entity {
 
     copy(): StatBlockEntity {
         let copy = new StatBlockEntity(this.StatBlock, this.Initiative, this.IsHostile);
+        copy.ID = this.ID;
         copy.Name = this.Name;
         copy.Suffix = this.Suffix;
         copy.CurrentHitPoints = this.CurrentHitPoints;
@@ -196,25 +184,37 @@ export class StatBlockEntity implements Entity {
         copy.SpellSaveDC = this.SpellSaveDC;
         copy.SpellSlots = this.SpellSlots.copy();
         copy.Concentration = this.Concentration;
-        copy.Reactions = { total: this.Reactions.total, used: this.Reactions.used };
         copy.Notes = this.Notes;
         copy.IsHostile = this.IsHostile;
         copy.EncounterLocked = this.EncounterLocked;
         copy.Displayable = this.Displayable;
-        copy.SavingThrows = {
-            Strength: this.SavingThrows.Strength,
-            Dexterity: this.SavingThrows.Dexterity,
-            Constitution: this.SavingThrows.Constitution,
-            Intelligence: this.SavingThrows.Intelligence,
-            Wisdom: this.SavingThrows.Wisdom,
-            Charisma: this.SavingThrows.Charisma
-        }
+        copy.SavingThrows = this.SavingThrows.copy();
         copy.DifficultyRating = this.DifficultyRating;
         return copy;
     }
 
     public static loadFromJSON(json: any): Entity {
-        console.log("Loading StatBlockEntity from JSON", json);
-        return null as any; // TODO: Implement this method to load from JSON
+        json.Displayable.Stats.Abilities = SmartMap.fromMap(json.Displayable.Stats.Abilities);
+        let ent = new StatBlockEntity(json.Displayable, json.Initiative, json.IsHostile);
+        ent.Name = json.Name;
+        ent.Suffix = json.Suffix;
+        ent.CurrentHitPoints = json.CurrentHitPoints;
+        ent.MaxHitPoints = json.MaxHitPoints;
+        ent.TempHitPoints = json.TempHitPoints;
+        ent.ArmorClassBonus = json.ArmorClassBonus;
+        ent.Conditions = new SmartMap<string, number>();
+        for (let cond in json.Conditions) {
+            ent.Conditions.set(cond, json.Conditions[cond]);
+        }
+        ent.SpellSlots = new SmartMap<number, { total: number, used: number }>();
+        for (let slot in json.SpellSlots) {
+            ent.SpellSlots.set(slot, json.SpellSlots[slot]);
+        }
+        ent.Concentration = json.Concentration;
+        ent.Notes = json.Notes;
+        ent.IsHostile = json.IsHostile;
+        ent.EncounterLocked = json.EncounterLocked;
+        if (json.ID) ent.ID = json.ID;
+        return ent;
     }
 }
