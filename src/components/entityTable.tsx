@@ -37,12 +37,13 @@ type EntityTableProps = {
 }
 
 export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityTableProps) => {
-    const [data, _] = React.useState<EntityOverviewT[]>(creatures);
+    const [data, setData] = React.useState<EntityOverviewT[]>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+    const dataRef = React.useRef(0);
 
     const factory = createColumnHelper<EntityOverviewT>();
 
-    const columns = React.useMemo<ColumnDef<EntityOverviewT, any>[]>(
+    const columns: ColumnDef<EntityOverviewT, any>[] = React.useMemo<ColumnDef<EntityOverviewT, any>[]>(
         () => [
             factory.accessor("Name", {
                 cell: info => info.getValue(),
@@ -59,7 +60,7 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
                 header: () => "Size",
                 meta: { filterVariant: "select" },
             }),
-            factory.accessor("DifficultyRating", {
+            factory.accessor("ChallengeRating", {
                 cell: info => info.getValue(),
                 header: () => "CR",
                 meta: { filterVariant: "range" },
@@ -103,6 +104,13 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
         debugHeaders: false,
         debugColumns: false,
     });
+
+    React.useEffect(() => {
+        if (dataRef.current === 0 && creatures.length > 0) {
+            setData(creatures);
+            dataRef.current = 1;
+        }
+    }, [creatures]);
 
     return (
         <div className="entityTable">

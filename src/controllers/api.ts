@@ -1,10 +1,10 @@
 import * as api from "@src/models/api_responses";
 
-import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { EntityOverview } from "@src/models/entity";
 import { Encounter, EncounterOverview } from "@src/models/encounter";
 import { dateFromString } from "@src/controllers/utils";
 import { deepCopy } from "@src/controllers/utils";
+import { parseDataAsStatBlock } from "@src/models/statBlock";
 
 export type APIDetailLevel = 1 | 2
 
@@ -193,29 +193,29 @@ export async function getEntities(_user: string, _page: number, detailLevel: API
                     entity.Name,
                     entity.Type,
                     entity.Size,
-                    entity.DifficultyRating,
+                    entity.ChallengeRating,
                     entity.Source
                 );
-                else return StatBlockEntity.loadFromJSON(entity);
+                else return parseDataAsStatBlock(entity);
             })
         }
     })
 }
 
 /**
- * Fetch a single entity from the server.
+ * Fetch a single stat block from the server.
  * @param _user The user ID.
- * @param entityID The id of the entity to fetch.
+ * @param entityID The id of the block to fetch.
  * 
- * @returns The entity data.
+ * @returns The statblock data.
  */
-export async function getEntity(_user: string, entityID: number): Promise<api.SingleEntityResponse> {
+export async function getStatBlock(_user: string, entityID: number): Promise<api.SingleStatBlockResponse> {
     return request("/statblock", {
         id: entityID,
         detail_level: 2,
     }).then((data: any) => {
         return {
-            Entity: StatBlockEntity.loadFromJSON(data)
+            StatBlock: parseDataAsStatBlock(data)
         }
     })
 }

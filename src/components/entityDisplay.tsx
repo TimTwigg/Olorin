@@ -3,6 +3,7 @@ import { Entity } from "@src/models/entity";
 import { Card } from "@src/components/card";
 import { SmartMap } from "@src/models/data_structures/smartMap";
 import { UserOptions } from "@src/models/userOptions";
+import { StatBlock } from "@src/models/statBlock";
 import "@src/styles/entityDisplay.scss";
 
 import {
@@ -32,7 +33,7 @@ type EntityDisplayProps = {
     entity: Entity;
     deleteCallback: (id: string) => void;
     userOptions?: UserOptions;
-    setDisplay?: (entity?: Entity) => void;
+    setDisplay?: (statblock?: StatBlock) => void;
     renderTrigger?: () => void;
     overviewOnly?: boolean;
     editMode?: boolean;
@@ -80,7 +81,7 @@ export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDis
     const [locked, SetLocked] = React.useState<boolean>(false);
 
     const ConditionTypes: string[] = userOptions?.conditions || [];
-    setDisplay = setDisplay || ((entity?: Entity) => { console.log(`No display callback found for entity: ${entity ? entity.Name : "undefined"}`) });
+    setDisplay = setDisplay || ((_: any) => { console.log(`No display callback found for entity: ${entity ? entity.Name : "undefined"}`) });
     renderTrigger = renderTrigger || (() => { console.log("No render trigger found") });
 
     const FlipExpandedState = () => {
@@ -91,7 +92,7 @@ export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDis
     const FlipControlState = (state: ControlOptions) => {
         if (ControlState === state) {
             SetControlState(ControlOptions.None);
-            if (state === ControlOptions.Display) setDisplay(entity);
+            if (state === ControlOptions.Display) setDisplay(entity.Displayable);
         } else {
             switch (state) {
                 case ControlOptions.Initiative:
@@ -106,7 +107,7 @@ export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDis
                     SetLocalNumericalState(0);
                     break;
                 case ControlOptions.Display:
-                    setDisplay(entity);
+                    setDisplay(entity.Displayable);
                     break;
                 case ControlOptions.Notes:
                     SetLocalStringState(entity.Notes);
@@ -133,7 +134,7 @@ export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDis
         return <>
             <span><button onClick={_ => LockEntity(!locked)} className="icon">{locked ? <AiFillLock /> : <SlLockOpen />}<br />{overviewOnly ? "" : locked ? "Locked" : "Unlocked"}</button></span>
             <span><button onClick={_ => SetReadonly(!readonly)} className="icon">{readonly ? <TbPencilOff /> : <TbPencil />}<br />{overviewOnly ? "" : readonly ? "Read Only" : "Edit"}</button></span>
-            <span><button onClick={_ => deleteCallback(entity.id)} disabled={locked || (!editMode && overviewOnly)} className="icon"><GiTrashCan /><br />{overviewOnly ? "" : "Delete"}</button></span>
+            <span><button onClick={_ => deleteCallback(entity.ID)} disabled={locked || (!editMode && overviewOnly)} className="icon"><GiTrashCan /><br />{overviewOnly ? "" : "Delete"}</button></span>
         </>
     }
 
@@ -180,13 +181,13 @@ export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDis
 
     const renderConditionsControl = () => {
         return <span className="conditionCheckBoxes">
-            {ConditionTypes.map((condition, ind) => <section key={ind}><input type="checkbox" name={condition} id={`${entity.id}_${condition}`} defaultChecked={entity.Conditions.has(condition)} onChange={e => { UpdateConditions(condition, e.target.checked), renderTrigger() }} disabled={readonly} /><label htmlFor={`${entity.id}_${condition}`}>{condition}</label></section>)}
+            {ConditionTypes.map((condition, ind) => <section key={ind}><input type="checkbox" name={condition} id={`${entity.ID}_${condition}`} defaultChecked={entity.Conditions.has(condition)} onChange={e => { UpdateConditions(condition, e.target.checked), renderTrigger() }} disabled={readonly} /><label htmlFor={`${entity.ID}_${condition}`}>{condition}</label></section>)}
         </span>
     }
 
     const renderSpellsControl = () => {
         return <span className="spellsControl">
-            <section><input type="checkbox" name="Concentration" id={`${entity.id}_Concentration`} defaultChecked={entity.Concentration} onChange={e => { entity.setConcentration(e.target.checked), renderTrigger() }} disabled={readonly} /><label htmlFor={`${entity.id}_Concentration`}>Concentration</label></section>
+            <section><input type="checkbox" name="Concentration" id={`${entity.ID}_Concentration`} defaultChecked={entity.Concentration} onChange={e => { entity.setConcentration(e.target.checked), renderTrigger() }} disabled={readonly} /><label htmlFor={`${entity.ID}_Concentration`}>Concentration</label></section>
         </span>
     }
 
@@ -205,14 +206,14 @@ export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDis
             </div>
             <div className="displayCard" style={{ columnCount: 3 }}>
                 <h4 style={{ textDecoration: entity.CurrentHitPoints > 0 ? "" : "line-through 3px", columnSpan: "all" }}>{entity.IsHostile && entity.CurrentHitPoints > 0 ? <GiCrossedSwords className="m-right" /> : null}{entity.Name}{entity.Suffix > "" ? ` (${entity.Suffix})` : ""}{locked ? <AiFillLock className="m-left" /> : null}</h4>
-                <section><strong>CR:</strong> {entity.DifficultyRating}</section>
+                <section><strong>CR:</strong> {entity.ChallengeRating}</section>
                 <section><strong>HP:</strong> {entity.CurrentHitPoints < entity.MaxHitPoints ? entity.CurrentHitPoints : entity.MaxHitPoints}</section>
                 <section><strong>AC:</strong> {entity.ArmorClass + entity.ArmorClassBonus}{entity.ArmorClassBonus === 0 ? "" : ` (${entity.ArmorClass}${entity.ArmorClassBonus > 0 ? "+" : ""}${entity.ArmorClassBonus})`}</section>
                 {entity.Notes.length > 0 ? <section style={{ columnSpan: "all" }}><strong>Notes:</strong> {entity.Notes}<br /></section> : null}
             </div>
             <div className="displayCardControls">
                 <div className="controls">
-                    <button onClick={_ => deleteCallback(entity.id)} disabled={locked || (!editMode && overviewOnly)} className="icon"><GiTrashCan /><br />{overviewOnly ? "" : "Delete"}</button>
+                    <button onClick={_ => deleteCallback(entity.ID)} disabled={locked || (!editMode && overviewOnly)} className="icon"><GiTrashCan /><br />{overviewOnly ? "" : "Delete"}</button>
                     <button onClick={_ => FlipControlState(ControlOptions.Display)} title="Display"><FaAddressCard /></button>
                 </div>
                 {(ControlState === ControlOptions.None || ControlState === ControlOptions.Display) ? null :

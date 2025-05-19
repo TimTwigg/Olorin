@@ -26,7 +26,7 @@ export class StatBlockEntity implements Entity {
     StatBlock: StatBlock;
     EntityType = EntityType.StatBlock;
     SavingThrows;
-    DifficultyRating;
+    ChallengeRating;
 
     constructor(statBlock: StatBlock, initiative: number = 0, IsHostile: boolean = true) {
         this.DBID = statBlock.ID;
@@ -42,7 +42,7 @@ export class StatBlockEntity implements Entity {
         this.Displayable = statBlock;
         this.SavingThrows = new SmartMap<string, number>();
         this.SpellSaveDC = statBlock.Details.SpellSaveDC || 0;
-        this.DifficultyRating = statBlock.ChallengeRating;
+        this.ChallengeRating = statBlock.ChallengeRating;
 
         for (let stat of statBlock.Stats.Abilities.keysAsArray()) {
             let item = statBlock.Details.SavingThrows.find((s) => s.Name === stat);
@@ -191,7 +191,7 @@ export class StatBlockEntity implements Entity {
         copy.EncounterLocked = this.EncounterLocked;
         copy.Displayable = this.Displayable;
         copy.SavingThrows = this.SavingThrows.copy();
-        copy.DifficultyRating = this.DifficultyRating;
+        copy.ChallengeRating = this.ChallengeRating;
         return copy;
     }
 

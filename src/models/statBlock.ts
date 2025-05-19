@@ -111,5 +111,9 @@ export type StatBlock = {
 }
 
 export function parseDataAsStatBlock(data: any): StatBlock {
-    return data as StatBlock;
+    if (data === null || data === undefined) {
+        throw new Error("Data is null or undefined");
+    }
+    data.Stats.Abilities = SmartMap.fromMap(data.Stats.Abilities);
+    return data;
 }

@@ -5,10 +5,10 @@ import { ToastContainer, toast } from "react-toastify";
 import * as api from "@src/controllers/api";
 import { Encounter, EncounterMetadata, EncounterOverview } from "@src/models/encounter";
 import { EntityDisplay } from "@src/components/entityDisplay";
-import { Entity, EntityOverview, EntityType, isEntity } from "@src/models/entity";
+import { EntityOverview } from "@src/models/entity";
 import { StatBlockDisplay } from "@src/components/statBlockDisplay";
 import { StatBlock } from "@src/models/statBlock";
-import { Lair, isLair } from "@src/models/lair";
+import { Lair } from "@src/models/lair";
 import { UserOptions } from "@src/models/userOptions";
 import { newLocalDate } from "@src/controllers/utils";
 
@@ -31,7 +31,8 @@ function Encounters() {
     const [activeEncounterIndex, SetActiveEncounterIndex] = React.useState<number>(0);
     const [backupEncounter, SetBackupEncounter] = React.useState<Encounter | null>(null);
     const [runningEncounter, SetRunningEncounter] = React.useState<boolean>(false);
-    const [DisplayEntity, SetDisplayEntity] = React.useState<Entity | Lair | undefined>();
+    const [DisplayEntity, SetDisplayEntity] = React.useState<StatBlock | Lair | undefined>();
+    const [DisplayEntityType, SetDisplayEntityType] = React.useState<"statblock"|"lair"|"">("");
     const [Config, SetConfig] = React.useState<UserOptions>(new UserOptions());
     const [EncounterIsActive, SetEncounterIsActive] = React.useState<boolean>(false);
     const [EditingEncounter, SetEditingEncounter] = React.useState<boolean>(false);
@@ -40,7 +41,7 @@ function Encounters() {
     const [LocalStringState2, SetLocalStringState2] = React.useState<string>("");
     const [LocalStringState3, SetLocalStringState3] = React.useState<string>("");
     const [CreatureList, SetCreatureList] = React.useState<EntityOverview[]>([]);
-    const [FullEntityList, SetFullEntityList] = React.useState<Entity[]>([]);
+    const [FullStatBlockList, SetFullStatBlockList] = React.useState<StatBlock[]>([]);
     const [LairDialogVisible, SetLairDialogVisible] = React.useState<boolean>(false);
     const [LairDialogList, SetLairDialogList] = React.useState<{ Name: string, Lair: Lair }[]>([]);
     const getEncountersRef = React.useRef(0);
@@ -57,11 +58,11 @@ function Encounters() {
      * 
      * @param entity The Entity to add to the list
      */
-    const appendToEntityList = (entity: Entity) => {
-        let list = FullEntityList;
-        let newLength = list.push(entity);
+    const appendToStatBlockList = (statblock: StatBlock) => {
+        let list = FullStatBlockList;
+        let newLength = list.push(statblock);
         if (newLength > CACHESIZE) list.shift();
-        SetFullEntityList(list);
+        SetFullStatBlockList(list);
     }
 
     /**
@@ -145,9 +146,8 @@ function Encounters() {
         else {
             // load entities if needed
             if (CreatureList.length === 0) {
-                console.log("Loading entities");
                 api.getEntities("dummy", 1, 1).then((res) => {
-                    SetCreatureList(res.Entities.map(e => e as EntityOverview)); // TODO - fix this
+                    SetCreatureList(res.Entities as EntityOverview[]);
                 });
             }
         }
@@ -216,19 +216,18 @@ function Encounters() {
     };
 
     /**
-     * Render the Entity or Lair in the Display
+     * Render the StatBlock or Lair in the Display
      * 
-     * @param item The Entity or Lair to render
+     * @param item The StatBlock or Lair to render
      * @param overviewOnly Whether or not to render the full display
      */
-    const renderDisplay = (item?: Entity | Lair, overviewOnly: boolean = false) => {
+    const renderDisplay = (item: StatBlock|Lair|undefined, type: "statblock"|"lair", overviewOnly: boolean = false) => {
         if (!item) return <></>;
-        if (isEntity(item) && item.EntityType === EntityType.StatBlock) {
-            return <StatBlockDisplay statBlock={item.Displayable as StatBlock} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={EditingEncounter ? 1 : Config.defaultColumns || 2} size={EditingEncounter ? "small" : "medium"} />;
+        if (type == "statblock") {
+            return <StatBlockDisplay statBlock={item as StatBlock} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={EditingEncounter ? 1 : Config.defaultColumns || 2} size={EditingEncounter ? "small" : "medium"} />;
         }
-        else if (isEntity(item) && item.EntityType === EntityType.Player) return <></>;
-        else if (isLair(item)) {
-            return <LairBlockDisplay lair={item} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={overviewOnly ? 1 : Config.defaultColumns || 2} />;
+        else if (type == "lair") {
+            return <LairBlockDisplay lair={item as Lair} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={overviewOnly ? 1 : Config.defaultColumns || 2} />;
         }
         else return <></>;
     }
@@ -249,24 +248,30 @@ function Encounters() {
                 console.log(activeEncounter.Entities, id);
                 throw new Error("Entity not found in Encounter");
             }
-            return <EntityDisplay key={`${entity.Name}${ind}`} ref={ref} entity={entity} deleteCallback={deleteEntity} setDisplay={SetDisplayEntity} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={entity.ID === activeEncounter.ActiveID} />;
+            return <EntityDisplay key={`${entity.Name}${ind}`} ref={ref} entity={entity} deleteCallback={deleteEntity} setDisplay={(statblock) => {SetDisplayEntity(statblock), SetDisplayEntityType("statblock")}} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={entity.ID === activeEncounter.ActiveID} />;
         });
     }
 
-    const getEntity = async (entityID: number): Promise<Entity | undefined> => {
-        return api.getEntity("dummy", entityID).then((res) => {
-            if (res.Entity === undefined) return;
-            appendToEntityList(res.Entity);
-            return res.Entity;
+    const getStatBlock = async (entityID: number): Promise<StatBlock | undefined> => {
+        return api.getStatBlock("dummy", entityID).then((res) => {
+            if (res.StatBlock === undefined) return;
+            appendToStatBlockList(res.StatBlock);
+            return res.StatBlock;
         });
     }
 
     const displayMiscEntity = (entityID: number) => {
-        let entity = FullEntityList.find((ent) => ent.DBID === entityID);
-        if (entity) SetDisplayEntity(entity);
+        let entity = FullStatBlockList.find((ent) => ent.ID === entityID);
+        if (entity) {
+            SetDisplayEntity(entity);
+            SetDisplayEntityType("statblock");
+        }
         else {
-            getEntity(entityID).then((ent) => {
-                if (ent) SetDisplayEntity(ent);
+            getStatBlock(entityID).then((ent) => {
+                if (ent) {
+                    SetDisplayEntity(ent);
+                    SetDisplayEntityType("statblock");
+                }
             });
         }
     }
@@ -274,17 +279,16 @@ function Encounters() {
     const addMiscEntity = (entityID: number) => {
         if (!activeEncounter) return;
         // Check if entity is in the cache
-        let entity = FullEntityList.find((ent) => ent.DBID === entityID);
+        let entity = FullStatBlockList.find((ent) => ent.ID === entityID);
         // Entity is not in cache
         if (!entity) {
-            getEntity(entityID).then((ent) => {
-                if (ent) SetActiveEncounter(activeEncounter.addEntity(ent), false);
+            getStatBlock(entityID).then((statblock) => {
+                if (statblock) SetActiveEncounter(activeEncounter.addEntity(new StatBlockEntity(statblock)), false);
             });
         }
         // Entity is in cache
         else {
-            if (entity.EntityType === EntityType.StatBlock) entity = new StatBlockEntity(entity.Displayable as StatBlock);
-            SetActiveEncounter(activeEncounter.addEntity(entity), false);
+            SetActiveEncounter(activeEncounter.addEntity(new StatBlockEntity(entity)), false);
         }
         TriggerReRender();
     }
@@ -431,7 +435,7 @@ function Encounters() {
                     {EditingEncounter && <EntityTable creatures={CreatureList} displayCallback={displayMiscEntity} addCallback={(id: number) => { addMiscEntity(id) }} />}
                 </div>
                 <div id="StatBlockDisplay" style={{ maxWidth: EditingEncounter ? "30%" : "55%", marginLeft: runningEncounter ? "2.5rem" : "0" }}>
-                    {DisplayEntity && renderDisplay(DisplayEntity, !runningEncounter)}
+                    {DisplayEntity && DisplayEntityType && renderDisplay(DisplayEntity, DisplayEntityType, !runningEncounter)}
                 </div>
             </section>
             <ToastContainer position="top-right" />

@@ -10,7 +10,7 @@ export type EntityOverviewT = {
     Name: string
     Type: string
     Size: string
-    DifficultyRating: number
+    ChallengeRating: number
     Source: string
 }
 
@@ -19,15 +19,15 @@ export class EntityOverview implements EntityOverviewT {
     Name: string
     Type: string
     Size: string
-    DifficultyRating: number
+    ChallengeRating: number
     Source: string
 
-    constructor(ID: number, Name: string, Type: string, Size: string, DifficultyRating: number, Source: string) {
+    constructor(ID: number, Name: string, Type: string, Size: string, ChallengeRating: number, Source: string) {
         this.ID = ID;
         this.Name = Name;
         this.Type = Type;
         this.Size = Size;
-        this.DifficultyRating = DifficultyRating;
+        this.ChallengeRating = ChallengeRating;
         this.Source = Source;
     }
 }
@@ -60,7 +60,7 @@ export interface Entity {
     Displayable: any
     EntityType: EntityType
     SavingThrows: SmartMap<string, number>
-    DifficultyRating: number
+    ChallengeRating: number
 
     tick(): void
     setSuffix(suffix: string): void
