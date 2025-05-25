@@ -168,9 +168,13 @@ export async function getEncounter(_user: string, encounterID: number): Promise<
 }
 
 export async function getConditions(_user: string): Promise<api.ConditionResponse> {
-    return {
-        Conditions: []
-    }
+    return request("/condition/all", {}).then((data: any) => {
+        return {
+            Conditions: data.map((condition: any) => {
+                return condition.Name;
+            })
+        }
+    })
 }
 
 /**
@@ -231,6 +235,8 @@ export async function saveEncounter(_user: string, encounter: Encounter): Promis
     if (!encounter) {
         throw new Error("Encounter is null or undefined.");
     }
+    console.log(encounter.Entities[1].Conditions);
+    console.log(JSON.stringify(encounter.Entities[1].Conditions, null, "\t"));
     return push("/encounter", encounter).then((data: any) => {
         return Encounter.loadFromJSON(data);
     });

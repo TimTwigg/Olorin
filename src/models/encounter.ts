@@ -303,6 +303,10 @@ export class Encounter {
         };
     }
 
+    toJSON(): any {
+        // TODO
+    }
+
     public static InitiativeSortKey(a: [string, number], b: [string, number]): number {
         let num_a = a[0].endsWith("lair") ? a[1] - 0.5 : a[1];
         let num_b = b[0].endsWith("lair") ? b[1] - 0.5 : b[1];

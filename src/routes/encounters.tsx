@@ -45,6 +45,7 @@ function Encounters() {
     const [LairDialogVisible, SetLairDialogVisible] = React.useState<boolean>(false);
     const [LairDialogList, SetLairDialogList] = React.useState<{ Name: string, Lair: Lair }[]>([]);
     const getEncountersRef = React.useRef(0);
+    const getConditionsRef = React.useRef(0);
 
     var refs: Map<string, React.RefObject<HTMLDivElement>> = new Map();
 
@@ -331,13 +332,16 @@ function Encounters() {
         }
     }, [getEncountersRef]);
 
-    // React.useEffect(() => {
-    //     api.getConditions("dummy").then((res) => {
-    //         let user = Config;
-    //         user.conditions = res.Conditions;
-    //         SetConfig(user);
-    //     });
-    // }, []); // TODO - when should this run?
+    React.useEffect(() => {
+        if (getConditionsRef.current === 0) {
+            getConditionsRef.current = 1;
+            api.getConditions("dummy").then((res) => {
+                let user = Config;
+                user.conditions = res.Conditions;
+                SetConfig(user);
+            });
+        }
+    }, [getConditionsRef]);
 
     // Encounters Overview
     if (!activeEncounter) return (
