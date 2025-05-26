@@ -261,7 +261,7 @@ export class Encounter {
         this.HasLair = lair !== undefined;
         this.Lair = lair;
         this.LairEntityName = Name;
-        if (lair && this.InitiativeOrder.length === this.Entities.length) this.InitiativeOrder.push([`${Name}_lair`, lair.Initiative]);
+        this.setInitiativeOrder();
         return this;
     }
 
@@ -303,9 +303,9 @@ export class Encounter {
         };
     }
 
-    toJSON(): any {
-        // TODO
-    }
+    // toJSON(): any {
+    //     // TODO
+    // }
 
     public static InitiativeSortKey(a: [string, number], b: [string, number]): number {
         let num_a = a[0].endsWith("lair") ? a[1] - 0.5 : a[1];
@@ -324,8 +324,11 @@ export class Encounter {
             Turn: json.Metadata.Turn === undefined ? 1 : json.Metadata.Turn
         };
         encounter.Entities = json.Entities.map((e: any) => StatBlockEntity.loadFromJSON(e)); // TODO - should this bifurcate to different entity types? Or Players/Temps ARE statblock entities?
-        encounter.setInitiativeOrder();
         encounter.ActiveID = json.ActiveID;
+        encounter.HasLair = json.HasLair;
+        encounter.LairEntityName = json.LairEntityName || "";
+        encounter.Lair = json.Lair ? Lair.loadFromJSON(json.Lair) : undefined;
+        encounter.setInitiativeOrder();
         return encounter;
     }
 }

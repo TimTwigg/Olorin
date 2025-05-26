@@ -97,7 +97,7 @@ async function _push(url: string, body: any): Promise<any> {
             "Accept": "application/json",
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(body, null, "\t"),
     });
 
     if (!response.ok) {
@@ -235,8 +235,6 @@ export async function saveEncounter(_user: string, encounter: Encounter): Promis
     if (!encounter) {
         throw new Error("Encounter is null or undefined.");
     }
-    console.log(encounter.Entities[1].Conditions);
-    console.log(JSON.stringify(encounter.Entities[1].Conditions, null, "\t"));
     return push("/encounter", encounter).then((data: any) => {
         return Encounter.loadFromJSON(data);
     });

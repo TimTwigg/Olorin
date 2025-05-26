@@ -32,7 +32,7 @@ function Encounters() {
     const [backupEncounter, SetBackupEncounter] = React.useState<Encounter | null>(null);
     const [runningEncounter, SetRunningEncounter] = React.useState<boolean>(false);
     const [DisplayEntity, SetDisplayEntity] = React.useState<StatBlock | Lair | undefined>();
-    const [DisplayEntityType, SetDisplayEntityType] = React.useState<"statblock"|"lair"|"">("");
+    const [DisplayEntityType, SetDisplayEntityType] = React.useState<"statblock" | "lair" | "">("");
     const [Config, SetConfig] = React.useState<UserOptions>(new UserOptions());
     const [EncounterIsActive, SetEncounterIsActive] = React.useState<boolean>(false);
     const [EditingEncounter, SetEditingEncounter] = React.useState<boolean>(false);
@@ -166,11 +166,11 @@ function Encounters() {
         if (!activeEncounter) return;
         let encs = encounters;
         api.saveEncounter("dummy", activeEncounter).then((res) => {
-            if (!notify) return;
             if (res) {
                 encs.splice(activeEncounterIndex, 1, res.toOverview());
                 SetActiveEncounter(res, false);
                 SetEncounters(encs);
+                if (!notify) return;
                 toast.success("Encounter saved successfully to server.");
             }
             else toast.error("Failed to save Encounter to server.");
@@ -222,7 +222,7 @@ function Encounters() {
      * @param item The StatBlock or Lair to render
      * @param overviewOnly Whether or not to render the full display
      */
-    const renderDisplay = (item: StatBlock|Lair|undefined, type: "statblock"|"lair", overviewOnly: boolean = false) => {
+    const renderDisplay = (item: StatBlock | Lair | undefined, type: "statblock" | "lair", overviewOnly: boolean = false) => {
         if (!item) return <></>;
         if (type == "statblock") {
             return <StatBlockDisplay statBlock={item as StatBlock} deleteCallback={() => SetDisplayEntity(undefined)} displayColumns={EditingEncounter ? 1 : Config.defaultColumns || 2} size={EditingEncounter ? "small" : "medium"} />;
@@ -243,13 +243,12 @@ function Encounters() {
         return ids.map((id, ind) => {
             let ref = React.createRef<HTMLDivElement>();
             refs.set(id[0], ref);
-            if (id[0] === `${activeEncounter.LairEntityName}_lair`) return <LairDisplay key={`${activeEncounter.LairEntityName}_lair${ind}`} ref={ref} lair={activeEncounter.Lair!} overviewOnly={overviewOnly} isActive={activeEncounter.ActiveID === `${activeEncounter.LairEntityName}_lair`} setDisplay={SetDisplayEntity} />;
+            if (id[0] === `${activeEncounter.LairEntityName}_lair`) return <LairDisplay key={`${activeEncounter.LairEntityName}_lair${ind}`} ref={ref} lair={activeEncounter.Lair!} overviewOnly={overviewOnly} isActive={activeEncounter.ActiveID === `${activeEncounter.LairEntityName}_lair`} setDisplay={(lair) => { SetDisplayEntity(lair), SetDisplayEntityType("lair") }} />;
             let entity = activeEncounter.Entities.find((ent) => ent.ID === id[0]);
             if (!entity) {
-                console.log(activeEncounter.Entities, id);
                 throw new Error("Entity not found in Encounter");
             }
-            return <EntityDisplay key={`${entity.Name}${ind}`} ref={ref} entity={entity} deleteCallback={deleteEntity} setDisplay={(statblock) => {SetDisplayEntity(statblock), SetDisplayEntityType("statblock")}} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={entity.ID === activeEncounter.ActiveID} />;
+            return <EntityDisplay key={`${entity.Name}${ind}`} ref={ref} entity={entity} deleteCallback={deleteEntity} setDisplay={(statblock) => { SetDisplayEntity(statblock), SetDisplayEntityType("statblock") }} renderTrigger={TriggerReRender} userOptions={{ conditions: Config.conditions }} overviewOnly={overviewOnly} editMode={EditingEncounter} isActive={entity.ID === activeEncounter.ActiveID} />;
         });
     }
 

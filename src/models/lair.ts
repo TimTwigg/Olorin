@@ -24,6 +24,10 @@ export class Lair {
         this.Actions = actions;
         this.RegionalEffects = regionalEffects;
     }
+
+    public static loadFromJSON(json: any): Lair {
+        return json as Lair;
+    }
 }
 
 export function isLair(arg: object): arg is Lair {
