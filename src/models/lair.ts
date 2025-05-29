@@ -1,5 +1,6 @@
 export class Lair {
     Name: string;
+    OwningEntityDBID: number;
     Description: string;
     Initiative: number;
     Actions?: {
@@ -17,8 +18,9 @@ export class Lair {
         }[];
     };
 
-    constructor(name: string, description: string, initiative: number, actions?: { Description: string, Items: {Name: string, Description: string}[] }, regionalEffects?: { Description: string, Items: {Name: string, Description: string}[] }) {
+    constructor(name: string, OwningEntityDBID: number, description: string, initiative: number, actions?: { Description: string, Items: {Name: string, Description: string}[] }, regionalEffects?: { Description: string, Items: {Name: string, Description: string}[] }) {
         this.Name = name;
+        this.OwningEntityDBID = OwningEntityDBID;
         this.Description = description;
         this.Initiative = initiative;
         this.Actions = actions;

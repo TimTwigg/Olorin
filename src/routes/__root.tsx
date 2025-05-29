@@ -5,13 +5,13 @@ import "@src/styles/main.scss"
 import "@src/styles/normalize.scss"
 
 const TanStackRouterDevtools =
-    process.env.NODE_ENV === "production"
-        ? () => <></>
-        : React.lazy(() =>
+    import.meta.env.VITE_USE_TANSTACK_ROUTER_TOOLS == "true" && import.meta.env.DEV
+        ? React.lazy(() =>
             import("@tanstack/router-devtools").then((res) => ({
                 default: res.TanStackRouterDevtools
             })),
         )
+        : () => <></>
 
 type ErrorComponentProps = {
     error: any
@@ -35,7 +35,7 @@ const ErrorComponent = ({ error, reset }: ErrorComponentProps) => {
                     </Link>
                 </span>
             </nav>
-            <span className = "errorBody">
+            <span className="errorBody">
                 <h2>Something went wrong</h2>
                 <pre><code>{error.message}</code></pre>
                 <p>Please take a screenshot of this page and share with the developer via the contact page so that the error can be addressed.</p>

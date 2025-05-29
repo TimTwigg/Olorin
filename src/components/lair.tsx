@@ -70,9 +70,10 @@ export function LairBlockDisplay({ lair, displayColumns, deleteCallback }: LairB
 
 type LairDialogProps = {
     visible: boolean;
-    lairs: { Name: string, Lair: Lair }[];
+    selectedOwningEntityDBID: number;
+    lairs: Lair[];
     onClose: () => void;
-    ReturnLair: (lair: Lair | undefined, Name: string) => void;
+    ReturnLair: (lair: Lair | undefined) => void;
 };
 
 enum Code {
@@ -80,16 +81,16 @@ enum Code {
     Cancel
 }
 
-export function LairDialog({ visible, lairs, onClose, ReturnLair }: LairDialogProps) {
-    const [selectedLair, setSelectedLair] = React.useState<{ Name: string, Lair: Lair } | undefined>(undefined);
-    const [radio_value, setRadioValue] = React.useState<string>("none");
+export function LairDialog({ visible, selectedOwningEntityDBID, lairs, onClose, ReturnLair }: LairDialogProps) {
+    const [selectedLair, setSelectedLair] = React.useState<Lair | undefined>(undefined);
+    const [radio_value, setRadioValue] = React.useState<number>(selectedOwningEntityDBID);
 
     const return_lair = (code: Code) => {
         if (code === Code.OK) {
             if (selectedLair) {
-                ReturnLair(selectedLair.Lair, selectedLair.Name);
+                ReturnLair(selectedLair);
             }
-            else ReturnLair(undefined, "");
+            else ReturnLair(undefined);
         }
         CloseDialog();
     };
@@ -112,8 +113,8 @@ export function LairDialog({ visible, lairs, onClose, ReturnLair }: LairDialogPr
 
     return (
         <Dialog header="Choose Lair" visible={visible} style={{ width: "50vw" }} onHide={CloseDialog} className="lairDialog" footer={footer_content}>
-            <input type={"radio"} id={"lair_dialog_none"} name={"none"} value={"none"} checked={"none" === radio_value} onChange={() => { setRadioValue("none"), setSelectedLair(undefined) }} /><label htmlFor={"lair_dialog_none"}>None</label>
-            {lairs.map((l, ind) => <section key={ind}><input type={"radio"} id={"lair_dialog" + l.Name} name={l.Name} value={l.Name} checked={l.Name === radio_value} onChange={() => { setRadioValue(l.Name), setSelectedLair(l) }} /><label htmlFor={"lair_dialog" + l.Name}>{l.Name}</label></section>)}
+            <input type={"radio"} id={"lair_dialog_none"} name={"none"} value={"none"} checked={radio_value === -1} onChange={() => { setRadioValue(-1), setSelectedLair(undefined) }} /><label htmlFor={"lair_dialog_none"}>None</label>
+            {lairs.map((l, ind) => <section key={ind}><input type={"radio"} id={"lair_dialog" + l.Name} name={l.Name} value={l.OwningEntityDBID} checked={l.OwningEntityDBID === radio_value} onChange={() => { setRadioValue(l.OwningEntityDBID), setSelectedLair(l) }} /><label htmlFor={"lair_dialog" + l.Name}>{l.Name}</label></section>)}
         </Dialog>
     );
 }

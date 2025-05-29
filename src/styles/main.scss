@@ -455,7 +455,7 @@ input.descriptionEdit {
 
 #EncounterList {
     min-width: 28rem;
-    height: 65vh;
+    height: 60vh;
     overflow-y: auto;
     padding: 0 10px;
     border: 10px groove v.$lightGray;
@@ -476,6 +476,11 @@ input.descriptionEdit {
         color: v.$blue;
         transition: 0.25s ease;
         border-radius: 5px;
+    }
+
+    &.small {
+        font-size: 1.5rem;
+        margin-top: 0;
     }
 }
 

@@ -43,7 +43,7 @@ function Encounters() {
     const [CreatureList, SetCreatureList] = React.useState<EntityOverview[]>([]);
     const [FullStatBlockList, SetFullStatBlockList] = React.useState<StatBlock[]>([]);
     const [LairDialogVisible, SetLairDialogVisible] = React.useState<boolean>(false);
-    const [LairDialogList, SetLairDialogList] = React.useState<{ Name: string, Lair: Lair }[]>([]);
+    const [LairDialogList, SetLairDialogList] = React.useState<Lair[]>([]);
     const getEncountersRef = React.useRef(0);
     const getConditionsRef = React.useRef(0);
 
@@ -116,7 +116,7 @@ function Encounters() {
         if (!backupEncounter || !activeEncounter) return;
         SetActiveEncounter(activeEncounter
             .withEntities(backupEncounter.Entities)
-            .withLair(backupEncounter.Lair, backupEncounter.LairEntityName)
+            .withLair(backupEncounter.Lair)
             .setInitiativeOrder()
             .copy()
             , false);
@@ -202,7 +202,8 @@ function Encounters() {
      */
     const openLairDialog = () => {
         if (!activeEncounter) return;
-        let lairs = activeEncounter.Entities.filter((ent) => ent instanceof StatBlockEntity && ent.StatBlock.Lair).map((ent) => { return { Name: ent.Name, Lair: (ent as StatBlockEntity).StatBlock.Lair! } });
+        let lairs = activeEncounter.Entities.filter((ent) => ent instanceof StatBlockEntity && ent.StatBlock.Lair).map((ent) => { return (ent as StatBlockEntity).StatBlock.Lair! });
+        lairs = [...new Map(lairs.map((lair) => [lair.OwningEntityDBID, lair])).values()]; // Remove duplicates
         if (lairs.length === 0) {
             toast.error("No lairs found in Encounter");
             return;
@@ -211,9 +212,9 @@ function Encounters() {
         SetLairDialogVisible(true);
     }
 
-    const getLair = (Lair: Lair | undefined, Name: string) => {
+    const getLair = (Lair: Lair | undefined) => {
         if (!activeEncounter) return;
-        SetActiveEncounter(activeEncounter.withLair(Lair, Name));
+        SetActiveEncounter(activeEncounter.withLair(Lair));
     };
 
     /**
@@ -243,7 +244,7 @@ function Encounters() {
         return ids.map((id, ind) => {
             let ref = React.createRef<HTMLDivElement>();
             refs.set(id[0], ref);
-            if (id[0] === `${activeEncounter.LairEntityName}_lair`) return <LairDisplay key={`${activeEncounter.LairEntityName}_lair${ind}`} ref={ref} lair={activeEncounter.Lair!} overviewOnly={overviewOnly} isActive={activeEncounter.ActiveID === `${activeEncounter.LairEntityName}_lair`} setDisplay={(lair) => { SetDisplayEntity(lair), SetDisplayEntityType("lair") }} />;
+            if (id[0] === `${activeEncounter.LairOwnerID}_lair`) return <LairDisplay key={`${activeEncounter.LairOwnerID}_lair${ind}`} ref={ref} lair={activeEncounter.Lair!} overviewOnly={overviewOnly} isActive={activeEncounter.ActiveID === `${activeEncounter.LairOwnerID}_lair`} setDisplay={(lair) => { SetDisplayEntity(lair), SetDisplayEntityType("lair") }} />;
             let entity = activeEncounter.Entities.find((ent) => ent.ID === id[0]);
             if (!entity) {
                 throw new Error("Entity not found in Encounter");
@@ -406,7 +407,7 @@ function Encounters() {
                 <section id="buttonSet1" className="five columns">
                     <button onClick={() => { initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter), TriggerReRender() }} disabled={runningEncounter} >{EditingEncounter ? "Cancel" : "Edit Mode"}</button>
                     <button onClick={startEncounter} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
-                    <button onClick={() => { SetActiveEncounter(activeEncounter.reset()), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter || EditingEncounter} >Reset Encounter</button>
+                    <button onClick={() => { SetActiveEncounter(activeEncounter.reset(), true), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter || EditingEncounter} >Reset Encounter</button>
                 </section>
                 <section id="mode-log">
                     <p>{EditingEncounter ? "Editing" : ""}</p>
@@ -421,6 +422,10 @@ function Encounters() {
             <hr />
             <section className="panel">
                 <div>
+                    {!runningEncounter && <div id="EncounterRunControls" className = "small">
+                        <section>Round: {activeEncounter.Metadata.Round}</section>
+                        <section>Turn: {activeEncounter.Metadata.Turn}</section>
+                    </div>}
                     <div id="EncounterList">
                         {renderEntities(!runningEncounter)}
                     </div>
@@ -442,7 +447,7 @@ function Encounters() {
                 </div>
             </section>
             <ToastContainer position="top-right" />
-            <LairDialog lairs={LairDialogList} visible={LairDialogVisible} onClose={() => { SetLairDialogVisible(false) }} ReturnLair={getLair} />
+            <LairDialog lairs={LairDialogList} selectedOwningEntityDBID={activeEncounter.Lair ? activeEncounter.Lair.OwningEntityDBID : -1} visible={LairDialogVisible} onClose={() => { SetLairDialogVisible(false) }} ReturnLair={getLair} />
         </div>
     );
 }

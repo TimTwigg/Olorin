@@ -49,7 +49,7 @@ export class Encounter {
     Entities: Entity[] = []
     HasLair: boolean = false
     Lair?: Lair = undefined
-    LairEntityName: string = ""
+    LairOwnerID: number = -1
     ActiveID: string = ""
     InitiativeOrder: [string, number][] = []
 
@@ -199,7 +199,7 @@ export class Encounter {
      */
     setInitiativeOrder(): Encounter {
         this.InitiativeOrder = this.Entities.map((e) => [e.ID, e.Initiative]);
-        if (this.HasLair) this.InitiativeOrder.push([`${this.LairEntityName}_lair`, this.Lair?.Initiative || 20]);
+        if (this.HasLair) this.InitiativeOrder.push([`${this.LairOwnerID}_lair`, this.Lair?.Initiative || 20]);
         this.InitiativeOrder.sort(Encounter.InitiativeSortKey);
         if (!this.Metadata.Started && this.InitiativeOrder.length > 0) this.ActiveID = this.InitiativeOrder[0][0];
         return this;
@@ -257,10 +257,10 @@ export class Encounter {
      * 
      * @returns the updated encounter
      */
-    withLair(lair: Lair | undefined, Name: string): Encounter {
+    withLair(lair: Lair | undefined): Encounter {
         this.HasLair = lair !== undefined;
         this.Lair = lair;
-        this.LairEntityName = Name;
+        this.LairOwnerID = lair !== undefined ? lair.OwningEntityDBID : -1;
         this.setInitiativeOrder();
         return this;
     }
@@ -326,7 +326,7 @@ export class Encounter {
         encounter.Entities = json.Entities.map((e: any) => StatBlockEntity.loadFromJSON(e)); // TODO - should this bifurcate to different entity types? Or Players/Temps ARE statblock entities?
         encounter.ActiveID = json.ActiveID;
         encounter.HasLair = json.HasLair;
-        encounter.LairEntityName = json.LairEntityName || "";
+        encounter.LairOwnerID = json.LairOwnerID || -1;
         encounter.Lair = json.Lair ? Lair.loadFromJSON(json.Lair) : undefined;
         encounter.setInitiativeOrder();
         return encounter;
