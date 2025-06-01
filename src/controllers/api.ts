@@ -24,6 +24,7 @@ var FUNCTION_CACHE = new Map<string, any>()
 const CACHE_EXCLUDED_ROUTES = [
     "/encounter/all",
     "/encounter",
+    "/encounter/",
 ]
 
 /**
@@ -44,6 +45,7 @@ async function api_wrapper(func: string, ...args: any): Promise<any> {
         let data: any;
         if (func === "request") data = await _request(args[0], args[1]).then((data) => data);
         else if (func === "push") data = _push(args[0], args[1]).then((data) => data);
+        else if (func === "delete") data = _delete(args[0], args[1]).then((data) => data);
         else return null;
         FUNCTION_CACHE.set(cache_key, data);
         return data;
@@ -61,7 +63,12 @@ async function api_wrapper(func: string, ...args: any): Promise<any> {
 async function _request(url: string, body: any): Promise<any> {
     const response = await fetch(BASE_URL + url + "?" + new URLSearchParams({
         ...body,
-    }).toString());
+    }).toString(), {
+        method: "GET",
+        headers: {
+            "Accept": "application/json",
+        },
+    });
 
     if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
@@ -120,6 +127,43 @@ async function push(url: string, body: any): Promise<any> {
 }
 
 /**
+ * [INTERNAL] Delete data from the server using a DELETE request.
+ * 
+ * @param url The endpoint to delete data from.
+ * @param body The data to send in the request body.
+ * 
+ * @returns The response data from the server.
+ */
+async function _delete(url: string, body: any): Promise<any> {
+    const response = await fetch(BASE_URL + url + "/" + body.id, {
+        method: "DELETE",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        body: null,
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+    }
+
+    return true;
+}
+
+/**
+ * Delete data from the server using a DELETE request.
+ * 
+ * @param url The endpoint to delete data from.
+ * @param body The data to send in the request body.
+ * 
+ * @returns The response data from the server.
+ */
+export async function deleteRequest(url: string, body: any): Promise<any> {
+    return api_wrapper("delete", url, body).then((data) => data)
+}
+
+/**
  * Retrieve all encounters from the server.
  * 
  * @param _user The user ID.
@@ -158,7 +202,7 @@ export async function getEncounters(_user: string): Promise<api.EncounterRespons
  */
 export async function getEncounter(_user: string, encounterID: number): Promise<api.SingleEncounterResponse> {
     return request("/encounter", {
-        id: encounterID,
+        id: encounterID.toString(),
         detail_level: 2,
     }).then((data: any) => {
         return {
@@ -248,7 +292,7 @@ export async function saveEncounter(_user: string, encounter: Encounter): Promis
  * @returns A boolean indicating success or failure.
  */
 export async function deleteEncounter(_user: string, encounterID: number): Promise<boolean> {
-    return push("/encounter/delete", {
+    return deleteRequest("/encounter", {
         id: encounterID,
     }).then(() => { return true }, () => { return false });
 }

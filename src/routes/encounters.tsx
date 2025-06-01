@@ -41,7 +41,6 @@ const CACHESIZE = 100;
 function Encounters() {
     const [encounters, SetEncounters] = React.useState<EncounterOverview[]>([]);
     const [activeEncounter, _SetActiveEncounter] = React.useState<Encounter | null>(null);
-    const [activeEncounterIndex, SetActiveEncounterIndex] = React.useState<number>(0);
     const [backupEncounter, SetBackupEncounter] = React.useState<Encounter | null>(null);
     const [runningEncounter, SetRunningEncounter] = React.useState<boolean>(false);
     const [DisplayEntity, SetDisplayEntity] = React.useState<StatBlock | Lair | undefined>();
@@ -181,11 +180,13 @@ function Encounters() {
         let encs = encounters;
         api.saveEncounter("dummy", activeEncounter).then((res) => {
             if (res) {
-                encs.splice(activeEncounterIndex, 1, res.toOverview());
+                if (IsNewEncounter) {
+                    encs.push(res.toOverview());
+                    SetIsNewEncounter(false);
+                }
                 SetActiveEncounter(res, false);
                 SetEncounters(encs);
-                if (!notify) return;
-                toast.success("Encounter saved successfully to server.");
+                if (notify) toast.success("Encounter saved successfully to server.");
             }
             else toast.error("Failed to save Encounter to server.");
         });
@@ -201,8 +202,6 @@ function Encounters() {
                 toast.error("Encounter must have a name");
                 return;
             }
-            SetEncounters([...encounters, activeEncounter.toOverview()]);
-            SetIsNewEncounter(false);
         }
         SetBackupEncounter(null);
         updateMetadata({ Campaign: LocalStringState2, AccessedDate: newLocalDate() });
@@ -329,9 +328,8 @@ function Encounters() {
         });
     }
 
-    const selectEncounter = (encounter: EncounterOverview, index: number) => {
+    const selectEncounter = (encounter: EncounterOverview) => {
         getEncounter(encounter.id);
-        SetActiveEncounterIndex(index);
         SetEncounterIsActive(encounter.Metadata.Started || false);
     }
 
@@ -342,7 +340,15 @@ function Encounters() {
             message: `Are you sure you want to delete the encounter "${encounter.Name}"?`,
             onHide: () => { SetDialogOptions({ ...dialogOptions, visible: false }) },
             accept: () => {
-                // TODO
+                api.deleteEncounter("dummy", encounter.id).then((res: boolean) => {
+                    if (res) {
+                        window.location.reload();
+                        toast.success("Encounter deleted successfully.");
+                    }
+                    else {
+                        toast.error("Failed to delete Encounter.");
+                    }
+                })
             },
             reject: () => { },
             defaultFocus: "reject",
@@ -388,6 +394,7 @@ function Encounters() {
             </div>
             <div className="break" />
             <EncountersTable encounters={encounters} className="ten columns offset-by-one column" nameCallback={selectEncounter} deleteCallback={deleteEncounter} />
+            <ToastContainer position="top-right" />
             <ConfirmDialog
                 visible={dialogOptions.visible}
                 onHide={() => { SetDialogOptions({ ...dialogOptions, visible: false }), dialogOptions.onHide() }}
@@ -477,6 +484,24 @@ function Encounters() {
                 </div>
             </section>
             <ToastContainer position="top-right" />
+            <ConfirmDialog
+                visible={dialogOptions.visible}
+                onHide={() => { SetDialogOptions({ ...dialogOptions, visible: false }), dialogOptions.onHide() }}
+                header={dialogOptions.label}
+                message={dialogOptions.message}
+                className="dialog"
+                focusOnShow={true}
+                accept={dialogOptions.accept}
+                reject={dialogOptions.reject}
+                defaultFocus={dialogOptions.defaultFocus}
+                icon={dialogOptions.icon}
+                modal={true}
+                acceptClassName="dialog-accept"
+                rejectClassName="dialog-reject"
+                maskClassName="dialog-mask"
+                headerClassName="dialog-header"
+                contentClassName="dialog-content"
+            />
             <LairDialog lairs={LairDialogList} selectedOwningEntityDBID={activeEncounter.HasLair ? activeEncounter.Lair!.OwningEntityDBID : -1} visible={LairDialogVisible} onClose={() => { SetLairDialogVisible(false) }} ReturnLair={getLair} />
         </div>
     );

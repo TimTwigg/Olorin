@@ -29,7 +29,7 @@ type EntityTableProps = {
 }
 
 export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityTableProps) => {
-    const [data, setData] = React.useState<EntityOverviewT[]>([]);
+    const [data, setData] = React.useState<EntityOverviewT[]>(creatures);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const dataRef = React.useRef(0);
 

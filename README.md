@@ -8,6 +8,7 @@ Custom Encounter Manager for D&D 5E.
 - Contact page - referenced in error component
 - login auth
 - Work in user id for api calls
+- entity table not populated on encounter creation
 
 ## Ideas
 

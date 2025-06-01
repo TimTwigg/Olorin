@@ -31,7 +31,7 @@ import "@src/styles/tables.scss";
 type EncountersTableProps = {
     encounters: EncounterOverview[],
     className?: string,
-    nameCallback?: (encounter: EncounterOverview, index: number) => void,
+    nameCallback?: (encounter: EncounterOverview) => void,
     deleteCallback: (encounter: EncounterOverview) => void,
 }
 
@@ -44,7 +44,7 @@ export const EncountersTable = ({ encounters, className, nameCallback, deleteCal
 
     const columns: ColumnDef<EncounterOverview, any>[] = React.useMemo<ColumnDef<EncounterOverview, any>[]>(() => [
         factory.accessor("Name", {
-            cell: info => nameCallback ? <a onClick={() => { nameCallback(info.row.original, info.row.index) }}>{info.getValue().replace(/\s/g, "").length > 0 ? info.getValue() : "<encounter name>"}</a> : info.getValue(),
+            cell: info => nameCallback ? <a onClick={() => { nameCallback(info.row.original) }}>{info.getValue().replace(/\s/g, "").length > 0 ? info.getValue() : "<encounter name>"}</a> : info.getValue(),
             header: () => "Name",
             meta: { filterVariant: "text" },
         }),
