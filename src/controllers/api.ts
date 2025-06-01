@@ -239,3 +239,16 @@ export async function saveEncounter(_user: string, encounter: Encounter): Promis
         return Encounter.loadFromJSON(data);
     });
 }
+
+/**
+ * Delete an encounter from the server.
+ * @param _user The user ID.
+ * @param encounterID The ID of the encounter to delete.
+ * 
+ * @returns A boolean indicating success or failure.
+ */
+export async function deleteEncounter(_user: string, encounterID: number): Promise<boolean> {
+    return push("/encounter/delete", {
+        id: encounterID,
+    }).then(() => { return true }, () => { return false });
+}

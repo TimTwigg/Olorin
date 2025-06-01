@@ -1,6 +1,8 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ToastContainer, toast } from "react-toastify";
+import { ConfirmDialog } from "primereact/confirmdialog";
+import { IoWarningSharp } from "react-icons/io5";
 
 import * as api from "@src/controllers/api";
 import { Encounter, EncounterMetadata, EncounterOverview } from "@src/models/encounter";
@@ -11,14 +13,25 @@ import { StatBlock } from "@src/models/statBlock";
 import { Lair } from "@src/models/lair";
 import { UserOptions } from "@src/models/userOptions";
 import { newLocalDate } from "@src/controllers/utils";
-
 import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { LairDisplay, LairDialog, LairBlockDisplay } from "@src/components/lair";
 import { EntityTable } from "@src/components/entityTable";
+import { EncountersTable } from "@src/components/encountersTable";
 
 export const Route = createFileRoute("/encounters")({
     component: Encounters,
 })
+
+type DialogOptions = {
+    visible: boolean,
+    label: string,
+    message: string,
+    onHide: () => void,
+    accept: () => void,
+    reject: () => void,
+    defaultFocus?: "accept" | "reject" | undefined,
+    icon?: React.ReactNode,
+}
 
 /**
  * Cache Size for Entities List
@@ -46,6 +59,7 @@ function Encounters() {
     const [LairDialogList, SetLairDialogList] = React.useState<Lair[]>([]);
     const getEncountersRef = React.useRef(0);
     const getConditionsRef = React.useRef(0);
+    const [dialogOptions, SetDialogOptions] = React.useState<DialogOptions>({ visible: false, label: "", message: "", onHide: () => { }, accept: () => { }, reject: () => { } });
 
     var refs: Map<string, React.RefObject<HTMLDivElement>> = new Map();
 
@@ -315,6 +329,27 @@ function Encounters() {
         });
     }
 
+    const selectEncounter = (encounter: EncounterOverview, index: number) => {
+        getEncounter(encounter.id);
+        SetActiveEncounterIndex(index);
+        SetEncounterIsActive(encounter.Metadata.Started || false);
+    }
+
+    const deleteEncounter = (encounter: EncounterOverview) => {
+        SetDialogOptions({
+            visible: true,
+            label: "Delete Encounter",
+            message: `Are you sure you want to delete the encounter "${encounter.Name}"?`,
+            onHide: () => { SetDialogOptions({ ...dialogOptions, visible: false }) },
+            accept: () => {
+                // TODO
+            },
+            reject: () => { },
+            defaultFocus: "reject",
+            icon: <IoWarningSharp />,
+        });
+    }
+
     /**
      * Scroll the entity list to the entity with the given ID
      * @param entityID The ID of the active entity
@@ -352,30 +387,25 @@ function Encounters() {
                 <button className="two columns" onClick={createNewEncounter}>Create New Encounter</button>
             </div>
             <div className="break" />
-            <table className="ten columns offset-by-one column">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Campaign</th>
-                        <th>Creation Date</th>
-                        <th>Last Accessed</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {(encounters ? encounters : []).map((encounter, ind) => {
-                        return (
-                            <tr key={`${encounter.Name}${ind}`}>
-                                <td className="link"><a onClick={() => { getEncounter(encounter.id), SetActiveEncounterIndex(ind), SetEncounterIsActive(encounter.Metadata.Started || false) }}>{encounter.Name.replace(/\s/g, "").length > 0 ? encounter.Name : "<encounter name>"}</a></td>
-                                <td>{encounter.Description}</td>
-                                <td>{encounter.Metadata.Campaign || ""}</td>
-                                <td>{encounter.Metadata.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</td>
-                                <td>{encounter.Metadata.AccessedDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+            <EncountersTable encounters={encounters} className="ten columns offset-by-one column" nameCallback={selectEncounter} deleteCallback={deleteEncounter} />
+            <ConfirmDialog
+                visible={dialogOptions.visible}
+                onHide={() => { SetDialogOptions({ ...dialogOptions, visible: false }), dialogOptions.onHide() }}
+                header={dialogOptions.label}
+                message={dialogOptions.message}
+                className="dialog"
+                focusOnShow={true}
+                accept={dialogOptions.accept}
+                reject={dialogOptions.reject}
+                defaultFocus={dialogOptions.defaultFocus}
+                icon={dialogOptions.icon}
+                modal={true}
+                acceptClassName="dialog-accept"
+                rejectClassName="dialog-reject"
+                maskClassName="dialog-mask"
+                headerClassName="dialog-header"
+                contentClassName="dialog-content"
+            />
         </>
     );
 
@@ -422,7 +452,7 @@ function Encounters() {
             <hr />
             <section className="panel">
                 <div>
-                    {!runningEncounter && <div id="EncounterRunControls" className = "small">
+                    {!runningEncounter && <div id="EncounterRunControls" className="small">
                         <section>Round: {activeEncounter.Metadata.Round}</section>
                         <section>Turn: {activeEncounter.Metadata.Turn}</section>
                     </div>}
@@ -447,7 +477,7 @@ function Encounters() {
                 </div>
             </section>
             <ToastContainer position="top-right" />
-            <LairDialog lairs={LairDialogList} selectedOwningEntityDBID={activeEncounter.Lair ? activeEncounter.Lair.OwningEntityDBID : -1} visible={LairDialogVisible} onClose={() => { SetLairDialogVisible(false) }} ReturnLair={getLair} />
+            <LairDialog lairs={LairDialogList} selectedOwningEntityDBID={activeEncounter.HasLair ? activeEncounter.Lair!.OwningEntityDBID : -1} visible={LairDialogVisible} onClose={() => { SetLairDialogVisible(false) }} ReturnLair={getLair} />
         </div>
     );
 }

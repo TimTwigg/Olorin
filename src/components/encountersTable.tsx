@@ -13,79 +13,83 @@ import {
     getFacetedMinMaxValues,
 } from "@tanstack/react-table";
 
-import { FaAddressCard } from "react-icons/fa";
+import {
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuItems,
+} from "@headlessui/react";
 
-import { EntityOverviewT } from "@src/models/entity";
+import { GiTrashCan, GiHamburgerMenu } from "react-icons/gi";
+
+import { displayDate } from "@src/controllers/utils";
 import { Filter } from "@src/components/tableFilter";
+import { EncounterOverview } from "@src/models/encounter";
 import "@src/styles/tables.scss";
 
-// Modified from Tanstack example:
-// https://tanstack.com/table/latest/docs/framework/react/examples/filters
 
-type EntityTableProps = {
-    creatures: EntityOverviewT[],
-    displayCallback: (id: number) => void,
-    addCallback: (id: number) => void,
+type EncountersTableProps = {
+    encounters: EncounterOverview[],
+    className?: string,
+    nameCallback?: (encounter: EncounterOverview, index: number) => void,
+    deleteCallback: (encounter: EncounterOverview) => void,
 }
 
-export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityTableProps) => {
-    const [data, setData] = React.useState<EntityOverviewT[]>([]);
+export const EncountersTable = ({ encounters, className, nameCallback, deleteCallback }: EncountersTableProps) => {
+    const [data, setData] = React.useState<EncounterOverview[]>(encounters);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const dataRef = React.useRef(0);
 
-    const factory = createColumnHelper<EntityOverviewT>();
+    const factory = createColumnHelper<EncounterOverview>();
 
-    const columns: ColumnDef<EntityOverviewT, any>[] = React.useMemo<ColumnDef<EntityOverviewT, any>[]>(
-        () => [
-            factory.accessor("Name", {
-                cell: info => info.getValue(),
-                header: () => "Name",
-                meta: { filterVariant: "text" },
-            }),
-            factory.accessor("Type", {
-                cell: info => info.getValue(),
-                header: () => "Type",
-                meta: { filterVariant: "select" },
-            }),
-            factory.accessor("Size", {
-                cell: info => info.getValue(),
-                header: () => "Size",
-                meta: { filterVariant: "select" },
-            }),
-            factory.accessor("ChallengeRating", {
-                cell: info => info.getValue(),
-                header: () => "CR",
-                meta: { filterVariant: "range" },
-            }),
-            factory.accessor("Source", {
-                cell: info => info.getValue(),
-                header: () => "Source",
-                meta: { filterVariant: "select" },
-            }),
-            factory.display({
-                id: "display",
-                cell: props => <button className="iconButton" onClick={() => displayCallback(props.row.original.ID)}><FaAddressCard /></button>,
-            }),
-            factory.display({
-                id: "add",
-                cell: props => <button className="iconButton" onClick={() => { addCallback(props.row.original.ID) }}>+</button>,
-            }),
-        ],
-        []
-    );
+    const columns: ColumnDef<EncounterOverview, any>[] = React.useMemo<ColumnDef<EncounterOverview, any>[]>(() => [
+        factory.accessor("Name", {
+            cell: info => nameCallback ? <a onClick={() => { nameCallback(info.row.original, info.row.index) }}>{info.getValue().replace(/\s/g, "").length > 0 ? info.getValue() : "<encounter name>"}</a> : info.getValue(),
+            header: () => "Name",
+            meta: { filterVariant: "text" },
+        }),
+        factory.accessor("Description", {
+            cell: info => info.getValue(),
+            header: () => "Description",
+            meta: { filterVariant: "text" },
+        }),
+        factory.accessor("Metadata.Campaign", {
+            cell: info => info.getValue(),
+            header: () => "Campaign",
+            meta: { filterVariant: "select" },
+        }),
+        factory.accessor("Metadata.CreationDate", {
+            cell: info => displayDate(info.getValue()),
+            header: () => "Creation Date",
+        }),
+        factory.accessor("Metadata.AccessedDate", {
+            cell: info => displayDate(info.getValue()),
+            header: () => "Last Accessed",
+        }),
+        factory.display({
+            id: "actions",
+            cell: info => (
+                <Menu>
+                    <MenuButton className={"iconButton"}><GiHamburgerMenu /></MenuButton>
+                    <MenuItems anchor={{ to: "bottom", gap: 5, padding: 0 }} className={"menu-items"}>
+                        <MenuItem><button onClick={() => deleteCallback(info.row.original)}><GiTrashCan color="#861C06" />Delete</button></MenuItem>
+                    </MenuItems>
+                </Menu>
+            ),
+        })
+    ], []);
 
     const table = useReactTable({
         data,
         columns,
-        filterFns: {},
         state: {
             columnFilters,
         },
         onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        getSortedRowModel: getSortedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
         getFacetedMinMaxValues: getFacetedMinMaxValues(),
         debugTable: false,
@@ -94,14 +98,14 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
     });
 
     React.useEffect(() => {
-        if (dataRef.current === 0 && creatures.length > 0) {
-            setData(creatures);
+        if (dataRef.current === 0 && encounters.length > 0) {
+            setData(encounters);
             dataRef.current = 1;
         }
-    }, [creatures]);
+    }, [encounters]);
 
     return (
-        <div className="table">
+        <div className={"table large" + (className ? " " + className : "")}>
             <table>
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => {

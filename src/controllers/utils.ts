@@ -58,6 +58,10 @@ export function dateFromString(dateString: string): Date {
     return new Date(year, month, day);
 }
 
+export function displayDate(date: Date): string {
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+}
+
 export function newLocalDate(): Date {
     return new Date(Date.now() - new Date().getTimezoneOffset()*60000);
 }

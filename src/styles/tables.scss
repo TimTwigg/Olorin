@@ -1,7 +1,11 @@
 @use 'variables' as v;
 
-.entityTable {
+.table {
     font-size: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 0 auto;
 
     input {
         margin: 0 5px;
@@ -13,6 +17,14 @@
         width: 8rem;
     }
 
+    table.medium input[type="text"] {
+        width: 10rem;
+    }
+    
+    table.large input[type="text"] {
+        width: 12rem;
+    }
+
     input[type="number"] {
         width: 2.5rem;
         text-align: center;
@@ -20,6 +32,14 @@
 
     select {
         width: 10rem;
+    }
+
+    &.medium select {
+        width: 12rem;
+    }
+
+    &.large select {
+        width: 14rem;
     }
 
     th,
@@ -33,15 +53,34 @@
         font-size: 1.25rem;
     }
 
-    #tableMeta {
+    &.medium td {
+        font-size: 1.5rem;
+    }
+
+    &.large td {
+        font-size: 1.75rem;
+    }
+
+    .tableMeta {
         display: flex;
         justify-content: space-between;
         margin-top: 1rem;
+        font-size: 1.25rem;
 
         section {
             display: flex;
             gap: 3px;
         }
+    }
+
+    &.medium .tableMeta {
+        font-size: 1.35rem;
+        margin-top: 2rem;
+    }
+
+    &.large .tableMeta {
+        font-size: 1.5rem;
+        margin-top: 3rem;
     }
 }
 
