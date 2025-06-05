@@ -1,8 +1,9 @@
-import React, { Suspense } from "react"
-import { createRootRouteWithContext, Link, Outlet } from "@tanstack/react-router"
-import { RouterContext } from "@src/router"
-import "@src/styles/main.scss"
-import "@src/styles/normalize.scss"
+import React, { Suspense } from "react";
+import { createRootRouteWithContext, Link, Outlet } from "@tanstack/react-router";
+import { RouterContext } from "@src/router";
+// import { SessionAuth } from "supertokens-auth-react/recipe/session";
+import "@src/styles/main.scss";
+import "@src/styles/normalize.scss";
 
 const TanStackRouterDevtools =
     import.meta.env.VITE_USE_TANSTACK_ROUTER_TOOLS == "true" && import.meta.env.DEV
