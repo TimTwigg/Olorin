@@ -22,7 +22,7 @@ const ErrorComponent = ({ error, reset }: ErrorComponentProps) => {
     return (
         <div className="errorComponent">
             <nav>
-                <h4>Encounter Manager</h4>
+                <h4>Olorin</h4>
                 <span>
                     <Link to="/">
                         Home
@@ -49,7 +49,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     component: () => (
         <div className="pageDiv">
             <nav>
-                <h4>Encounter Manager</h4>
+                <h4>Olorin</h4>
                 <span>
                     <Link to="/">
                         Home
