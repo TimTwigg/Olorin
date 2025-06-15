@@ -100,7 +100,7 @@ function Encounters() {
         SetEncounterIsActive(false);
         SetEditingEncounter(false);
         SetIsNewEncounter(false);
-        api.getEncounters("dummy").then((res) => { SetEncounters(res.Encounters) });
+        api.getEncounters().then((res) => { SetEncounters(res.Encounters) });
     }
 
     const deleteEntity = (entityID: string) => {
@@ -160,7 +160,7 @@ function Encounters() {
         else {
             // load entities if needed
             if (CreatureList.length === 0) {
-                api.getEntities("dummy", 1, 1).then((res) => {
+                api.getEntities(1, 1).then((res) => {
                     SetCreatureList(res.Entities as EntityOverview[]);
                 });
             }
@@ -178,7 +178,7 @@ function Encounters() {
     const saveEncounter = (notify: boolean) => {
         if (!activeEncounter) return;
         let encs = encounters;
-        api.saveEncounter("dummy", activeEncounter).then((res) => {
+        api.saveEncounter(activeEncounter).then((res) => {
             if (res) {
                 if (IsNewEncounter) {
                     encs.push(res.toOverview());
@@ -267,7 +267,7 @@ function Encounters() {
     }
 
     const getStatBlock = async (entityID: number): Promise<StatBlock | undefined> => {
-        return api.getStatBlock("dummy", entityID).then((res) => {
+        return api.getStatBlock(entityID).then((res) => {
             if (res.StatBlock === undefined) return;
             appendToStatBlockList(res.StatBlock);
             return res.StatBlock;
@@ -322,7 +322,7 @@ function Encounters() {
     }
 
     const getEncounter = (id: number) => {
-        api.getEncounter("dummy", id).then((res) => {
+        api.getEncounter(id).then((res) => {
             if (!res.Encounter) return;
             SetActiveEncounter(res.Encounter.copy());
         });
@@ -340,7 +340,7 @@ function Encounters() {
             message: `Are you sure you want to delete the encounter "${encounter.Name}"?`,
             onHide: () => { SetDialogOptions({ ...dialogOptions, visible: false }) },
             accept: () => {
-                api.deleteEncounter("dummy", encounter.id).then((res: boolean) => {
+                api.deleteEncounter(encounter.id).then((res: boolean) => {
                     if (res) {
                         window.location.reload();
                         toast.success("Encounter deleted successfully.");
@@ -369,14 +369,14 @@ function Encounters() {
     React.useEffect(() => {
         if (getEncountersRef.current === 0) {
             getEncountersRef.current = 1;
-            api.getEncounters("dummy").then((res) => { SetEncounters(res.Encounters) });
+            api.getEncounters().then((res) => { SetEncounters(res.Encounters) });
         }
     }, [getEncountersRef]);
 
     React.useEffect(() => {
         if (getConditionsRef.current === 0) {
             getConditionsRef.current = 1;
-            api.getConditions("dummy").then((res) => {
+            api.getConditions().then((res) => {
                 let user = Config;
                 user.conditions = res.Conditions;
                 SetConfig(user);

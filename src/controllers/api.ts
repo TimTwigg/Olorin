@@ -166,11 +166,9 @@ export async function deleteRequest(url: string, body: any): Promise<any> {
 /**
  * Retrieve all encounters from the server.
  * 
- * @param _user The user ID.
- * 
  * @returns Promise<api.EncounterResponse> - A list of encounters.
  */
-export async function getEncounters(_user: string): Promise<api.EncounterResponse> {
+export async function getEncounters(): Promise<api.EncounterResponse> {
     return request("/encounter/all", {}).then((data: any) => {
         return {
             Encounters: data.map((encounter: any) => {
@@ -195,12 +193,11 @@ export async function getEncounters(_user: string): Promise<api.EncounterRespons
 /**
  * Retrieve a single encounter from the server.
  * 
- * @param _user The user ID.
  * @param encounterID The ID of the encounter to retrieve.
  * 
  * @returns Promise<api.SingleEncounterResponse> - The encounter data.
  */
-export async function getEncounter(_user: string, encounterID: number): Promise<api.SingleEncounterResponse> {
+export async function getEncounter(encounterID: number): Promise<api.SingleEncounterResponse> {
     return request("/encounter", {
         id: encounterID.toString(),
         detail_level: 2,
@@ -211,7 +208,7 @@ export async function getEncounter(_user: string, encounterID: number): Promise<
     })
 }
 
-export async function getConditions(_user: string): Promise<api.ConditionResponse> {
+export async function getConditions(): Promise<api.ConditionResponse> {
     return request("/condition/all", {}).then((data: any) => {
         return {
             Conditions: data.map((condition: any) => {
@@ -223,13 +220,13 @@ export async function getConditions(_user: string): Promise<api.ConditionRespons
 
 /**
  * Fetch all entities from the server, within a given page.
- * @param _user The user ID.
+ * 
  * @param _page The page number for pagination.
  * @param detailLevel The detail level for the entity data.
  * 
  * @returns A list of entities.
  */
-export async function getEntities(_user: string, _page: number, detailLevel: APIDetailLevel = 1): Promise<api.EntityResponse> {
+export async function getEntities(_page: number, detailLevel: APIDetailLevel = 1): Promise<api.EntityResponse> {
     return request("/statblock/all", {
         page: _page,
         detail_level: detailLevel,
@@ -252,12 +249,12 @@ export async function getEntities(_user: string, _page: number, detailLevel: API
 
 /**
  * Fetch a single stat block from the server.
- * @param _user The user ID.
+ * 
  * @param entityID The id of the block to fetch.
  * 
  * @returns The statblock data.
  */
-export async function getStatBlock(_user: string, entityID: number): Promise<api.SingleStatBlockResponse> {
+export async function getStatBlock(entityID: number): Promise<api.SingleStatBlockResponse> {
     return request("/statblock", {
         id: entityID,
         detail_level: 2,
@@ -270,12 +267,12 @@ export async function getStatBlock(_user: string, entityID: number): Promise<api
 
 /**
  * Save an encounter to the server.
- * @param _user The user ID.
+ * 
  * @param encounter The encounter to save.
  * 
  * @returns The saved encounter data.
  */
-export async function saveEncounter(_user: string, encounter: Encounter): Promise<Encounter> {
+export async function saveEncounter(encounter: Encounter): Promise<Encounter> {
     if (!encounter) {
         throw new Error("Encounter is null or undefined.");
     }
@@ -286,12 +283,12 @@ export async function saveEncounter(_user: string, encounter: Encounter): Promis
 
 /**
  * Delete an encounter from the server.
- * @param _user The user ID.
+ * 
  * @param encounterID The ID of the encounter to delete.
  * 
  * @returns A boolean indicating success or failure.
  */
-export async function deleteEncounter(_user: string, encounterID: number): Promise<boolean> {
+export async function deleteEncounter(encounterID: number): Promise<boolean> {
     return deleteRequest("/encounter", {
         id: encounterID,
     }).then(() => { return true }, () => { return false });

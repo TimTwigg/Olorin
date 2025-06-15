@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { createRootRouteWithContext, Link, Outlet } from "@tanstack/react-router";
 import { RouterContext } from "@src/router";
-// import { SessionAuth } from "supertokens-auth-react/recipe/session";
+import { AuthBox } from "@src/components/authBox";
 import "@src/styles/main.scss";
 import "@src/styles/normalize.scss";
 
@@ -34,6 +34,7 @@ const ErrorComponent = ({ error, reset }: ErrorComponentProps) => {
                     <Link to="/library">
                         Library
                     </Link>
+                    <AuthBox />
                 </span>
             </nav>
             <span className="errorBody">
@@ -51,17 +52,20 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         <div className="pageDiv">
             <nav>
                 <h4>Olorin</h4>
-                <span>
-                    <Link to="/">
-                        Home
-                    </Link>
-                    <Link to="/encounters">
-                        Encounters
-                    </Link>
-                    <Link to="/library">
-                        Library
-                    </Link>
-                </span>
+                <section>
+                    <span>
+                        <Link to="/">
+                            Home
+                        </Link>
+                        <Link to="/encounters">
+                            Encounters
+                        </Link>
+                        <Link to="/library">
+                            Library
+                        </Link>
+                    </span>
+                    <AuthBox />
+                </section>
             </nav>
             <Outlet />
             <Suspense>

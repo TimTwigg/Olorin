@@ -236,6 +236,9 @@ button {
 nav {
     background-color: v.$gray;
     color: v.$blue;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 
     h4 {
         margin: 1rem;
@@ -245,8 +248,6 @@ nav {
     span {
         margin: 1.5rem;
         padding: 0;
-        float: right;
-        text-align: right;
     }
 
     a {    
