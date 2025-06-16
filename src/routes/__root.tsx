@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { createRootRouteWithContext, Link, Outlet } from "@tanstack/react-router";
 import { RouterContext } from "@src/router";
-import { AuthBox } from "@src/components/authBox";
+import { OptionBox } from "@src/components/OptionBox";
 import "@src/styles/main.scss";
 import "@src/styles/normalize.scss";
 
@@ -24,18 +24,20 @@ const ErrorComponent = ({ error, reset }: ErrorComponentProps) => {
         <div className="errorComponent">
             <nav>
                 <h4>Olorin</h4>
-                <span>
-                    <Link to="/">
-                        Home
-                    </Link>
-                    <Link to="/encounters">
-                        Encounters
-                    </Link>
-                    <Link to="/library">
-                        Library
-                    </Link>
-                    <AuthBox />
-                </span>
+                <section>
+                    <span>
+                        <Link to="/">
+                            Home
+                        </Link>
+                        <Link to="/encounters">
+                            Encounters
+                        </Link>
+                        <Link to="/library">
+                            Library
+                        </Link>
+                    </span>
+                    <OptionBox />
+                </section>
             </nav>
             <span className="errorBody">
                 <h2>Something went wrong</h2>
@@ -64,7 +66,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
                             Library
                         </Link>
                     </span>
-                    <AuthBox />
+                    <OptionBox />
                 </section>
             </nav>
             <Outlet />

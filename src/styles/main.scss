@@ -245,42 +245,16 @@ nav {
         display: inline-block;
     }
 
-    span {
-        margin: 1.5rem;
-        padding: 0;
+    section {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
     }
 
     a {    
         margin: 0 0.5rem;
-    }
-}
-
-.nav-img {
-    max-width: 4em;
-    margin-left: 10px;
-}
-
-@media (max-width: 550px) {
-    .nav-img {
-        display: none !important;
-    }
-}
-
-@media (min-width: 550px) {
-    .nav-img {
-        width: 25%;
-    }
-
-    nav {
-        h4 {
-            margin: 1rem 1rem 1rem 3rem;
-        }
-    }
-}
-
-@media (min-width: 1000px) {
-    .nav-img {
-        width: 30%;
     }
 }
 

@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ToastContainer, toast } from "react-toastify";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { IoWarningSharp } from "react-icons/io5";
+import Session, { SessionAuth } from "supertokens-auth-react/recipe/session";
 
 import * as api from "@src/controllers/api";
 import { Encounter, EncounterMetadata, EncounterOverview } from "@src/models/encounter";
@@ -386,7 +387,10 @@ function Encounters() {
 
     // Encounters Overview
     if (!activeEncounter) return (
-        <>
+        <SessionAuth onSessionExpired={async () => {
+            await Session.signOut();
+            window.location.href = "/auth";
+        }}>
             <h1>Encounters</h1>
             <div className="twelve columns">
                 <h3 className="eight columns offset-by-one column">My Encounters</h3>
@@ -413,11 +417,15 @@ function Encounters() {
                 headerClassName="dialog-header"
                 contentClassName="dialog-content"
             />
-        </>
+        </SessionAuth>
     );
 
     // Encounter Play Screen
     return (
+        <SessionAuth onSessionExpired={async () => {
+            await Session.signOut();
+            window.location.href = "/auth";
+        }}>
         <div className="playScreen container">
             <section className="justify-between">
                 <span className="three columns"><button className="big button" onClick={() => { resetAllStates() }} disabled={EditingEncounter}>Back to Encounters</button></span>
@@ -504,5 +512,6 @@ function Encounters() {
             />
             <LairDialog lairs={LairDialogList} selectedOwningEntityDBID={activeEncounter.HasLair ? activeEncounter.Lair!.OwningEntityDBID : -1} visible={LairDialogVisible} onClose={() => { SetLairDialogVisible(false) }} ReturnLair={getLair} />
         </div>
+        </SessionAuth>
     );
 }

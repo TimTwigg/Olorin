@@ -1,0 +1,51 @@
+@use 'variables' as v;
+
+.optionBox {
+    display: flex;
+    border-radius: 5px;
+    padding: 5px;
+    min-width: 20rem;
+
+    span {
+        margin: 0 5px;
+    }
+}
+
+.menuButton {
+    padding: 5px;
+    width: 20rem;
+    border-radius: 5px;
+    outline: none;
+    background-color: transparent;
+    color: v.$lightGray;
+    border: none;
+    font-size: 1.6rem;
+
+    &:hover {
+        outline: solid 1px v.$lightGray;
+    }
+}
+
+.menuItems {
+    width: 20rem;
+    display: flex;
+    flex-direction: column;
+    background-color: v.$lightGray;
+    outline: none;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+
+    * {
+        width: 100%;
+    }
+
+    button {
+        height: 3rem;
+        background-color: transparent;
+        border: solid 1px rgba(0, 0, 0, 0.2);
+
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+    }
+}

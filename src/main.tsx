@@ -11,7 +11,7 @@ import ThirdPartyEmailPassword, {
 import EmailPassword from "supertokens-auth-react/recipe/emailpassword";
 import { EmailPasswordPreBuiltUI } from "supertokens-auth-react/recipe/emailpassword/prebuiltui";
 import { ThirdPartyPreBuiltUI } from "supertokens-auth-react/recipe/thirdparty/prebuiltui";
-import Session, { SessionAuth } from "supertokens-auth-react/recipe/session";
+import Session from "supertokens-auth-react/recipe/session";
 import { SuperTokensWrapper } from "supertokens-auth-react";
 
 // Initialize SuperTokens
@@ -34,6 +34,11 @@ SuperTokens.init({
         }),
         Session.init(),
     ],
+    style: `
+        [data-supertokens~=container] {
+            font-family: Open Sans, sans-serif;
+        }
+    `,
 });
 
 // Render the app
@@ -47,12 +52,7 @@ if (!rootElement.innerHTML) {
                     getRoutingComponent([ThirdPartyPreBuiltUI, EmailPasswordPreBuiltUI])
                 ) : (
                     <SuperTokensWrapper>
-                        <SessionAuth onSessionExpired={async () => {
-                            await Session.signOut();
-                            window.location.href = "/auth";
-                        }}>
-                            <RouterProvider router={router} />
-                        </SessionAuth>
+                        <RouterProvider router={router} />
                     </SuperTokensWrapper>
                 )}
             </StrictMode>
