@@ -7,27 +7,38 @@ import {
     MenuItems,
 } from "@headlessui/react";
 
+import * as api from "@src/controllers/api";
+
 import "@src/styles/optionBox.scss";
 
 type AuthBoxProps = {}
 
 export function OptionBox({ }: AuthBoxProps) {
     const [displayName, SetDisplayName] = React.useState<string | null>(null);
+    const metaRef = React.useRef<number>(0);
 
     React.useEffect(() => {
-        Session.doesSessionExist().then((exists) => {
-            if (exists) {
-                Session.getUserId().then((userId) => {
-                    if (userId) {
-                        SetDisplayName(userId);
-                    } else {
-                        SetDisplayName(null);
-                    }
-                });
-            } else {
-                SetDisplayName(null);
-            }
-        });
+        if (metaRef.current === 0) {
+            metaRef.current = 1;
+            api.getDisplayName().then((name) => {
+                if (name) SetDisplayName(name);
+                else {
+                    Session.doesSessionExist().then((exists) => {
+                        if (exists) {
+                            Session.getUserId().then((userId) => {
+                                if (userId) {
+                                    SetDisplayName(userId);
+                                } else {
+                                    SetDisplayName(null);
+                                }
+                            });
+                        } else {
+                            SetDisplayName(null);
+                        }
+                    });
+                }
+            });
+        }
     }, []);
 
     const signOut = async () => {

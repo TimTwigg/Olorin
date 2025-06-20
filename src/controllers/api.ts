@@ -1,10 +1,9 @@
 import * as api from "@src/models/api_responses";
-
 import { EntityOverview } from "@src/models/entity";
 import { Encounter, EncounterOverview } from "@src/models/encounter";
 import { dateFromString } from "@src/controllers/utils";
-import { deepCopy } from "@src/controllers/utils";
 import { parseDataAsStatBlock } from "@src/models/statBlock";
+import * as caching from "@src/controllers/api_cache";
 
 export type APIDetailLevel = 1 | 2
 
@@ -12,20 +11,6 @@ export type APIDetailLevel = 1 | 2
  * Base URL for the API server.
  */
 const BASE_URL = "http://localhost:8080"
-
-/**
- * Cache for API functions to avoid redundant calls.
- */
-var FUNCTION_CACHE = new Map<string, any>()
-
-/**
- * Excluded routes from caching.
- */
-const CACHE_EXCLUDED_ROUTES = [
-    "/encounter/all",
-    "/encounter",
-    "/encounter/",
-]
 
 /**
  * Wrapper for API functions to handle caching
@@ -36,10 +21,9 @@ const CACHE_EXCLUDED_ROUTES = [
  * @returns Promise<any> - the result of the function call
  */
 async function api_wrapper(func: string, ...args: any): Promise<any> {
-    let cache_key = func + JSON.stringify(args);
-    if (FUNCTION_CACHE.has(cache_key) && !CACHE_EXCLUDED_ROUTES.some((route) => args[0] == (route))) {
-        console.log("Cache hit for " + cache_key);
-        return deepCopy(FUNCTION_CACHE.get(cache_key));
+    let cached_entry = caching.checkCache(caching.createCacheKey(func, args));
+    if (cached_entry !== null) {
+        return cached_entry.data;
     }
     else {
         let data: any;
@@ -47,7 +31,7 @@ async function api_wrapper(func: string, ...args: any): Promise<any> {
         else if (func === "push") data = _push(args[0], args[1]).then((data) => data);
         else if (func === "delete") data = _delete(args[0], args[1]).then((data) => data);
         else return null;
-        FUNCTION_CACHE.set(cache_key, data);
+        caching.setCacheEntry(caching.createCacheKey(func, args), data);
         return data;
     }
 }
@@ -292,4 +276,38 @@ export async function deleteEncounter(encounterID: number): Promise<boolean> {
     return deleteRequest("/encounter", {
         id: encounterID,
     }).then(() => { return true }, () => { return false });
+}
+
+/**
+ * Fetch user metadata from the server.
+ * 
+ * @returns The metadata
+ */
+export async function getMetadata(): Promise<api.MetadataResponse> {
+    return request("/metadata", {}).then((data: object) => {
+        return {
+            Metadata: new Map<string, string>(Object.entries(data))
+        }
+    });
+}
+
+/**
+ * Set user metadata on the server.
+ * 
+ * @param metadata The new metadata to set.
+ * 
+ * @returns A boolean indicating success or failure.
+ */
+export async function setMetadata(metadata: Map<string, string>): Promise<api.MetadataResponse> {
+    return push("/metadata", Object.fromEntries(metadata)).then((data) => {
+        return {
+            Metadata: new Map<string, string>(Object.entries(data))
+        }
+    });
+}
+
+export async function getDisplayName(): Promise<string | null> {
+    return getMetadata().then((data) => {
+        return data.Metadata.get("displayName") || null;
+    });
 }
