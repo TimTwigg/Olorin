@@ -7,8 +7,6 @@ Custom Encounter Manager for D&D 5E.
 - Entity Display Spells Control
 - Contact page - referenced in error component
 - entity table not populated on encounter creation
-- Use user email/display name instead of user id in optionBox
-- Profile page - linked from optionBox
 
 ## Ideas
 
