@@ -1,3 +1,5 @@
+import { SmartMap } from "@src/models/data_structures/smartMap";
+
 export type MetadataResponse = {
-    Metadata: Map<string, string>;
+    Metadata: SmartMap<string, string>;
 }

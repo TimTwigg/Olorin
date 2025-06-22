@@ -85,7 +85,7 @@ export class Encounter {
         if (entityCounts.get(entity.Name) === 1) {
             this.Entities.forEach((e) => { if (e.Name === entity.Name) e.setSuffix("1") });
         }
-        let num = entityCounts.get(entity.Name) + 1 || 0;
+        let num = entityCounts.get(entity.Name)! + 1 || 0;
         if (num > 0) entity.setSuffix(num.toString());
         this.Entities.push(entity);
         return this.setInitiativeOrder();
@@ -119,12 +119,12 @@ export class Encounter {
         for (let e of this.Entities) entityCounts.increment(e.Name);
         for (let e of this.Entities) {
             let num = entityCounts.get(e.Name);
-            if (num < 2) {
+            if (num! < 2) {
                 e.setSuffix("");
                 continue;
             }
             nameCounts.increment(e.Name);
-            e.setSuffix(nameCounts.get(e.Name).toString());
+            e.setSuffix(nameCounts.get(e.Name)!.toString());
         }
         return this;
     }

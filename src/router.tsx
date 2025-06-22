@@ -7,9 +7,6 @@ export interface RouterContext {
 
 export const router = createRouter({
     routeTree,
-    context: {
-        columnCount: 2,
-    }
 })
 
 // Register the router instance for type safety

@@ -19,6 +19,7 @@ Custom Encounter Manager for D&D 5E.
         - Wildshape would act in a certain way
         - Default behavior for other uses
             - What other use cases are there?
+- Make which saving throws are on entity overview customizable
 
 ## Long Term
 

@@ -4,6 +4,7 @@ import { Encounter, EncounterOverview } from "@src/models/encounter";
 import { dateFromString } from "@src/controllers/utils";
 import { parseDataAsStatBlock } from "@src/models/statBlock";
 import * as caching from "@src/controllers/api_cache";
+import { SmartMap } from "@src/models/data_structures/smartMap";
 
 export type APIDetailLevel = 1 | 2
 
@@ -286,7 +287,7 @@ export async function deleteEncounter(encounterID: number): Promise<boolean> {
 export async function getMetadata(): Promise<api.MetadataResponse> {
     return request("/metadata", {}).then((data: object) => {
         return {
-            Metadata: new Map<string, string>(Object.entries(data))
+            Metadata: new SmartMap<string, string>(Object.entries(data))
         }
     });
 }
@@ -301,13 +302,17 @@ export async function getMetadata(): Promise<api.MetadataResponse> {
 export async function setMetadata(metadata: Map<string, string>): Promise<api.MetadataResponse> {
     return push("/metadata", Object.fromEntries(metadata)).then((data) => {
         return {
-            Metadata: new Map<string, string>(Object.entries(data))
+            Metadata: new SmartMap<string, string>(Object.entries(data))
         }
     });
 }
 
 export async function getDisplayName(): Promise<string | null> {
     return getMetadata().then((data) => {
-        return data.Metadata.get("displayName") || null;
+        let name = data.Metadata.dGet("displayName", data.Metadata.dGet("email", ""));
+        if (name && name.length > 0) {
+            return name;
+        }
+        return null;
     });
 }

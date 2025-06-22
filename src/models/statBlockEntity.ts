@@ -46,7 +46,7 @@ export class StatBlockEntity implements Entity {
 
         for (let stat of statBlock.Stats.Abilities.keysAsArray()) {
             let item = statBlock.Details.SavingThrows.find((s) => s.Name === stat);
-            let mod = item ? item.Override !== 0 ? item.Override : modifierOf(statBlock.Stats.Abilities.dGet(stat, 10)) + (item.Level * statBlock.ProficiencyBonus) : modifierOf(statBlock.Stats.Abilities.get(stat));
+            let mod = item ? item.Override !== 0 ? item.Override : modifierOf(statBlock.Stats.Abilities.dGet(stat, 10)) + (item.Level * statBlock.ProficiencyBonus) : modifierOf(statBlock.Stats.Abilities.get(stat)!);
             this.SavingThrows.set(stat, mod);
         }
     }
@@ -210,7 +210,7 @@ export class StatBlockEntity implements Entity {
         }
         ent.SpellSlots = new SmartMap<number, { total: number, used: number }>();
         for (let slot in json.SpellSlots) {
-            ent.SpellSlots.set(slot, json.SpellSlots[slot]);
+            ent.SpellSlots.set(parseInt(slot), json.SpellSlots[slot]);
         }
         ent.Concentration = json.Concentration;
         ent.Notes = json.Notes;

@@ -239,7 +239,7 @@ export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDis
                         <strong>Hit Points:</strong> {entity.CurrentHitPoints} {entity.TempHitPoints > 0 ? ` (+${entity.TempHitPoints})` : null} / {entity.MaxHitPoints}<br />
                         <strong>Armor Class:</strong> {entity.ArmorClass + entity.ArmorClassBonus}{entity.ArmorClassBonus === 0 ? "" : ` (${entity.ArmorClass}${entity.ArmorClassBonus > 0 ? "+" : ""}${entity.ArmorClassBonus})`}<br />
                         {renderSpeed(entity.Speed)}
-                        <strong>Saves:</strong> DEX {entity.SavingThrows.get("Dexterity") >= 0 ? "+" : ""}{entity.SavingThrows.get("Dexterity")} WIS {entity.SavingThrows.get("Wisdom") >= 0 ? "+" : ""}{entity.SavingThrows.get("Wisdom")} CON {entity.SavingThrows.get("Constitution") >= 0 ? "+" : ""}{entity.SavingThrows.get("Constitution")}<br />
+                        <strong>Saves:</strong> DEX {entity.SavingThrows.get("Dexterity")! >= 0 ? "+" : ""}{entity.SavingThrows.get("Dexterity")} WIS {entity.SavingThrows.get("Wisdom")! >= 0 ? "+" : ""}{entity.SavingThrows.get("Wisdom")} CON {entity.SavingThrows.get("Constitution")! >= 0 ? "+" : ""}{entity.SavingThrows.get("Constitution")}<br />
                         {entity.SpellSaveDC > 0 ? <><strong>Spell Save DC:</strong> {entity.SpellSaveDC}<br /></> : null}
                         {renderConditions(entity.Conditions)}
                         {entity.Notes.length > 0 ? <><strong>Notes:</strong> {entity.Notes}<br /></> : null}

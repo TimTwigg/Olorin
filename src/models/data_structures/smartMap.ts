@@ -1,4 +1,8 @@
-export class SmartMap<keyType, valueType> extends Map {
+export class SmartMap<keyType, valueType> extends Map<keyType, valueType> {
+    constructor(entries?: readonly (readonly [keyType, valueType])[] | null) {
+        super(entries);
+    }
+
     dGet(key: keyType, defaultValue: valueType): any {
         return super.get(key) || defaultValue;
     }
@@ -19,16 +23,18 @@ export class SmartMap<keyType, valueType> extends Map {
         return _copy;
     }
 
-    toJSON<K extends string | number | symbol, V>() {
-        var obj: Record<K, V> = {} as Record<K, V>;
-        for (let [key, value] of this) obj[key as K] = value;
+    toJSON(): Record<string, valueType> {
+        const obj: Record<string, valueType> = {};
+        for (const [key, value] of this) {
+            obj[String(key)] = value;
+        }
         return obj;
     }
 
     public static fromMap<K extends string | number | symbol, V>(obj: Record<K, V>): SmartMap<K, V> {
         const map = new SmartMap<K, V>();
         for (const [key, value] of Object.entries(obj)) {
-            map.set(key as K, value);
+            map.set(key as K, value as V);
         }
         return map;
     }

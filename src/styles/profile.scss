@@ -1,0 +1,6 @@
+@use 'variables' as v;
+
+#updateProfileForm {
+    border: solid 1px v.$lightGray;
+    padding: 20px;
+}

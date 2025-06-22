@@ -13,6 +13,7 @@ import { EmailPasswordPreBuiltUI } from "supertokens-auth-react/recipe/emailpass
 import { ThirdPartyPreBuiltUI } from "supertokens-auth-react/recipe/thirdparty/prebuiltui";
 import Session from "supertokens-auth-react/recipe/session";
 import { SuperTokensWrapper } from "supertokens-auth-react";
+import * as api from "@src/controllers/api";
 
 // Initialize SuperTokens
 SuperTokens.init({
@@ -24,12 +25,31 @@ SuperTokens.init({
         websiteBasePath: "/auth",
     },
     recipeList: [
-        EmailPassword.init(),
+        EmailPassword.init({
+            onHandleEvent: async (context) => {
+                if (context.action === "SUCCESS") {
+                    if (context.isNewRecipeUser && context.user.loginMethods.length === 1) {
+                        if (context.user.emails.length > 0) {
+                            api.setMetadata(new Map<string, string>([["email", context.user.emails[0]]]))
+                        }
+                    }
+                }
+            },
+        }),
         ThirdPartyEmailPassword.init({
             signInAndUpFeature: {
                 providers: [
                     Google.init(),
                 ],
+            },
+            onHandleEvent: async (context) => {
+                if (context.action === "SUCCESS") {
+                    if (context.isNewRecipeUser && context.user.loginMethods.length === 1) {
+                        if (context.user.emails.length > 0) {
+                            api.setMetadata(new Map<string, string>([["email", context.user.emails[0]]]))
+                        }
+                    }
+                }
             },
         }),
         Session.init(),

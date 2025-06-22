@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import Session, { SessionAuth } from "supertokens-auth-react/recipe/session";
 import { ToastContainer, toast } from "react-toastify";
 import * as api from "@src/controllers/api";
+import "@src/styles/profile.scss";
 
 export const Route = createFileRoute("/profile")({
     component: Profile,
@@ -51,11 +52,19 @@ function Profile() {
             window.location.href = "/auth";
         }}>
             <h1>Profile</h1>
-            <form>
+            <p className="ten columns offset-by-one column">
+                <strong>Current Data</strong><br />
+                <u>Email:</u> {metadata.get("email") || "Not Available"}<br />
+                <u>Display Name:</u> {metadata.get("displayName") || "Not Available"}<br />
+            </p>
+            <div className="break" />
+            <hr />
+            <strong className="ten columns offset-by-one column" >Update Profile</strong><br />
+            <form id="updateProfileForm" className="ten columns offset-by-one column">
                 <label htmlFor="displayName">Display Name:</label>
                 <input id="displayName" type="text" value={displayName} onChange={(e) => { SetDisplayName(e.target.value) }} />
                 <div className="break" />
-                <input type="submit" value="Save" onClick={(e) => {
+                <input className="two columns offset-by-nine columns" type="submit" value="Save" onClick={(e) => {
                     e.preventDefault();
                     SaveMetadata();
                 }} />
