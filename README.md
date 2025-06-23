@@ -5,8 +5,9 @@ Custom Encounter Manager for D&D 5E.
 ## To Do
 
 - Entity Display Spells Control
-- Contact page - referenced in error component
-- entity table not populated on encounter creation
+- Add file upload to contact form
+- Campaigns page
+    - Create and manage campaigns, set up list of players
 
 ## Ideas
 

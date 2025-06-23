@@ -1,11 +1,11 @@
 import * as React from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createLazyFileRoute } from "@tanstack/react-router";
 import Session, { SessionAuth } from "supertokens-auth-react/recipe/session";
 import { ToastContainer, toast } from "react-toastify";
 import * as api from "@src/controllers/api";
 import "@src/styles/profile.scss";
 
-export const Route = createFileRoute("/profile")({
+export const Route = createLazyFileRoute("/profile")({
     component: Profile,
 })
 
@@ -66,6 +66,7 @@ function Profile() {
                 <div className="break" />
                 <input className="two columns offset-by-nine columns" type="submit" value="Save" onClick={(e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     SaveMetadata();
                 }} />
             </form>

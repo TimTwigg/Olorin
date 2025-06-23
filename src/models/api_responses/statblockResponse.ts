@@ -5,5 +5,5 @@ export type StatBlockResponse = {
 }
 
 export type SingleStatBlockResponse = {
-    StatBlock: StatBlock|undefined
+    StatBlock: StatBlock | undefined
 }

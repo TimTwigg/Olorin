@@ -5,5 +5,5 @@ export type EncounterResponse = {
 }
 
 export type SingleEncounterResponse = {
-    Encounter: Encounter|undefined
+    Encounter: Encounter | undefined
 }

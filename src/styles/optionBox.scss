@@ -2,9 +2,9 @@
 
 .optionBox {
     display: flex;
-    border-radius: 5px;
     padding: 5px;
     min-width: 20rem;
+    border-left: solid 1px v.$lightGray;
 
     span {
         margin: 0 5px;
@@ -20,6 +20,7 @@
     color: v.$lightGray;
     border: none;
     font-size: 1.6rem;
+    margin-left: 5px;
 
     &:hover {
         outline: solid 1px v.$lightGray;

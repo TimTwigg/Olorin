@@ -1,7 +1,7 @@
 import * as React from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { ToastContainer, toast } from "react-toastify";
-import { ConfirmDialog } from "primereact/confirmdialog";
+import { createLazyFileRoute } from "@tanstack/react-router";
+import { toast } from "react-toastify";
+import { ConfirmDialog, DialogOptions } from "primereact/confirmdialog";
 import { IoWarningSharp } from "react-icons/io5";
 import Session, { SessionAuth } from "supertokens-auth-react/recipe/session";
 
@@ -19,20 +19,9 @@ import { LairDisplay, LairDialog, LairBlockDisplay } from "@src/components/lair"
 import { EntityTable } from "@src/components/entityTable";
 import { EncountersTable } from "@src/components/encountersTable";
 
-export const Route = createFileRoute("/encounters")({
+export const Route = createLazyFileRoute("/encounters")({
     component: Encounters,
 })
-
-type DialogOptions = {
-    visible: boolean,
-    label: string,
-    message: string,
-    onHide: () => void,
-    accept: () => void,
-    reject: () => void,
-    defaultFocus?: "accept" | "reject" | undefined,
-    icon?: React.ReactNode,
-}
 
 /**
  * Cache Size for Entities List
@@ -124,6 +113,11 @@ function Encounters() {
         SetActiveEncounter(enc, false);
         SetEditingEncounter(true);
         SetIsNewEncounter(true);
+        if (CreatureList.length === 0) {
+            api.getEntities(1, 1).then((res) => {
+                SetCreatureList(res.Entities as EntityOverview[]);
+            });
+        }
     }
 
     const loadEncounterFromBackup = () => {
@@ -385,12 +379,38 @@ function Encounters() {
         }
     }, [getConditionsRef]);
 
+    const PageTemplate = ({ children }: { children: React.ReactNode }) => {
+        return (
+            <SessionAuth onSessionExpired={async () => {
+                await Session.signOut();
+                window.location.href = "/auth";
+            }}>
+                {children}
+                <ConfirmDialog
+                    visible={dialogOptions.visible}
+                    onHide={() => { SetDialogOptions({ ...dialogOptions, visible: false }), dialogOptions.onHide() }}
+                    header={dialogOptions.label}
+                    message={dialogOptions.message}
+                    className="dialog"
+                    focusOnShow={true}
+                    accept={dialogOptions.accept}
+                    reject={dialogOptions.reject}
+                    defaultFocus={dialogOptions.defaultFocus}
+                    icon={dialogOptions.icon}
+                    modal={true}
+                    acceptClassName="dialog-accept"
+                    rejectClassName="dialog-reject"
+                    maskClassName="dialog-mask"
+                    headerClassName="dialog-header"
+                    contentClassName="dialog-content"
+                />
+            </SessionAuth>
+        );
+    }
+
     // Encounters Overview
     if (!activeEncounter) return (
-        <SessionAuth onSessionExpired={async () => {
-            await Session.signOut();
-            window.location.href = "/auth";
-        }}>
+        <PageTemplate>
             <h1>Encounters</h1>
             <div className="twelve columns">
                 <h3 className="eight columns offset-by-one column">My Encounters</h3>
@@ -398,120 +418,79 @@ function Encounters() {
             </div>
             <div className="break" />
             <EncountersTable encounters={encounters} className="ten columns offset-by-one column" nameCallback={selectEncounter} deleteCallback={deleteEncounter} />
-            <ToastContainer position="top-right" />
-            <ConfirmDialog
-                visible={dialogOptions.visible}
-                onHide={() => { SetDialogOptions({ ...dialogOptions, visible: false }), dialogOptions.onHide() }}
-                header={dialogOptions.label}
-                message={dialogOptions.message}
-                className="dialog"
-                focusOnShow={true}
-                accept={dialogOptions.accept}
-                reject={dialogOptions.reject}
-                defaultFocus={dialogOptions.defaultFocus}
-                icon={dialogOptions.icon}
-                modal={true}
-                acceptClassName="dialog-accept"
-                rejectClassName="dialog-reject"
-                maskClassName="dialog-mask"
-                headerClassName="dialog-header"
-                contentClassName="dialog-content"
-            />
-        </SessionAuth>
+        </PageTemplate>
     );
 
     // Encounter Play Screen
     return (
-        <SessionAuth onSessionExpired={async () => {
-            await Session.signOut();
-            window.location.href = "/auth";
-        }}>
-        <div className="playScreen container">
-            <section className="justify-between">
-                <span className="three columns"><button className="big button" onClick={() => { resetAllStates() }} disabled={EditingEncounter}>Back to Encounters</button></span>
-                {EditingEncounter ?
-                    <span className="six columns titleEdit"><input type="text" defaultValue={LocalStringState1} placeholder="Name" onChange={(e) => { SetLocalStringState1(e.target.value) }} /></span>
-                    :
-                    <h3 className="six columns">{activeEncounter.Name}</h3>
-                }
-                <section className="three columns">
-                    <span><strong>Created On:</strong> {activeEncounter.Metadata.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</span><br />
-                    <span><strong>Campaign:</strong> {EditingEncounter ? <input type="text" defaultValue={LocalStringState2} placeholder="Campaign Name" onChange={e => { SetLocalStringState2(e.target.value) }} /> : activeEncounter.Metadata.Campaign}</span>
-                </section>
-            </section>
-            <div className="break" />
-            <hr />
-            {EditingEncounter ?
-                <input type="text" className="ten columns descriptionEdit" defaultValue={LocalStringState3} placeholder="Encounter Description" onChange={(e) => { SetLocalStringState3(e.target.value) }} />
-                :
-                <p>{activeEncounter.Description}</p>
-            }
-            <div className="break" />
-            <hr />
-            <section className="container">
-                <section id="buttonSet1" className="five columns">
-                    <button onClick={() => { initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter), TriggerReRender() }} disabled={runningEncounter} >{EditingEncounter ? "Cancel" : "Edit Mode"}</button>
-                    <button onClick={startEncounter} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
-                    <button onClick={() => { SetActiveEncounter(activeEncounter.reset(), true), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter || EditingEncounter} >Reset Encounter</button>
-                </section>
-                <section id="mode-log">
-                    <p>{EditingEncounter ? "Editing" : ""}</p>
-                </section>
-                <section id="buttonSet2" className="five columns">
-                    <button onClick={saveEncounterChanges} disabled={!EditingEncounter} >Save Changes</button>
-                    <button onClick={openLairDialog} disabled={!EditingEncounter} >Set Lair</button>
-                    <button onClick={() => { }} disabled={!EditingEncounter} >Add Player</button>
+        <PageTemplate>
+            <div className="playScreen container">
+                <section className="justify-between">
+                    <span className="three columns"><button className="big button" onClick={() => { resetAllStates() }} disabled={EditingEncounter}>Back to Encounters</button></span>
+                    {EditingEncounter ?
+                        <span className="six columns titleEdit"><input type="text" defaultValue={LocalStringState1} placeholder="Name" onChange={(e) => { SetLocalStringState1(e.target.value) }} /></span>
+                        :
+                        <h3 className="six columns">{activeEncounter.Name}</h3>
+                    }
+                    <section className="three columns">
+                        <span><strong>Created On:</strong> {activeEncounter.Metadata.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</span><br />
+                        <span><strong>Campaign:</strong> {EditingEncounter ? <input type="text" defaultValue={LocalStringState2} placeholder="Campaign Name" onChange={e => { SetLocalStringState2(e.target.value) }} /> : activeEncounter.Metadata.Campaign}</span>
+                    </section>
                 </section>
                 <div className="break" />
-            </section>
-            <hr />
-            <section className="panel">
-                <div>
-                    {!runningEncounter && <div id="EncounterRunControls" className="small">
-                        <section>Round: {activeEncounter.Metadata.Round}</section>
-                        <section>Turn: {activeEncounter.Metadata.Turn}</section>
-                    </div>}
-                    <div id="EncounterList">
-                        {renderEntities(!runningEncounter)}
+                <hr />
+                {EditingEncounter ?
+                    <input type="text" className="ten columns descriptionEdit" defaultValue={LocalStringState3} placeholder="Encounter Description" onChange={(e) => { SetLocalStringState3(e.target.value) }} />
+                    :
+                    <p>{activeEncounter.Description}</p>
+                }
+                <div className="break" />
+                <hr />
+                <section className="container">
+                    <section id="buttonSet1" className="five columns">
+                        <button onClick={() => { initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter), TriggerReRender() }} disabled={runningEncounter} >{EditingEncounter ? "Cancel" : "Edit Mode"}</button>
+                        <button onClick={startEncounter} disabled={EditingEncounter} >{runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter</button>
+                        <button onClick={() => { SetActiveEncounter(activeEncounter.reset(), true), SetEncounterIsActive(false), TriggerReRender() }} disabled={runningEncounter || EditingEncounter} >Reset Encounter</button>
+                    </section>
+                    <section id="mode-log">
+                        <p>{EditingEncounter ? "Editing" : ""}</p>
+                    </section>
+                    <section id="buttonSet2" className="five columns">
+                        <button onClick={saveEncounterChanges} disabled={!EditingEncounter} >Save Changes</button>
+                        <button onClick={openLairDialog} disabled={!EditingEncounter} >Set Lair</button>
+                        <button onClick={() => { }} disabled={!EditingEncounter} >Add Player</button>
+                    </section>
+                    <div className="break" />
+                </section>
+                <hr />
+                <section className="panel">
+                    <div>
+                        {!runningEncounter && <div id="EncounterRunControls" className="small">
+                            <section>Round: {activeEncounter.Metadata.Round}</section>
+                            <section>Turn: {activeEncounter.Metadata.Turn}</section>
+                        </div>}
+                        <div id="EncounterList">
+                            {renderEntities(!runningEncounter)}
+                        </div>
+                        {runningEncounter && <div id="EncounterRunControls">
+                            <section>Round: {activeEncounter.Metadata.Round}</section>
+                            <section>Turn: {activeEncounter.Metadata.Turn}</section>
+                            <button onClick={() => { SetActiveEncounter(activeEncounter.tick(), activeEncounter.Metadata.Turn === 1), ScrollToEntity(activeEncounter.ActiveID), TriggerReRender() }}>NEXT</button>
+                        </div>}
+                        {!runningEncounter && <div id="EncounterEditControls">
+                            <button onClick={() => { SetActiveEncounter(activeEncounter.randomizeInitiative()), TriggerReRender() }}>Random Initiative</button>
+                            <button onClick={() => { SetActiveEncounter(activeEncounter.clear()), TriggerReRender() }} disabled={!EditingEncounter} >Clear Encounter</button>
+                        </div>}
                     </div>
-                    {runningEncounter && <div id="EncounterRunControls">
-                        <section>Round: {activeEncounter.Metadata.Round}</section>
-                        <section>Turn: {activeEncounter.Metadata.Turn}</section>
-                        <button onClick={() => { SetActiveEncounter(activeEncounter.tick(), activeEncounter.Metadata.Turn === 1), ScrollToEntity(activeEncounter.ActiveID), TriggerReRender() }}>NEXT</button>
-                    </div>}
-                    {!runningEncounter && <div id="EncounterEditControls">
-                        <button onClick={() => { SetActiveEncounter(activeEncounter.randomizeInitiative()), TriggerReRender() }}>Random Initiative</button>
-                        <button onClick={() => { SetActiveEncounter(activeEncounter.clear()), TriggerReRender() }} disabled={!EditingEncounter} >Clear Encounter</button>
-                    </div>}
-                </div>
-                <div id="CreatureList" style={{ display: runningEncounter ? "none" : "block" }}>
-                    {EditingEncounter && <EntityTable creatures={CreatureList} displayCallback={displayMiscEntity} addCallback={(id: number) => { addMiscEntity(id) }} />}
-                </div>
-                <div id="StatBlockDisplay" style={{ maxWidth: EditingEncounter ? "30%" : "55%", marginLeft: runningEncounter ? "2.5rem" : "0" }}>
-                    {DisplayEntity && DisplayEntityType && renderDisplay(DisplayEntity, DisplayEntityType, !runningEncounter)}
-                </div>
-            </section>
-            <ToastContainer position="top-right" />
-            <ConfirmDialog
-                visible={dialogOptions.visible}
-                onHide={() => { SetDialogOptions({ ...dialogOptions, visible: false }), dialogOptions.onHide() }}
-                header={dialogOptions.label}
-                message={dialogOptions.message}
-                className="dialog"
-                focusOnShow={true}
-                accept={dialogOptions.accept}
-                reject={dialogOptions.reject}
-                defaultFocus={dialogOptions.defaultFocus}
-                icon={dialogOptions.icon}
-                modal={true}
-                acceptClassName="dialog-accept"
-                rejectClassName="dialog-reject"
-                maskClassName="dialog-mask"
-                headerClassName="dialog-header"
-                contentClassName="dialog-content"
-            />
-            <LairDialog lairs={LairDialogList} selectedOwningEntityDBID={activeEncounter.HasLair ? activeEncounter.Lair!.OwningEntityDBID : -1} visible={LairDialogVisible} onClose={() => { SetLairDialogVisible(false) }} ReturnLair={getLair} />
-        </div>
-        </SessionAuth>
+                    <div id="CreatureList" style={{ display: runningEncounter ? "none" : "block" }}>
+                        {EditingEncounter && <EntityTable creatures={CreatureList} displayCallback={displayMiscEntity} addCallback={(id: number) => { addMiscEntity(id) }} />}
+                    </div>
+                    <div id="StatBlockDisplay" style={{ maxWidth: EditingEncounter ? "30%" : "55%", marginLeft: runningEncounter ? "2.5rem" : "0" }}>
+                        {DisplayEntity && DisplayEntityType && renderDisplay(DisplayEntity, DisplayEntityType, !runningEncounter)}
+                    </div>
+                </section>
+                <LairDialog lairs={LairDialogList} selectedOwningEntityDBID={activeEncounter.HasLair ? activeEncounter.Lair!.OwningEntityDBID : -1} visible={LairDialogVisible} onClose={() => { SetLairDialogVisible(false) }} ReturnLair={getLair} />
+            </div>
+        </PageTemplate>
     );
 }

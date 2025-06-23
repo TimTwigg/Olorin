@@ -61,6 +61,20 @@ SuperTokens.init({
     `,
 });
 
+// Add DialogOptions type for ConfirmDialog
+declare module "primereact/confirmdialog" {
+    type DialogOptions = {
+        visible: boolean,
+        label: string,
+        message: string,
+        onHide: () => void,
+        accept: () => void,
+        reject: () => void,
+        defaultFocus?: "accept" | "reject" | undefined,
+        icon?: React.ReactNode,
+    };
+}
+
 // Render the app
 const rootElement = document.getElementById("root")!
 if (!rootElement.innerHTML) {

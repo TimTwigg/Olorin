@@ -1,6 +1,6 @@
 import { Entity, EntityType } from "@src/models/entity";
 import { SmartMap } from "@src/models/data_structures/smartMap";
-import { StatBlock } from "@src/models/statBlock";
+import { StatBlock, parseDataAsStatBlock } from "@src/models/statBlock";
 import { d20, hashCode, modifierOf } from "@src/controllers/utils";
 
 export class StatBlockEntity implements Entity {
@@ -196,8 +196,8 @@ export class StatBlockEntity implements Entity {
     }
 
     public static loadFromJSON(json: any): Entity {
-        json.Displayable.Stats.Abilities = SmartMap.fromMap(json.Displayable.Stats.Abilities);
-        let ent = new StatBlockEntity(json.Displayable, json.Initiative, json.IsHostile);
+        let statblock = parseDataAsStatBlock(json.Displayable);
+        let ent = new StatBlockEntity(statblock, json.Initiative, json.IsHostile);
         ent.Name = json.Name;
         ent.Suffix = json.Suffix;
         ent.CurrentHitPoints = json.CurrentHitPoints;

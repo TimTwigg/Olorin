@@ -26,6 +26,9 @@ var FUNCTION_CACHE = new Map<string, APICacheEntry>()
 const CACHE_EXCLUDED_ROUTES = [
     "/encounter/all",
     "/encounter",
+    "/support",
+    "/campaign",
+    "/campaign/",
 ]
 
 /**

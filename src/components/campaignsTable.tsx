@@ -9,9 +9,8 @@ import {
     getPaginationRowModel,
     getSortedRowModel,
     useReactTable,
-    getFacetedUniqueValues,
-    getFacetedMinMaxValues,
 } from "@tanstack/react-table";
+import { Filter } from "@src/components/tableFilter";
 
 import {
     Menu,
@@ -19,32 +18,27 @@ import {
     MenuItem,
     MenuItems,
 } from "@headlessui/react";
-
 import { GiTrashCan, GiHamburgerMenu } from "react-icons/gi";
 
-import { displayDate } from "@src/controllers/utils";
-import { Filter } from "@src/components/tableFilter";
-import { EncounterOverview } from "@src/models/encounter";
-import "@src/styles/tables.scss";
+import { CampaignOverview } from "@src/models/campaign";
 
-
-type EncountersTableProps = {
-    encounters: EncounterOverview[],
+type CampaignTableProps = {
+    campaigns: CampaignOverview[],
     className?: string,
-    nameCallback?: (encounter: EncounterOverview) => void,
-    deleteCallback: (encounter: EncounterOverview) => void,
+    nameCallback?: (campaignName: string) => void,
+    deleteCallback: (campaignName: string) => void,
 }
 
-export const EncountersTable = ({ encounters, className, nameCallback, deleteCallback }: EncountersTableProps) => {
-    const [data, setData] = React.useState<EncounterOverview[]>(encounters);
+export const CampaignsTable = ({ campaigns, className, nameCallback, deleteCallback }: CampaignTableProps) => {
+    const [data, setData] = React.useState<CampaignOverview[]>(campaigns);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const dataRef = React.useRef(0);
 
-    const factory = createColumnHelper<EncounterOverview>();
+    const factory = createColumnHelper<CampaignOverview>();
 
-    const columns: ColumnDef<EncounterOverview, any>[] = React.useMemo<ColumnDef<EncounterOverview, any>[]>(() => [
+    const columns: ColumnDef<CampaignOverview, any>[] = React.useMemo<ColumnDef<CampaignOverview, any>[]>(() => [
         factory.accessor("Name", {
-            cell: info => nameCallback ? <a onClick={() => { nameCallback(info.row.original) }}>{info.getValue().replace(/\s/g, "").length > 0 ? info.getValue() : "<encounter name>"}</a> : info.getValue(),
+            cell: info => nameCallback ? <a onClick={() => { nameCallback(info.getValue()) }}>{info.getValue().replace(/\s/g, "").length > 0 ? info.getValue() : "<campaign name>"}</a> : info.getValue(),
             header: () => "Name",
             meta: { filterVariant: "text" },
         }),
@@ -53,26 +47,13 @@ export const EncountersTable = ({ encounters, className, nameCallback, deleteCal
             header: () => "Description",
             meta: { filterVariant: "text" },
         }),
-        factory.accessor("Metadata.Campaign", {
-            cell: info => info.getValue(),
-            header: () => "Campaign",
-            meta: { filterVariant: "select" },
-        }),
-        factory.accessor("Metadata.CreationDate", {
-            cell: info => displayDate(info.getValue()),
-            header: () => "Creation Date",
-        }),
-        factory.accessor("Metadata.AccessedDate", {
-            cell: info => displayDate(info.getValue()),
-            header: () => "Last Accessed",
-        }),
         factory.display({
             id: "actions",
             cell: info => (
                 <Menu>
                     <MenuButton className={"iconButton"}><GiHamburgerMenu /></MenuButton>
                     <MenuItems anchor={{ to: "bottom", gap: 5, padding: 0 }} className={"menu-items"}>
-                        <MenuItem><button onClick={() => deleteCallback(info.row.original)}><GiTrashCan color="#861C06" />Delete</button></MenuItem>
+                        <MenuItem><button onClick={() => deleteCallback(info.row.original.Name)}><GiTrashCan color="#861C06" />Delete</button></MenuItem>
                     </MenuItems>
                 </Menu>
             ),
@@ -88,21 +69,19 @@ export const EncountersTable = ({ encounters, className, nameCallback, deleteCal
         onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
-        getFacetedUniqueValues: getFacetedUniqueValues(),
-        getFacetedMinMaxValues: getFacetedMinMaxValues(),
+        getPaginationRowModel: getPaginationRowModel(),
         debugTable: false,
         debugHeaders: false,
         debugColumns: false,
     });
 
     React.useEffect(() => {
-        if (dataRef.current === 0 && encounters.length > 0) {
+        if (dataRef.current === 0 && campaigns.length > 0) {
             dataRef.current = 1;
-            setData(encounters);
+            setData(campaigns);
         }
-    }, [encounters]);
+    }, [campaigns]);
 
     return (
         <div className={"table large" + (className ? " " + className : "")}>

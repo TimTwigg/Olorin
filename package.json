@@ -10,11 +10,12 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@formspree/react": "^3.0.0",
         "@headlessui/react": "^2.2.4",
         "@tanstack/react-router": "latest",
         "@tanstack/react-table": "^8.20.6",
         "@vitejs/plugin-react": "latest",
-        "primereact": "^10.9.2",
+        "primereact": "^10.9.6",
         "react": "latest",
         "react-icons": "latest",
         "react-toastify": "^11.0.3",

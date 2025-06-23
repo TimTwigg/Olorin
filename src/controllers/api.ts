@@ -5,6 +5,7 @@ import { dateFromString } from "@src/controllers/utils";
 import { parseDataAsStatBlock } from "@src/models/statBlock";
 import * as caching from "@src/controllers/api_cache";
 import { SmartMap } from "@src/models/data_structures/smartMap";
+import { Campaign, CampaignOverview } from "@src/models/campaign";
 
 export type APIDetailLevel = 1 | 2
 
@@ -144,7 +145,7 @@ async function _delete(url: string, body: any): Promise<any> {
  * 
  * @returns The response data from the server.
  */
-export async function deleteRequest(url: string, body: any): Promise<any> {
+export async function deleteRequest(url: string, body: { id: any }): Promise<any> {
     return api_wrapper("delete", url, body).then((data) => data)
 }
 
@@ -307,6 +308,11 @@ export async function setMetadata(metadata: Map<string, string>): Promise<api.Me
     });
 }
 
+/**
+ * Get the display name of the user.
+ *
+ * @returns The display name or null if not set.
+ */
 export async function getDisplayName(): Promise<string | null> {
     return getMetadata().then((data) => {
         let name = data.Metadata.dGet("displayName", data.Metadata.dGet("email", ""));
@@ -315,4 +321,89 @@ export async function getDisplayName(): Promise<string | null> {
         }
         return null;
     });
+}
+
+/**
+ * Send a support request to the server.
+ *
+ * @param description The description of the support request.
+ *
+ * @returns A boolean indicating success or failure.
+ */
+export async function sendSupportRequest(description: string): Promise<boolean> {
+    if (!description || description.trim().length === 0) {
+        throw new Error("Description cannot be empty.");
+    }
+    return push("/support", { description }).then(() => true, () => false);
+}
+
+/**
+ * Fetch all campaigns from the server.
+ *
+ * @param detailLevel  The detail level for the campaign data (1 for overview, 2 for full details).
+ * 
+ * @returns A list of campaigns.
+ */
+export async function getCampaigns(detailLevel: APIDetailLevel = 1): Promise<api.CampaignResponse> {
+    return request("/campaign/all", {
+        detail_level: detailLevel,
+    }).then((data: any) => {
+        return {
+            Campaigns: data.map((c: any) => {
+                if (detailLevel === 1) {
+                    return new CampaignOverview(c.Name, c.Description);
+                }
+                else {
+                    return Campaign.loadFromJSON(c);
+                }
+            }),
+        }
+    });
+}
+
+/**
+ * Fetch a single campaign from the server.
+ *
+ * @param campaignName The name of the campaign to fetch.
+ *
+ * @returns The campaign data.
+ */
+export async function getCampaign(campaignName: string): Promise<api.SingleCampaignResponse> {
+    return request("/campaign", {
+        name: campaignName,
+        detail_level: 2,
+    }).then((data: any) => {
+        return {
+            Campaign: Campaign.loadFromJSON(data)
+        }
+    });
+}
+
+/**
+ * Save a campaign to the server.
+ *
+ * @param campaign The campaign to save.
+ *
+ * @returns The saved campaign data.
+ */
+export async function saveCampaign(campaign: Campaign): Promise<Campaign> {
+    if (!campaign) {
+        throw new Error("Campaign is null or undefined.");
+    }
+    return push("/campaign", campaign).then((data: any) => {
+        return Campaign.loadFromJSON(data);
+    });
+}
+
+/**
+ * Delete a campaign from the server.
+ *
+ * @param campaignName The name of the campaign to delete.
+ *
+ * @returns A boolean indicating success or failure.
+ */
+export async function deleteCampaign(campaignName: string): Promise<boolean> {
+    return deleteRequest("/campaign", {
+        id: campaignName,
+    }).then(() => { return true }, () => { return false });
 }
