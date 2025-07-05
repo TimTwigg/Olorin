@@ -14,6 +14,7 @@ import { ThirdPartyPreBuiltUI } from "supertokens-auth-react/recipe/thirdparty/p
 import Session from "supertokens-auth-react/recipe/session";
 import { SuperTokensWrapper } from "supertokens-auth-react";
 import * as api from "@src/controllers/api";
+import { ContentProps } from "primereact/dialog";
 
 // Initialize SuperTokens
 SuperTokens.init({
@@ -65,13 +66,15 @@ SuperTokens.init({
 declare module "primereact/confirmdialog" {
     type DialogOptions = {
         visible: boolean,
-        label: string,
-        message: string,
+        label?: string,
+        message?: string,
         onHide: () => void,
-        accept: () => void,
-        reject: () => void,
+        accept?: () => void,
+        reject?: () => void,
         defaultFocus?: "accept" | "reject" | undefined,
         icon?: React.ReactNode,
+        content?: (props: ContentProps) => React.ReactNode,
+        footer?: React.ReactNode,
     };
 }
 

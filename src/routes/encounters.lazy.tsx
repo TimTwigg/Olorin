@@ -2,6 +2,7 @@ import * as React from "react";
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { toast } from "react-toastify";
 import { ConfirmDialog, DialogOptions } from "primereact/confirmdialog";
+import { AutoComplete } from "primereact/autocomplete";
 import { IoWarningSharp } from "react-icons/io5";
 import Session, { SessionAuth } from "supertokens-auth-react/recipe/session";
 
@@ -49,6 +50,9 @@ function Encounters() {
     const getEncountersRef = React.useRef(0);
     const getConditionsRef = React.useRef(0);
     const [dialogOptions, SetDialogOptions] = React.useState<DialogOptions>({ visible: false, label: "", message: "", onHide: () => { }, accept: () => { }, reject: () => { } });
+    const [campaigns, SetCampaigns] = React.useState<string[]>([]);
+    const [campaignSelectionOptions, SetCampaignSelectionOptions] = React.useState<string[]>([]);
+    const campaignsRef = React.useRef(0);
 
     var refs: Map<string, React.RefObject<HTMLDivElement>> = new Map();
 
@@ -379,38 +383,21 @@ function Encounters() {
         }
     }, [getConditionsRef]);
 
-    const PageTemplate = ({ children }: { children: React.ReactNode }) => {
-        return (
-            <SessionAuth onSessionExpired={async () => {
-                await Session.signOut();
-                window.location.href = "/auth";
-            }}>
-                {children}
-                <ConfirmDialog
-                    visible={dialogOptions.visible}
-                    onHide={() => { SetDialogOptions({ ...dialogOptions, visible: false }), dialogOptions.onHide() }}
-                    header={dialogOptions.label}
-                    message={dialogOptions.message}
-                    className="dialog"
-                    focusOnShow={true}
-                    accept={dialogOptions.accept}
-                    reject={dialogOptions.reject}
-                    defaultFocus={dialogOptions.defaultFocus}
-                    icon={dialogOptions.icon}
-                    modal={true}
-                    acceptClassName="dialog-accept"
-                    rejectClassName="dialog-reject"
-                    maskClassName="dialog-mask"
-                    headerClassName="dialog-header"
-                    contentClassName="dialog-content"
-                />
-            </SessionAuth>
-        );
-    }
+    React.useEffect(() => {
+        if (campaignsRef.current === 0) {
+            campaignsRef.current = 1;
+            api.getCampaigns().then((res) => {
+                SetCampaigns(res.Campaigns.map((camp) => camp.Name));
+            });
+        }
+    }, [campaignsRef]);
 
     // Encounters Overview
     if (!activeEncounter) return (
-        <PageTemplate>
+        <SessionAuth onSessionExpired={async () => {
+            await Session.signOut();
+            window.location.href = "/auth";
+        }}>
             <h1>Encounters</h1>
             <div className="twelve columns">
                 <h3 className="eight columns offset-by-one column">My Encounters</h3>
@@ -418,12 +405,33 @@ function Encounters() {
             </div>
             <div className="break" />
             <EncountersTable encounters={encounters} className="ten columns offset-by-one column" nameCallback={selectEncounter} deleteCallback={deleteEncounter} />
-        </PageTemplate>
+            <ConfirmDialog
+                visible={dialogOptions.visible}
+                onHide={() => { SetDialogOptions({ ...dialogOptions, visible: false }), dialogOptions.onHide() }}
+                header={dialogOptions.label}
+                message={dialogOptions.message}
+                className="dialog"
+                focusOnShow={true}
+                accept={dialogOptions.accept}
+                reject={dialogOptions.reject}
+                defaultFocus={dialogOptions.defaultFocus}
+                icon={dialogOptions.icon}
+                modal={true}
+                acceptClassName="dialog-accept"
+                rejectClassName="dialog-reject"
+                maskClassName="dialog-mask"
+                headerClassName="dialog-header"
+                contentClassName="dialog-content"
+            />
+        </SessionAuth>
     );
 
     // Encounter Play Screen
     return (
-        <PageTemplate>
+        <SessionAuth onSessionExpired={async () => {
+            await Session.signOut();
+            window.location.href = "/auth";
+        }}>
             <div className="playScreen container">
                 <section className="justify-between">
                     <span className="three columns"><button className="big button" onClick={() => { resetAllStates() }} disabled={EditingEncounter}>Back to Encounters</button></span>
@@ -434,7 +442,7 @@ function Encounters() {
                     }
                     <section className="three columns">
                         <span><strong>Created On:</strong> {activeEncounter.Metadata.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</span><br />
-                        <span><strong>Campaign:</strong> {EditingEncounter ? <input type="text" defaultValue={LocalStringState2} placeholder="Campaign Name" onChange={e => { SetLocalStringState2(e.target.value) }} /> : activeEncounter.Metadata.Campaign}</span>
+                        <span><strong>Campaign:</strong> {EditingEncounter ? <AutoComplete value={LocalStringState2} onChange={(e) => {SetLocalStringState2(e.value)}} suggestions={campaignSelectionOptions} completeMethod={(e) => {SetCampaignSelectionOptions(campaigns.filter(c => c.toLowerCase().startsWith(e.query.toLowerCase())))}} placeholder="Campaign Name" dropdown forceSelection /> : activeEncounter.Metadata.Campaign}</span>
                     </section>
                 </section>
                 <div className="break" />
@@ -491,6 +499,24 @@ function Encounters() {
                 </section>
                 <LairDialog lairs={LairDialogList} selectedOwningEntityDBID={activeEncounter.HasLair ? activeEncounter.Lair!.OwningEntityDBID : -1} visible={LairDialogVisible} onClose={() => { SetLairDialogVisible(false) }} ReturnLair={getLair} />
             </div>
-        </PageTemplate>
+            <ConfirmDialog
+                visible={dialogOptions.visible}
+                onHide={() => { SetDialogOptions({ ...dialogOptions, visible: false }), dialogOptions.onHide() }}
+                header={dialogOptions.label}
+                message={dialogOptions.message}
+                className="dialog"
+                focusOnShow={true}
+                accept={dialogOptions.accept}
+                reject={dialogOptions.reject}
+                defaultFocus={dialogOptions.defaultFocus}
+                icon={dialogOptions.icon}
+                modal={true}
+                acceptClassName="dialog-accept"
+                rejectClassName="dialog-reject"
+                maskClassName="dialog-mask"
+                headerClassName="dialog-header"
+                contentClassName="dialog-content"
+            />
+        </SessionAuth>
     );
 }

@@ -17,12 +17,16 @@
         width: 8rem;
     }
 
-    table.medium input[type="text"] {
+    &.medium input[type="text"] {
         width: 10rem;
     }
     
-    table.large input[type="text"] {
+    &.large input[type="text"] {
         width: 12rem;
+    }
+
+    &.wide input[type="text"] {
+        width: 16rem;
     }
 
     input[type="number"] {

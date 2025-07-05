@@ -21,6 +21,8 @@ import {
 import { GiTrashCan, GiHamburgerMenu } from "react-icons/gi";
 
 import { CampaignOverview } from "@src/models/campaign";
+import { displayDate } from "@src/controllers/utils";
+import "@src/styles/tables.scss";
 
 type CampaignTableProps = {
     campaigns: CampaignOverview[],
@@ -46,6 +48,14 @@ export const CampaignsTable = ({ campaigns, className, nameCallback, deleteCallb
             cell: info => info.getValue(),
             header: () => "Description",
             meta: { filterVariant: "text" },
+        }),
+        factory.accessor("CreationDate", {
+            cell: info => displayDate(info.getValue()),
+            header: () => "Creation Date",
+        }),
+        factory.accessor("LastModified", {
+            cell: info => displayDate(info.getValue()),
+            header: () => "Last Modified",
         }),
         factory.display({
             id: "actions",
@@ -84,7 +94,7 @@ export const CampaignsTable = ({ campaigns, className, nameCallback, deleteCallb
     }, [campaigns]);
 
     return (
-        <div className={"table large" + (className ? " " + className : "")}>
+        <div className={"table large wide" + (className ? " " + className : "")}>
             <table>
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => {
@@ -167,7 +177,7 @@ export const CampaignsTable = ({ campaigns, className, nameCallback, deleteCallb
                     Go to page:
                     <input type="number" min="1" max={table.getPageCount()} defaultValue={table.getState().pagination.pageIndex + 1} onChange={e => { table.setPageIndex(e.target.value ? Number(e.target.value) - 1 : 0) }} />
                 </span>
-                <select value={table.getState().pagination.pageSize} onChange={e => { table.setPageSize(Number(e.target.value)) }}>
+                <select title="Select page size" value={table.getState().pagination.pageSize} onChange={e => { table.setPageSize(Number(e.target.value)) }}>
                     {[10, 20, 30, 40, 50].map(pageSize => (
                         <option key={pageSize} value={pageSize}>
                             Show {pageSize}

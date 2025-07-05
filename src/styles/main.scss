@@ -440,6 +440,13 @@ input {
     }
 }
 
+input.p-autocomplete-input {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
 input[type="text"],
 input[type="number"],
 select {

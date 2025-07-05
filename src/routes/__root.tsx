@@ -5,6 +5,7 @@ import { RouterContext } from "@src/router";
 import { OptionBox } from "@src/components/optionBox";
 import "@src/styles/main.scss";
 import "@src/styles/normalize.scss";
+import "primereact/resources/themes/bootstrap4-light-blue/theme.css";
 
 const TanStackRouterDevtools =
     import.meta.env.VITE_USE_TANSTACK_ROUTER_TOOLS == "true" && import.meta.env.DEV

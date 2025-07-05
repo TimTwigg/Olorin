@@ -6,7 +6,6 @@ import { FloatLabel } from "primereact/floatlabel";
 import { Button } from "primereact/button";
 // import { toast } from "react-toastify";
 import { useForm, ValidationError } from "@formspree/react";
-import "primereact/resources/themes/bootstrap4-light-blue/theme.css";
 import * as api from "@src/controllers/api";
 
 export const Route = createLazyFileRoute("/support")({
@@ -65,7 +64,7 @@ function Support() {
         <div>
             <h1>Support</h1>
             <p className="middle eight columns offset-by-two columns">
-                If you encounter any issues or have questions about Olorin, please reach out using the form below.
+                If you encounter any issues or have questions about Olorin, please reach out using the form below. <br />
                 {/* You can also upload screenshots that might help us understand the issue better. */}
                 We will get back to you as soon as possible.
             </p>

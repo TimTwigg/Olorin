@@ -351,7 +351,7 @@ export async function getCampaigns(detailLevel: APIDetailLevel = 1): Promise<api
         return {
             Campaigns: data.map((c: any) => {
                 if (detailLevel === 1) {
-                    return new CampaignOverview(c.Name, c.Description);
+                    return new CampaignOverview(c.Name, c.Description, dateFromString(c.CreationDate), dateFromString(c.LastModified));
                 }
                 else {
                     return Campaign.loadFromJSON(c);
@@ -406,4 +406,20 @@ export async function deleteCampaign(campaignName: string): Promise<boolean> {
     return deleteRequest("/campaign", {
         id: campaignName,
     }).then(() => { return true }, () => { return false });
+}
+
+/**
+ * Create a new campaign on the server.
+ *
+ * @param campaign The campaign to create.
+ *
+ * @returns The created campaign data.
+ */
+export async function createCampaign(campaign: Campaign): Promise<Campaign> {
+    if (!campaign) {
+        throw new Error("Campaign is null or undefined.");
+    }
+    return push("/campaign", campaign).then((data: any) => {
+        return Campaign.loadFromJSON(data);
+    });
 }
