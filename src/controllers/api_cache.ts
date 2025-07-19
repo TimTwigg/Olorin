@@ -53,7 +53,8 @@ function createCacheKey(func: string, args: any[]): string {
 function getRouteFromCacheKey(cache_key: string): string {
     const parts = cache_key.split("::");
     if (parts.length > 1) {
-        return parts[1];
+        let args = JSON.parse(parts[1]);
+        return args[0] || "";
     }
     return "";
 }
