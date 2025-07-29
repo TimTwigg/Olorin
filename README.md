@@ -11,6 +11,7 @@ Custom Encounter Manager for D&D 5E.
 - Create/manage players within campaign
 - Add players from linked campaign into encounter
     - Multicheckbox style
+- Fix scuffed CSS on encounter page
 
 ## Ideas
 

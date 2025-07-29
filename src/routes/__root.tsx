@@ -84,7 +84,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
             <Suspense>
                 <TanStackRouterDevtools />
             </Suspense>
-            <ToastContainer position="top-right" />
+            <ToastContainer position="top-right" autoClose={3000} />
         </div>
     ),
     errorComponent: ErrorComponent,
