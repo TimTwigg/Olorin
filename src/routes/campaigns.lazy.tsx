@@ -4,6 +4,7 @@ import Session, { SessionAuth } from "supertokens-auth-react/recipe/session";
 import { ConfirmDialog, DialogOptions } from "primereact/confirmdialog";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
+import { Card } from "primereact/card";
 import { IoWarningSharp } from "react-icons/io5";
 import { toast } from "react-toastify";
 
@@ -62,6 +63,11 @@ function Campaigns() {
         SetLocalStringState1("");
         SetLocalStringState2("");
         SetOpenCreationDialog(true);
+    }
+
+    const resetAllStates = () => {
+        SetActiveCampaign(null);
+        api.getCampaigns().then((res) => { SetCampaigns(res.Campaigns) });
     }
 
     React.useEffect(() => {
@@ -155,8 +161,28 @@ function Campaigns() {
                 window.location.href = "/auth"
             }}
         >
-            <p>{activeCampaign.Name}</p>
-            {/* TODO */}
+            <div className="playScreen container">
+                <section className="justify-between">
+                    <span className="three columns"><button className="big button" onClick={() => { resetAllStates() }} disabled={false}>Back to Campaigns</button></span>
+                    <h3 className="six columns">{activeCampaign.Name}</h3>
+                    <section className="three columns">
+                        <span><strong>Created On:</strong> {activeCampaign.CreationDate?.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) || ""}</span>
+                    </section>
+                </section>
+                <hr />
+                <p>{activeCampaign.Description}</p>
+                <hr />
+                <section className="ten columns offset-by-one column flex">
+                    {activeCampaign.Players.map((player, index) => {return <div key={index}>
+                        <Card title={player.StatBlock.Name} subTitle={player.StatBlock.Description.Type}>
+                            <p>
+                                {player.Notes}
+                            </p>
+                        </Card>
+                    </div>})}
+                </section>
+                <div className = "break" />
+            </div>
             <ConfirmDialog
                 visible={confirmDialogOptions.visible}
                 onHide={() => { SetConfirmDialogOptions({ ...confirmDialogOptions, visible: false }), confirmDialogOptions.onHide() }}

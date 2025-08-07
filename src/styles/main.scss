@@ -492,14 +492,23 @@ input.descriptionEdit {
 *   ================================================================
 */
 
-.card.collapsed {
-    display: flex;
-    justify-content: space-between;
+.card {
+    &.collapsed {
+        display: flex;
+        justify-content: space-between;
 
-    p {
-        margin: 0;
-        padding-top: 0.75rem;
+        p {
+            margin: 0;
+            padding-top: 0.75rem;
+        }
     }
+}
+
+.p-card {
+    width: 30rem;
+    height: 15rem;
+    margin: 5px;
+    border: 1px solid v.$lightGray;
 }
 
 .statdisplay {
@@ -525,6 +534,12 @@ input.descriptionEdit {
     h3 {
         text-align: center;
         margin: 0;
+    }
+
+    section {
+        height: 100%;
+        margin-top: auto;
+        margin-bottom: auto;
     }
 
     .panel {
@@ -612,11 +627,13 @@ td {
 .justify-between {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
 }
 
 .justify-evenly {
     display: flex;
     justify-content: space-evenly;
+    flex-wrap: wrap;
 }
 
 .m-right {
@@ -641,6 +658,7 @@ td {
 
 .flex {
     display: flex;
+    flex-wrap: wrap;
 }
 
 .gap-1 {
