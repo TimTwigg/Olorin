@@ -487,6 +487,17 @@ input.descriptionEdit {
     font-size: 1.75rem;
 }
 
+.inputContainer {
+    label {
+        width: 6rem;
+        display: inline-block;
+    }
+
+    .margin-bottom {
+        margin-bottom: 5px;
+    }
+}
+
 /*
 *   Encounter Manager Elements
 *   ================================================================
@@ -502,13 +513,6 @@ input.descriptionEdit {
             padding-top: 0.75rem;
         }
     }
-}
-
-.p-card {
-    width: 30rem;
-    height: 15rem;
-    margin: 5px;
-    border: 1px solid v.$lightGray;
 }
 
 .statdisplay {
@@ -596,6 +600,30 @@ input.descriptionEdit {
 .statblock.displayCard {
     border-radius: 5px;
     width: auto;
+}
+
+#campaignPlayerArea {
+    padding-left: 5rem;
+
+    .p-card {
+        width: 25rem;
+        height: 15rem;
+        margin: 5px;
+        border: 1px solid v.$lightGray;
+        position: relative;
+    }
+
+    .p-card-footer {
+        position: absolute;
+        bottom: 1.5rem;
+        right: 1.5rem;
+    }
+
+    .p-card-header {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+    }
 }
 
 /*

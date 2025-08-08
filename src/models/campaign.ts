@@ -39,6 +39,14 @@ export class Campaign {
         return new CampaignOverview(this.Name, this.Description, this.CreationDate, this.LastModified);
     }
 
+    withUpdatedPlayer(player: Player): Campaign {
+        const updatedPlayers = this.Players.map(p => p.RowID === player.RowID ? player : p);
+        let c =  new Campaign(this.Name, this.Description, updatedPlayers);
+        c.CreationDate = this.CreationDate;
+        c.LastModified = new Date();
+        return c;
+    }
+
     public static loadFromJSON(json: any): Campaign {
         const players = json.Players ? json.Players.map((p: any) => Player.loadFromJSON(p)) : [];
         let c = new Campaign(json.Name, json.Description, players);

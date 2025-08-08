@@ -28,6 +28,8 @@ const CACHE_EXCLUDED_ROUTES = [
     "/support",
     "/campaign",
     "/campaign/",
+    "/player",
+    "/player/",
 ]
 
 /**

@@ -6,6 +6,7 @@ import { parseDataAsStatBlock } from "@src/models/statBlock";
 import * as caching from "@src/controllers/api_cache";
 import { SmartMap } from "@src/models/data_structures/smartMap";
 import { Campaign, CampaignOverview } from "@src/models/campaign";
+import { Player } from "@src/models/player"
 
 export type APIDetailLevel = 1 | 2
 
@@ -194,6 +195,11 @@ export async function getEncounter(encounterID: number): Promise<api.SingleEncou
     })
 }
 
+/**
+ * Retrieve all conditions from the server.
+ * 
+ * @returns A list of conditions.
+ */
 export async function getConditions(): Promise<api.ConditionResponse> {
     return request("/condition/all", {}).then((data: any) => {
         return {
@@ -422,4 +428,46 @@ export async function createCampaign(campaign: Campaign): Promise<Campaign> {
     return push("/campaign", campaign).then((data: any) => {
         return Campaign.loadFromJSON(data);
     });
+}
+
+/**
+ * Edit a player on the server.
+ *
+ * @param player The player to edit.
+ * 
+ * @returns The edited player data.
+ */
+export async function editPlayer(player: Player): Promise<Player> {
+    if (!player) {
+        throw new Error("Player is null or undefined.");
+    }
+    return push("/player", player).then((data: any) => {
+        return Player.loadFromJSON(data);
+    });
+}
+
+/**
+ * Delete a player from the server.
+ *
+ * @param player The player to delete.
+ * 
+ * @returns A boolean indicating success or failure.
+ */
+export async function deletePlayer(player: Player): Promise<boolean> {
+    return deleteRequest("/player", {
+        id: `${player.Campaign},${player.RowID}`,
+    }).then(() => { return true }, () => { return false });
+}
+
+/**
+ * Retrieve all types from the server.
+ *
+ * @returns A list of types.
+ */
+export async function getTypes(): Promise<api.TypeResponse> {
+    return request("/type/all", {}).then((data: any) => {
+        return {
+            Types: data
+        }
+    })
 }

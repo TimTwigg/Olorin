@@ -4,6 +4,7 @@ import { EntityResponse, SingleEntityResponse } from "./entityResponse";
 import { StatBlockResponse, SingleStatBlockResponse } from "./statblockResponse";
 import { MetadataResponse } from "./metadataResponse";
 import { CampaignResponse, SingleCampaignResponse } from "./campaignResponse";
+import { TypeResponse } from "./typeResponse";
 
 export type {
     EncounterResponse,
@@ -15,5 +16,6 @@ export type {
     SingleStatBlockResponse,
     MetadataResponse,
     CampaignResponse,
-    SingleCampaignResponse
+    SingleCampaignResponse,
+    TypeResponse
 }

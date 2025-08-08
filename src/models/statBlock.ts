@@ -11,6 +11,7 @@ export type StatBlock = {
         Size: string;
         Type: string;
         Alignment: string;
+        Category: string;
     };
     Stats: {
         ArmorClass: number;
