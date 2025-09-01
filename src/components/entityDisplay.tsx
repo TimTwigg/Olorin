@@ -2,8 +2,8 @@ import * as React from "react";
 import { Entity } from "@src/models/entity";
 import { Card } from "@src/components/card";
 import { SmartMap } from "@src/models/data_structures/smartMap";
-import { UserOptions } from "@src/models/userOptions";
 import { StatBlock } from "@src/models/statBlock";
+import { ModelContext } from "@src/models/modelContext";
 import "@src/styles/entityDisplay.scss";
 
 import {
@@ -31,8 +31,8 @@ import { TbPencilOff, TbPencil } from "react-icons/tb";
 type EntityDisplayProps = {
     ref?: React.RefObject<HTMLDivElement>;
     entity: Entity;
+    context: ModelContext;
     deleteCallback: (id: string) => void;
-    userOptions?: UserOptions;
     setDisplay?: (statblock?: StatBlock) => void;
     renderTrigger?: () => void;
     overviewOnly?: boolean;
@@ -70,7 +70,7 @@ function renderConditions(conditions: SmartMap<string, number>): JSX.Element {
     </div>)
 }
 
-export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDisplay, renderTrigger, overviewOnly, editMode, isActive }: EntityDisplayProps) {
+export function EntityDisplay({ ref, entity, context, deleteCallback, setDisplay, renderTrigger, overviewOnly, editMode, isActive }: EntityDisplayProps) {
     const [ExpandedState, SetExpandedState] = React.useState<boolean>(false);
     const [ControlState, SetControlState] = React.useState<ControlOptions>(ControlOptions.None);
     const [LocalNumericalState, SetLocalNumericalState] = React.useState<number>(0);
@@ -80,7 +80,7 @@ export function EntityDisplay({ ref, entity, deleteCallback, userOptions, setDis
     const [readonly, SetReadonly] = React.useState<boolean>(false);
     const [locked, SetLocked] = React.useState<boolean>(false);
 
-    const ConditionTypes: string[] = userOptions?.conditions || [];
+    const ConditionTypes = context.conditions.map(c => c.Name) || [];
     setDisplay = setDisplay || ((_: any) => { console.log(`No display callback found for entity: ${entity ? entity.Name : "undefined"}`) });
     renderTrigger = renderTrigger || (() => { console.log("No render trigger found") });
 

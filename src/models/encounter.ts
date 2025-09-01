@@ -2,37 +2,37 @@ import { Entity } from "@src/models/entity";
 import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { CounterMap } from "@src/models/data_structures/counterMap";
 import { Lair } from "@src/models/lair";
-import { deepCopy, dateFromString } from "@src/controllers/utils";
+import { deepCopy, dateFromString, newLocalDate } from "@src/controllers/utils";
 
 export type EncounterMetadata = {
-    CreationDate?: Date,
-    AccessedDate?: Date,
-    Campaign?: string,
-    Started?: boolean,
-    Round?: number,
-    Turn?: number
-}
+    CreationDate?: Date;
+    AccessedDate?: Date;
+    Campaign?: string;
+    Started?: boolean;
+    Round?: number;
+    Turn?: number;
+};
 
 export type EncounterOverviewT = {
-    id: number,
-    Name: string,
-    Description: string,
-    Metadata: EncounterMetadata
-}
+    id: number;
+    Name: string;
+    Description: string;
+    Metadata: EncounterMetadata;
+};
 
 export class EncounterOverview implements EncounterOverviewT {
-    id: number
-    Name: string
-    Description: string
-    Metadata: EncounterMetadata
+    id: number;
+    Name: string;
+    Description: string;
+    Metadata: EncounterMetadata;
 
     constructor(id: number, name: string, description: string, metadata: EncounterMetadata) {
         this.id = id;
         this.Name = name;
         this.Description = description;
         this.Metadata = {
-            CreationDate: metadata.CreationDate === undefined ? new Date() : metadata.CreationDate,
-            AccessedDate: metadata.AccessedDate === undefined ? new Date() : metadata.AccessedDate,
+            CreationDate: metadata.CreationDate === undefined ? newLocalDate() : metadata.CreationDate,
+            AccessedDate: metadata.AccessedDate === undefined ? newLocalDate() : metadata.AccessedDate,
             Campaign: metadata.Campaign === undefined ? "" : metadata.Campaign,
             Started: metadata.Started === undefined ? false : metadata.Started,
             Turn: metadata.Turn === undefined ? 1 : metadata.Turn,
@@ -42,24 +42,24 @@ export class EncounterOverview implements EncounterOverviewT {
 }
 
 export class Encounter {
-    id: number
-    Name: string
-    Description: string
-    Metadata: EncounterMetadata
-    Entities: Entity[] = []
-    HasLair: boolean = false
-    Lair?: Lair = undefined
-    LairOwnerID: number = -1
-    ActiveID: string = ""
-    InitiativeOrder: [string, number][] = []
+    id: number;
+    Name: string;
+    Description: string;
+    Metadata: EncounterMetadata;
+    Entities: Entity[] = [];
+    HasLair: boolean = false;
+    Lair?: Lair = undefined;
+    LairOwnerID: number = -1;
+    ActiveID: string = "";
+    InitiativeOrder: [string, number][] = [];
 
     constructor(id: number, name: string = "", description: string = "", Campaign: string = "", metadata: EncounterMetadata = {}) {
         this.id = id;
         this.Name = name;
         this.Description = description;
         this.Metadata = {
-            CreationDate: metadata.CreationDate === undefined ? new Date() : metadata.CreationDate,
-            AccessedDate: metadata.AccessedDate === undefined ? new Date() : metadata.AccessedDate,
+            CreationDate: metadata.CreationDate === undefined ? newLocalDate() : metadata.CreationDate,
+            AccessedDate: metadata.AccessedDate === undefined ? newLocalDate() : metadata.AccessedDate,
             Campaign: metadata.Campaign === undefined ? Campaign : metadata.Campaign,
             Started: metadata.Started === undefined ? false : metadata.Started,
             Turn: metadata.Turn === undefined ? 1 : metadata.Turn,
@@ -73,7 +73,7 @@ export class Encounter {
 
     /**
      * Add an entity to the encounter
-     * 
+     *
      * @param entity the new entity
      * @returns the updated encounter
      */
@@ -83,7 +83,9 @@ export class Encounter {
             entityCounts.increment(e.Name);
         }
         if (entityCounts.get(entity.Name) === 1) {
-            this.Entities.forEach((e) => { if (e.Name === entity.Name) e.setSuffix("1") });
+            this.Entities.forEach((e) => {
+                if (e.Name === entity.Name) e.setSuffix("1");
+            });
         }
         let num = entityCounts.get(entity.Name)! + 1 || 0;
         if (num > 0) entity.setSuffix(num.toString());
@@ -93,7 +95,7 @@ export class Encounter {
 
     /**
      * Remove an entity from the encounter
-     * 
+     *
      * @param entity the id of the entity to remove
      * @returns the updated encounter
      */
@@ -110,7 +112,7 @@ export class Encounter {
 
     /**
      * Recalculate the suffixes of all entities in the encounter
-     * 
+     *
      * @returns the updated encounter
      */
     recalculateEntitySuffixes(): Encounter {
@@ -130,8 +132,8 @@ export class Encounter {
     }
 
     /**
-     * Tick the encounter, advancing the state of the active entity 
-     * 
+     * Tick the encounter, advancing the state of the active entity
+     *
      * @returns the updated encounter
      */
     tick(): Encounter {
@@ -153,7 +155,7 @@ export class Encounter {
 
     /**
      * Clear all non-locked entities from the encounter
-     * 
+     *
      * @returns the updated encounter
      */
     clear(): Encounter {
@@ -167,7 +169,7 @@ export class Encounter {
 
     /**
      * Reset the state of the encounter and all contained entities
-     * 
+     *
      * @returns the updated encounter
      */
     reset(): Encounter {
@@ -183,7 +185,7 @@ export class Encounter {
 
     /**
      * Randomize the initiative of all entities in the encounter
-     * 
+     *
      * @returns the updated encounter
      */
     randomizeInitiative(): Encounter {
@@ -194,7 +196,7 @@ export class Encounter {
 
     /**
      * Set the initiative order of the encounter
-     * 
+     *
      * @returns the updated encounter
      */
     setInitiativeOrder(): Encounter {
@@ -207,7 +209,7 @@ export class Encounter {
 
     /**
      * Update the encounter name
-     * 
+     *
      * @returns the updated encounter
      */
     withName(name: string): Encounter {
@@ -217,7 +219,7 @@ export class Encounter {
 
     /**
      * Update the encounter description
-     * 
+     *
      * @returns the updated encounter
      */
     withDescription(description: string): Encounter {
@@ -227,7 +229,7 @@ export class Encounter {
 
     /**
      * Update the encounter metadata
-     * 
+     *
      * @returns the updated encounter
      */
     withMetadata(metadata: EncounterMetadata): Encounter {
@@ -238,13 +240,13 @@ export class Encounter {
             Started: metadata.Started === undefined ? this.Metadata.Started : metadata.Started,
             Turn: metadata.Turn === undefined ? this.Metadata.Turn : metadata.Turn,
             Round: metadata.Round === undefined ? this.Metadata.Round : metadata.Round,
-        }
+        };
         return this;
     }
 
     /**
      * Update the encounter entity list
-     * 
+     *
      * @returns the updated encounter
      */
     withEntities(entities: Entity[]): Encounter {
@@ -254,7 +256,7 @@ export class Encounter {
 
     /**
      * Update the encounter lair
-     * 
+     *
      * @returns the updated encounter
      */
     withLair(lair: Lair | undefined): Encounter {
@@ -267,7 +269,7 @@ export class Encounter {
 
     /**
      * Make a copy of the encounter
-     * 
+     *
      * @returns a new encounter
      */
     copy(): Encounter {
@@ -291,7 +293,7 @@ export class Encounter {
 
     /**
      * Get a summary of the encounter
-     * 
+     *
      * @returns a summary of the encounter
      */
     toOverview(): EncounterOverview {
@@ -299,7 +301,7 @@ export class Encounter {
             id: this.id,
             Name: this.Name,
             Description: this.Description,
-            Metadata: deepCopy(this.Metadata)
+            Metadata: deepCopy(this.Metadata),
         };
     }
 
@@ -312,12 +314,12 @@ export class Encounter {
     public static loadFromJSON(json: any): Encounter {
         let encounter = new Encounter(json.ID, json.Name, json.Description, "", json.Metadata);
         encounter.Metadata = {
-            CreationDate: json.Metadata.CreationDate === undefined ? new Date() : dateFromString(json.Metadata.CreationDate),
-            AccessedDate: json.Metadata.AccessedDate === undefined ? new Date() : dateFromString(json.Metadata.AccessedDate),
+            CreationDate: json.Metadata.CreationDate === undefined ? newLocalDate() : dateFromString(json.Metadata.CreationDate),
+            AccessedDate: json.Metadata.AccessedDate === undefined ? newLocalDate() : dateFromString(json.Metadata.AccessedDate),
             Campaign: json.Metadata.Campaign === undefined ? "" : json.Metadata.Campaign,
             Started: json.Metadata.Started === undefined ? false : json.Metadata.Started,
             Round: json.Metadata.Round === undefined ? 1 : json.Metadata.Round,
-            Turn: json.Metadata.Turn === undefined ? 1 : json.Metadata.Turn
+            Turn: json.Metadata.Turn === undefined ? 1 : json.Metadata.Turn,
         };
         encounter.Entities = json.Entities.map((e: any) => StatBlockEntity.loadFromJSON(e)); // TODO - should this bifurcate to different entity types? Or Players/Temps ARE statblock entities?
         encounter.ActiveID = json.ActiveID;

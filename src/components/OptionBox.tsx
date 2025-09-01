@@ -1,21 +1,18 @@
 import * as React from "react";
 import Session from "supertokens-auth-react/recipe/session";
-import {
-    Menu,
-    MenuButton,
-    MenuItem,
-    MenuItems,
-} from "@headlessui/react";
+import { useRouter } from "@tanstack/react-router";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
 import * as api from "@src/controllers/api";
 
 import "@src/styles/optionBox.scss";
 
-type AuthBoxProps = {}
+type AuthBoxProps = {};
 
-export function OptionBox({ }: AuthBoxProps) {
+export function OptionBox({}: AuthBoxProps) {
     const [displayName, SetDisplayName] = React.useState<string | null>(null);
     const metaRef = React.useRef<number>(0);
+    const router = useRouter();
 
     React.useEffect(() => {
         if (metaRef.current === 0) {
@@ -43,8 +40,9 @@ export function OptionBox({ }: AuthBoxProps) {
 
     const signOut = async () => {
         await Session.signOut();
+        router.invalidate();
         window.location.href = "/";
-    }
+    };
 
     return (
         <>
@@ -52,19 +50,37 @@ export function OptionBox({ }: AuthBoxProps) {
                 {displayName ? (
                     <Menu as="div">
                         <MenuButton className="menuButton">
-                            {displayName.substring(0, 20)}{displayName.length > 20 ? "..." : ""}
+                            {displayName.substring(0, 20)}
+                            {displayName.length > 20 ? "..." : ""}
                         </MenuButton>
                         <MenuItems className="menuItems" anchor="bottom">
-                            <MenuItem><button onClick={() => {window.location.href = "/profile"}}>Profile</button></MenuItem>
-                            <MenuItem><button onClick={signOut}>Sign Out</button></MenuItem>
+                            <MenuItem>
+                                <button
+                                    onClick={() => {
+                                        window.location.href = "/profile";
+                                    }}
+                                >
+                                    Profile
+                                </button>
+                            </MenuItem>
+                            <MenuItem>
+                                <button onClick={signOut}>Sign Out</button>
+                            </MenuItem>
                         </MenuItems>
                     </Menu>
                 ) : (
                     <div>
-                        <button className="menuButton" onClick={() => {window.location.href = "/auth"}}>Sign In</button>
+                        <button
+                            className="menuButton"
+                            onClick={() => {
+                                window.location.href = "/auth";
+                            }}
+                        >
+                            Sign In
+                        </button>
                     </div>
                 )}
             </div>
-    </>
+        </>
     );
 }

@@ -6,12 +6,11 @@ Custom Encounter Manager for D&D 5E.
 
 - Entity Display Spells Control
 - Add file upload to contact form
-- Campaigns page
-    - Create and manage campaigns
-- Create/manage players within campaign
+- Create players within campaign
 - Add players from linked campaign into encounter
     - Multicheckbox style
 - Fix scuffed CSS on encounter page
+- Rewrite $encounterID.tsx
 
 ## Ideas
 

@@ -5,9 +5,7 @@ import { router } from "@src/router";
 
 import { canHandleRoute, getRoutingComponent } from "supertokens-auth-react/ui";
 import SuperTokens from "supertokens-auth-react";
-import ThirdPartyEmailPassword, {
-    Google,
-} from "supertokens-auth-react/recipe/thirdparty";
+import ThirdPartyEmailPassword, { Google } from "supertokens-auth-react/recipe/thirdparty";
 import EmailPassword from "supertokens-auth-react/recipe/emailpassword";
 import { EmailPasswordPreBuiltUI } from "supertokens-auth-react/recipe/emailpassword/prebuiltui";
 import { ThirdPartyPreBuiltUI } from "supertokens-auth-react/recipe/thirdparty/prebuiltui";
@@ -31,7 +29,7 @@ SuperTokens.init({
                 if (context.action === "SUCCESS") {
                     if (context.isNewRecipeUser && context.user.loginMethods.length === 1) {
                         if (context.user.emails.length > 0) {
-                            api.setMetadata(new Map<string, string>([["email", context.user.emails[0]]]))
+                            api.setMetadata(new Map<string, string>([["email", context.user.emails[0]]]));
                         }
                     }
                 }
@@ -39,15 +37,13 @@ SuperTokens.init({
         }),
         ThirdPartyEmailPassword.init({
             signInAndUpFeature: {
-                providers: [
-                    Google.init(),
-                ],
+                providers: [Google.init()],
             },
             onHandleEvent: async (context) => {
                 if (context.action === "SUCCESS") {
                     if (context.isNewRecipeUser && context.user.loginMethods.length === 1) {
                         if (context.user.emails.length > 0) {
-                            api.setMetadata(new Map<string, string>([["email", context.user.emails[0]]]))
+                            api.setMetadata(new Map<string, string>([["email", context.user.emails[0]]]));
                         }
                     }
                 }
@@ -65,23 +61,23 @@ SuperTokens.init({
 // Add DialogOptions type for ConfirmDialog
 declare module "primereact/confirmdialog" {
     type DialogOptions = {
-        visible: boolean,
-        label?: string,
-        message?: string,
-        onHide: () => void,
-        accept?: () => void,
-        reject?: () => void,
-        defaultFocus?: "accept" | "reject" | undefined,
-        icon?: React.ReactNode,
-        content?: (props: ContentProps) => React.ReactNode,
-        footer?: React.ReactNode,
+        visible: boolean;
+        label?: string;
+        message?: string;
+        onHide: () => void;
+        accept?: () => void;
+        reject?: () => void;
+        defaultFocus?: "accept" | "reject" | undefined;
+        icon?: React.ReactNode;
+        content?: (props: ContentProps) => React.ReactNode;
+        footer?: React.ReactNode;
     };
 }
 
 // Render the app
-const rootElement = document.getElementById("root")!
+const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {
-    const root = ReactDOM.createRoot(rootElement)
+    const root = ReactDOM.createRoot(rootElement);
     root.render(
         <>
             <StrictMode>
@@ -94,5 +90,5 @@ if (!rootElement.innerHTML) {
                 )}
             </StrictMode>
         </>
-    )
+    );
 }

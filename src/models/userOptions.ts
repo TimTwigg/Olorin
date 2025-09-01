@@ -1,9 +1,7 @@
 export class UserOptions {
-    conditions?: string[]
-    defaultColumns?: number
+    defaultColumns: number;
 
-    constructor(conditions: string[] = [], defaultColumns: number|null = null) {
-        this.conditions = conditions
-        this.defaultColumns = defaultColumns||undefined
+    constructor(defaultColumns: number | null = null) {
+        this.defaultColumns = defaultColumns || 2;
     }
 }

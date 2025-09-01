@@ -1,17 +1,20 @@
-import { createRouter } from "@tanstack/react-router"
-import { routeTree } from "./routeTree.gen"
-
-export interface RouterContext {
-    columnCount?: number,
-}
+import { createRouter } from "@tanstack/react-router";
+import { routeTree } from "@src/routeTree.gen";
+import { UserOptions } from "@src/models/userOptions";
 
 export const router = createRouter({
     routeTree,
-})
+    context: {
+        userOptions: new UserOptions(),
+        conditions: [],
+        creatureTypes: [],
+        campaigns: [],
+    },
+});
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {
     interface Register {
-        router: typeof router
+        router: typeof router;
     }
 }
