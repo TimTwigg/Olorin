@@ -115,27 +115,27 @@ export function StatBlockDisplay({ statBlock, displayColumns, size, deleteCallba
                     <span><strong>Proficiency Bonus:</strong> +{statBlock.ProficiencyBonus}</span>
                 </span>
             </Card>
-            <Card>
+            {statBlock.Actions.length > 0 && <Card>
                 <h5>Actions</h5>
                 <hr className="thin" />
                 <ActionsDisplay actions={statBlock.Actions} />
-            </Card>
-            {statBlock.BonusActions && <Card>
+            </Card>}
+            {statBlock.BonusActions && statBlock.BonusActions.length > 0 && <Card>
                 <h5>Bonus Actions</h5>
                 <hr className="thin" />
                 <SimpleActionsDisplay actions={statBlock.BonusActions} />
             </Card>}
-            {statBlock.Reactions && <Card>
+            {statBlock.Reactions && statBlock.Reactions.length > 0 && <Card>
                 <h5>Reactions</h5>
                 <hr className="thin" />
                 <SimpleActionsDisplay actions={statBlock.Reactions} />
             </Card>}
-            {statBlock.LegendaryActions && <Card>
+            {statBlock.LegendaryActions && statBlock.LegendaryActions.Actions && statBlock.LegendaryActions.Actions.length > 0 && <Card>
                 <h5>Legendary Actions</h5>
                 <hr className="thin" />
                 <LegendaryActionsDisplay legendaryActions={statBlock.LegendaryActions} />
             </Card>}
-            {statBlock.MythicActions && <Card>
+            {statBlock.MythicActions && statBlock.MythicActions.Actions && statBlock.MythicActions.Actions.length > 0 && <Card>
                 <h5>Mythic Actions</h5>
                 <hr className="thin" />
                 <MythicActionsDisplay mythicActions={statBlock.MythicActions} />

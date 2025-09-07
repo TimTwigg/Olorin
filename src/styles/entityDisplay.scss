@@ -58,7 +58,7 @@
 
 .displayCardInfo {
     background-color: #ebe2d3;
-    width: 3rem;
+    width: 4rem;
     text-align: center;
     border-top: 1px solid v.$red;
     border-bottom: 1px solid v.$red;
@@ -217,15 +217,13 @@
 
     .displayCardInfo {
         margin: 5px 0 5px 0;
-        padding: 0.5rem;
-        width: 2.5rem;
 
         input {
-            width: 2rem;
+            width: 3rem;
             text-align: center;
             border-radius: 5px;
             line-height: 2.5rem;
-            margin-top: 1.25rem;
+            margin: 0.5rem auto;
         }
 
         label {

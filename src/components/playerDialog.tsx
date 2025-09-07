@@ -38,6 +38,7 @@ export function PlayerDialog({ visible, campaign, currentPlayersIDs, onClose, ca
      * Wrap the close function to allow adding cleanup functionality
      */
     const CloseDialog = () => {
+        setSelectedPlayerIDs(currentPlayersIDs);
         onClose();
     };
 
@@ -67,7 +68,7 @@ export function PlayerDialog({ visible, campaign, currentPlayersIDs, onClose, ca
     if (!visible || campaign === "") return null;
 
     return (
-        <Dialog header="Include Players" visible={visible} style={{ width: "50vw" }} onHide={CloseDialog} className="playerDialog" footer={footer_content}>
+        <Dialog header="Add Players" visible={visible} style={{ width: "50vw" }} onHide={CloseDialog} className="playerDialog" footer={footer_content}>
             {campaignPlayers.map((player, index) => {
                 return (
                     <section key={`player_dialog_${index}`}>

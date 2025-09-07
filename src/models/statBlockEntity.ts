@@ -198,7 +198,7 @@ export class StatBlockEntity implements Entity {
 
     public static loadFromJSON(json: any): Entity {
         let statblock = parseDataAsStatBlock(json.Displayable);
-        let ent = new StatBlockEntity(statblock, json.Initiative, json.IsHostile);
+        let ent = new StatBlockEntity(statblock, json.Initiative, json.IsHostile, json.EntityType);
         ent.Name = json.Name;
         ent.Suffix = json.Suffix;
         ent.CurrentHitPoints = json.CurrentHitPoints;

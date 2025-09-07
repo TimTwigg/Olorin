@@ -119,21 +119,31 @@ function ActiveEncounter() {
      * @param entityID The ID of the StatBlock to retrieve
      * @returns The retrieved StatBlock, or undefined if not found
      */
-    const getStatBlock = async (entityID: number): Promise<StatBlock | undefined> => {
-        return api.getStatBlock(entityID).then((res) => {
-            if (res.StatBlock === undefined) return;
-            appendToStatBlockList(res.StatBlock);
-            return res.StatBlock;
-        });
+    const getStatBlock = async (entityID: number, entityType: EntityType = EntityType.StatBlock): Promise<StatBlock | undefined> => {
+        if (entityType === EntityType.StatBlock) {
+            return api.getStatBlock(entityID).then((res) => {
+                if (res.StatBlock === undefined) return;
+                appendToStatBlockList(res.StatBlock);
+                return res.StatBlock;
+            });
+        } else if (entityType === EntityType.Player) {
+            return api.getPlayerEntity(entityID).then((res) => {
+                if (res.StatBlock === undefined) return;
+                appendToStatBlockList(res.StatBlock);
+                return res.StatBlock;
+            });
+        }
     };
 
     /**
-     * Delete an Entity from the Encounter
+     * Delete an Entity from the Encounter.
+     * Does not save (operates within edit mode)
+     * 
      * @param entityID The ID of the Entity to delete
      */
     const deleteEntity = (entityID: string) => {
         if (!activeEncounter) return;
-        SetActiveEncounter(activeEncounter.removeEntity(entityID).copy());
+        SetActiveEncounter(activeEncounter.removeEntity(entityID).copy(), false);
     };
 
     /**
@@ -214,13 +224,13 @@ function ActiveEncounter() {
         let entity = FullStatBlockList.find((ent) => ent.ID === entityID);
         // Entity is not in cache
         if (!entity) {
-            getStatBlock(entityID).then((statblock) => {
-                if (statblock) SetActiveEncounter(activeEncounter.addEntity(new StatBlockEntity(statblock, (entityType = entityType))), false);
+            getStatBlock(entityID, entityType).then((statblock) => {
+                if (statblock) SetActiveEncounter(activeEncounter.addEntity(new StatBlockEntity(statblock, 0, entityType !== EntityType.Player, entityType)), false);
             });
         }
         // Entity is in cache
         else {
-            SetActiveEncounter(activeEncounter.addEntity(new StatBlockEntity(entity, (entityType = entityType))), false);
+            SetActiveEncounter(activeEncounter.addEntity(new StatBlockEntity(entity, 0, entityType !== EntityType.Player, entityType)), false);
         }
         TriggerReRender();
     };
@@ -261,7 +271,7 @@ function ActiveEncounter() {
      */
     const openLairDialog = () => {
         if (!activeEncounter) return;
-        let lairs = activeEncounter.Entities.filter((ent) => ent instanceof StatBlockEntity && ent.StatBlock.Lair).map((ent) => {
+        let lairs = activeEncounter.Entities.filter((ent) => ent instanceof StatBlockEntity && ent.StatBlock.Lair && ent.StatBlock.Lair.Name).map((ent) => {
             return (ent as StatBlockEntity).StatBlock.Lair!;
         });
         lairs = [...new Map(lairs.map((lair) => [lair.OwningEntityDBID, lair])).values()]; // Remove duplicates
@@ -466,8 +476,13 @@ function ActiveEncounter() {
                         <button onClick={openLairDialog} disabled={!EditingEncounter}>
                             Set Lair
                         </button>
-                        <button onClick={() => {SetOpenPlayerDialog(true)}} disabled={!EditingEncounter}>
-                            Manage Players
+                        <button
+                            onClick={() => {
+                                SetOpenPlayerDialog(true);
+                            }}
+                            disabled={!EditingEncounter}
+                        >
+                            Add Players
                         </button>
                     </section>
                     <div className="break" />

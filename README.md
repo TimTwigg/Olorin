@@ -9,11 +9,15 @@ Custom Encounter Manager for D&D 5E.
 - Create players within campaign
 - Add players from linked campaign into encounter
     - Multicheckbox style
-- PlayerDialog
-    - Set default checks for players already present
-        - Test this
-    - Fix callback
-        - ID issue
+- Design
+    - Encounter runtime page
+        - replace right-side controls with runtime controls
+            - "Manage Initiative"
+- Changing initiative should not be allowed in encounter view mode (allowed in edit or run mode)
+- Library
+    - Edit lairs
+- Add Environment?
+    - Basically lair but tied to encounter rather than an entity
 
 ## Ideas
 

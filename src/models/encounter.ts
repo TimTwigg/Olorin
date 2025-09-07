@@ -321,7 +321,7 @@ export class Encounter {
             Round: json.Metadata.Round === undefined ? 1 : json.Metadata.Round,
             Turn: json.Metadata.Turn === undefined ? 1 : json.Metadata.Turn,
         };
-        encounter.Entities = json.Entities.map((e: any) => StatBlockEntity.loadFromJSON(e)); // TODO - should this bifurcate to different entity types? Or Players/Temps ARE statblock entities?
+        encounter.Entities = json.Entities.map((e: any) => StatBlockEntity.loadFromJSON(e));
         encounter.ActiveID = json.ActiveID;
         encounter.HasLair = json.HasLair;
         encounter.LairOwnerID = json.LairOwnerID || -1;
