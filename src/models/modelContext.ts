@@ -7,4 +7,9 @@ export interface ModelContext {
     conditions: Condition[];
     creatureTypes: string[];
     campaigns: CampaignOverview[];
+    technicalConfig: {
+        cacheSizes: {
+            statblocks: number;
+        };
+    };
 }

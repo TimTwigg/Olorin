@@ -120,7 +120,7 @@ function Encounters() {
                 maskClassName="dialog-mask"
                 footer={
                     <div>
-                        <Button label="Cancel" onClick={() => SetOpenCreationDialog(false)} />
+                        <Button label="Cancel" onClick={() => SetOpenCreationDialog(false)} severity="secondary" />
                         <Button
                             label="Done"
                             onClick={() => {
@@ -148,7 +148,7 @@ function Encounters() {
                     </div>
                 }
             >
-                <div>
+                <div className="inputContainer">
                     <label htmlFor="encounter-name">Name</label>
                     <input id="encounter-name" type="text" value={LocalStringState1} onChange={(e) => SetLocalStringState1(e.target.value)} placeholder="Encounter Name" />
                     <br />

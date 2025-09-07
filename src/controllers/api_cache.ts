@@ -13,7 +13,7 @@ class APICacheEntry {
 /**
  * Cache entry validity period in seconds.
  */
-const CACHE_AGING = 600;
+const CACHE_AGING = import.meta.env.VITE_CACHE_AGING ? Number(import.meta.env.VITE_CACHE_AGING) : 600; // Default to 5 minutes
 
 /**
  * Cache for API functions to avoid redundant calls.
@@ -85,10 +85,10 @@ function checkCache(cache_key: string): APICacheEntry | null {
             const now = new Date();
             const age = (now.getTime() - entry.timestamp.getTime()) / 1000;
             if (age < CACHE_AGING) {
-                console.log(`Cache hit for key: ${cache_key}, age: ${age} s`);
+                if (import.meta.env.DEV) console.log(`Cache hit for key: ${cache_key}, age: ${age} s`);
                 return deepCopy(entry);
             } else {
-                console.log(`Cache expired for key: ${cache_key}, age: ${age} s`);
+                if (import.meta.env.DEV) console.log(`Cache expired for key: ${cache_key}, age: ${age} s`);
                 FUNCTION_CACHE.delete(cache_key);
             }
         }

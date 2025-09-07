@@ -16,7 +16,7 @@ export class StatBlockEntity implements Entity {
     ArmorClassBonus = 0;
     Speed;
     Conditions = new SmartMap<string, number>();
-    SpellSaveDC: number;
+    SpellSaveDC;
     SpellSlots = new SmartMap<number, { total: number, used: number }>();
     Concentration = false;
     Notes = "";
@@ -24,11 +24,11 @@ export class StatBlockEntity implements Entity {
     EncounterLocked = false;
     Displayable;
     StatBlock: StatBlock;
-    EntityType = EntityType.StatBlock;
+    EntityType;
     SavingThrows;
     ChallengeRating;
 
-    constructor(statBlock: StatBlock, initiative: number = 0, IsHostile: boolean = true) {
+    constructor(statBlock: StatBlock, initiative: number = 0, IsHostile: boolean = true, entityType: EntityType = EntityType.StatBlock) {
         this.DBID = statBlock.ID;
         this.ID = (hashCode(statBlock.Name) * Date.now() * Math.random()).toString(16);
         this.Name = statBlock.Name;
@@ -43,6 +43,7 @@ export class StatBlockEntity implements Entity {
         this.SavingThrows = new SmartMap<string, number>();
         this.SpellSaveDC = statBlock.Details.SpellSaveDC || 0;
         this.ChallengeRating = statBlock.ChallengeRating;
+        this.EntityType = entityType;
 
         for (let stat of statBlock.Stats.Abilities.keysAsArray()) {
             let item = statBlock.Details.SavingThrows.find((s) => s.Name === stat);

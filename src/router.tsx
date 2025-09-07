@@ -9,6 +9,11 @@ export const router = createRouter({
         conditions: [],
         creatureTypes: [],
         campaigns: [],
+        technicalConfig: {
+            cacheSizes: {
+                statblocks: 100,
+            },
+        },
     },
 });
 

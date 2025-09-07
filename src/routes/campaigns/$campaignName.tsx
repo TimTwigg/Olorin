@@ -17,6 +17,7 @@ import * as api from "@src/controllers/api";
 
 export const Route = createFileRoute("/campaigns/$campaignName")({
     loader: async ({ params: { campaignName } }) => {
+        document.body.style.cursor = "wait";
         const activeCampaign =
             (await api
                 .getCampaign(campaignName)
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/campaigns/$campaignName")({
                     return res ? res.Campaign : null;
                 })
                 .catch(() => null)) || null;
+        document.body.style.cursor = "default";
         return { activeCampaign };
     },
     component: ActiveCampaign,
@@ -102,9 +104,7 @@ function ActiveCampaign() {
                 <section className="justify-between">
                     <span className="three columns">
                         <Link to="/campaigns">
-                            <button className="big button" disabled={false}>
-                                Back to Campaigns
-                            </button>
+                            <button className="big button">Back to Campaigns</button>
                         </Link>
                     </span>
                     <h3 className="six columns">{activeCampaign.Name}</h3>
@@ -182,7 +182,7 @@ function ActiveCampaign() {
                 maskClassName="dialog-mask"
                 footer={
                     <div>
-                        <Button label="Cancel" onClick={() => SetOpenCreationDialog(false)} />
+                        <Button label="Cancel" onClick={() => SetOpenCreationDialog(false)} severity="secondary" />
                         <Button
                             label="Done"
                             onClick={() => {

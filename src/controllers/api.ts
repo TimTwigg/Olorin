@@ -13,7 +13,7 @@ export type APIDetailLevel = 1 | 2
 /**
  * Base URL for the API server.
  */
-const BASE_URL = "http://localhost:8080"
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 /**
  * Wrapper for API functions to handle caching
@@ -204,7 +204,7 @@ export async function getConditions(): Promise<api.ConditionResponse> {
     return request("/condition/all", {}).then((data: any) => {
         return {
             Conditions: data.map((condition: any) => {
-                return condition.Name;
+                return condition;
             })
         }
     })

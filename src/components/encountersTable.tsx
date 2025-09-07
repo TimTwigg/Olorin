@@ -28,8 +28,8 @@ export const EncountersTable = ({ encounters, className, deleteCallback }: Encou
         () => [
             factory.accessor("Name", {
                 cell: (info) => (
-                    <Link to="/encounters/$encounterID" params={{ encounterID: info.getValue() }}>
-                        {info.getValue().replace(/\s/g, "").length > 0 ? info.getValue() : "<campaign name>"}
+                    <Link to="/encounters/$encounterID" params={{ encounterID: info.row.original.id.toString() }}>
+                        {info.getValue().replace(/\s/g, "").length > 0 ? info.getValue() : "<encounter name>"}
                     </Link>
                 ),
                 header: () => "Name",

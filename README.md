@@ -9,8 +9,11 @@ Custom Encounter Manager for D&D 5E.
 - Create players within campaign
 - Add players from linked campaign into encounter
     - Multicheckbox style
-- Fix scuffed CSS on encounter page
-- Rewrite $encounterID.tsx
+- PlayerDialog
+    - Set default checks for players already present
+        - Test this
+    - Fix callback
+        - ID issue
 
 ## Ideas
 

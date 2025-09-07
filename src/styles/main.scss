@@ -431,7 +431,6 @@ input {
     border: ridge 1px v.$gray;
     line-height: 2rem;
     border-color: v.$lightGray;
-    border-radius: 5px;
     padding: 5px;
 
     &:focus {
@@ -488,6 +487,10 @@ input.descriptionEdit {
 }
 
 .inputContainer {
+    input {
+        border-radius: 4px;
+    }
+
     label {
         width: 6rem;
         display: inline-block;
@@ -541,7 +544,6 @@ input.descriptionEdit {
     }
 
     section {
-        height: 100%;
         margin-top: auto;
         margin-bottom: auto;
     }
