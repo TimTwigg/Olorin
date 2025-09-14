@@ -1,4 +1,4 @@
-@use 'variables' as v;
+@use "variables" as v;
 
 .displayCard {
     background-color: v.$parchment;
@@ -18,7 +18,7 @@
     .h4 {
         font-size: 2rem;
         margin: 0;
-        color: #861C06;
+        color: #861c06;
         font-weight: bold;
         column-span: all;
     }
@@ -26,7 +26,7 @@
     h5 {
         font-size: 2rem;
         margin: 0;
-        color: #861C06;
+        color: #861c06;
     }
 
     p {
@@ -35,7 +35,7 @@
 
     hr {
         height: 2px;
-        background-color: #861C06;
+        background-color: #861c06;
         border: 0;
         margin-right: 1rem;
         clip-path: polygon(100% 50%, 0 0, 0 100%);
@@ -77,12 +77,6 @@
     padding: 0rem 1rem;
     margin: 0 5px;
 
-    svg {
-        width: 3rem;
-        height: 3rem;
-        margin: 5px;
-    }
-
     .controls {
         display: flex;
         justify-content: space-evenly;
@@ -90,13 +84,10 @@
     }
 
     .suboptions {
-        padding: 1rem 0;
+        padding: 1rem 0 1rem 2rem;
         display: flex;
         justify-content: left;
-
-        span {
-            margin: 0 1rem;
-        }
+        gap: 1rem;
 
         p {
             margin: 0;
@@ -114,40 +105,19 @@
         button,
         input[type="number"] {
             height: 3rem;
-            margin-top: 0.25rem;
             vertical-align: top;
             border: ridge 1px v.$gray;
         }
 
-        button {
+        button.p-button-icon-only {
             width: 3rem;
             font-size: 2.5rem;
-
-            &.icon {
-                height: 5rem;
-                width: 6rem;
-                font-size: 1rem;
-
-                svg {
-                    width: 2rem;
-                    height: 2rem;
-                }
-            }
-
-            &.leftButton {
-                border-top-left-radius: 5px;
-                border-bottom-left-radius: 5px;
-            }
-
-            &.rightButton {
-                border-top-right-radius: 5px;
-                border-bottom-right-radius: 5px;
-            }
+            padding: 0;
         }
 
         input[type="text"],
         input[type="number"] {
-            width: 6rem;
+            width: 7rem;
             box-sizing: border-box;
             padding-left: 5px;
 
@@ -160,10 +130,13 @@
                 border-top-right-radius: 5px;
                 border-bottom-right-radius: 5px;
             }
+
+            &.wide {
+                width: 9rem;
+            }
         }
 
         textarea {
-            width: 30rem;
             resize: none;
             font-size: inherit;
             line-height: 1.2;
@@ -173,14 +146,24 @@
         }
 
         .conditionCheckBoxes {
-            column-count: 4;
-            -webkit-column-count: 4;
-            -moz-column-count: 4;
-            font-size: 1.25rem;
+            column-count: 3;
+            -webkit-column-count: 3;
+            -moz-column-count: 3;
+            font-size: 1.5rem;
+        }
+
+        &.narrow {
+            flex-direction: column;
+
+            .conditionCheckBoxes {
+                column-count: 2;
+                -webkit-column-count: 2;
+                -moz-column-count: 2;
+                font-size: 1.25rem;
+            }
         }
     }
 }
-
 
 .active .displayCard {
     border-top-width: 5px;
@@ -238,6 +221,16 @@
 
     label {
         font-size: 1.5rem;
+    }
+}
+
+.notesControl {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    textarea {
+        width: 100%;
     }
 }
 

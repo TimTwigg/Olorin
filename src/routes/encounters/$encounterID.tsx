@@ -138,7 +138,7 @@ function ActiveEncounter() {
     /**
      * Delete an Entity from the Encounter.
      * Does not save (operates within edit mode)
-     * 
+     *
      * @param entityID The ID of the Entity to delete
      */
     const deleteEntity = (entityID: string) => {
@@ -517,6 +517,7 @@ function ActiveEncounter() {
                                     onClick={() => {
                                         SetActiveEncounter(activeEncounter.randomizeInitiative(), false), TriggerReRender();
                                     }}
+                                    disabled={!EditingEncounter}
                                 >
                                     Random Initiative
                                 </button>

@@ -1,16 +1,20 @@
 import * as React from "react";
 import { useRouteContext } from "@tanstack/react-router";
+import { Button } from "primereact/button";
+import { Checkbox } from "primereact/checkbox";
+import { InputTextarea } from "primereact/inputtextarea";
+
+import { GiCrossedSwords, GiCog, GiHalfHeart, GiShield, GiChalkOutlineMurder, GiPencil, GiSpellBook, GiRun, GiMountainClimbing, GiDigDug, GiLibertyWing, GiHourglass, GiTrashCan, GiDeathSkull } from "react-icons/gi";
+import { FaSwimmer, FaAddressCard } from "react-icons/fa";
+import { SlLockOpen } from "react-icons/sl";
+import { AiFillLock } from "react-icons/ai";
+import { TbPencilOff, TbPencil } from "react-icons/tb";
+
 import { Entity } from "@src/models/entity";
 import { Card } from "@src/components/card";
 import { SmartMap } from "@src/models/data_structures/smartMap";
 import { StatBlock } from "@src/models/statBlock";
 import "@src/styles/entityDisplay.scss";
-
-import { GiCrossedSwords, GiCog, GiHalfHeart, GiShield, GiChalkOutlineMurder, GiPencil, GiSpellBook, GiRun, GiMountainClimbing, GiDigDug, GiLibertyWing, GiHourglass, GiTrashCan, GiCheckMark, GiDeathSkull } from "react-icons/gi";
-import { FaSwimmer, FaAddressCard } from "react-icons/fa";
-import { SlLockOpen } from "react-icons/sl";
-import { AiFillLock } from "react-icons/ai";
-import { TbPencilOff, TbPencil } from "react-icons/tb";
 
 type EntityDisplayProps = {
     ref?: React.RefObject<HTMLDivElement>;
@@ -156,27 +160,9 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
     const renderSettingsControl = () => {
         return (
             <>
-                <span>
-                    <button onClick={(_) => LockEntity(!locked)} className="icon">
-                        {locked ? <AiFillLock /> : <SlLockOpen />}
-                        <br />
-                        {overviewOnly ? "" : locked ? "Locked" : "Unlocked"}
-                    </button>
-                </span>
-                <span>
-                    <button onClick={(_) => SetReadonly(!readonly)} className="icon">
-                        {readonly ? <TbPencilOff /> : <TbPencil />}
-                        <br />
-                        {overviewOnly ? "" : readonly ? "Read Only" : "Edit"}
-                    </button>
-                </span>
-                <span>
-                    <button onClick={(_) => deleteCallback(entity.ID)} disabled={locked || (!editMode && overviewOnly)} className="icon">
-                        <GiTrashCan />
-                        <br />
-                        {overviewOnly ? "" : "Delete"}
-                    </button>
-                </span>
+                <Button icon={locked ? <AiFillLock /> : <SlLockOpen />} severity={locked ? "info" : "secondary"} outlined label={locked ? "Locked" : "Unlocked"} onClick={(_) => LockEntity(!locked)} className="rounded" />
+                {(!overviewOnly || editMode) && <Button icon={readonly ? <TbPencilOff /> : <TbPencil />} severity={readonly ? "secondary" : undefined} outlined label={readonly ? "Read Only" : "Edit"} onClick={(_) => SetReadonly(!readonly)} className="rounded" />}
+                {!overviewOnly && <Button icon={<GiTrashCan />} severity="danger" outlined label="Delete" onClick={(_) => deleteCallback(entity.ID)} disabled={locked || (!editMode && overviewOnly) || readonly} className="rounded" />}
             </>
         );
     };
@@ -185,17 +171,17 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
         return (
             <>
                 <span>
-                    <p>Initiative</p>
                     <input type="number" min={0} placeholder="Set" onChange={(e) => SetLocalNumericalState(parseInt(e.target.value))} className="curveLeft" disabled={readonly} />
-                    <button
+                    <Button
+                        icon="pi pi-check"
+                        text
+                        severity="success"
                         onClick={(_) => {
                             entity.setInitiative(LocalNumericalState), SetControlState(ControlOptions.None), renderTrigger();
                         }}
-                        className="rightButton iconButton"
+                        className="rightButton"
                         disabled={readonly}
-                    >
-                        <GiCheckMark />
-                    </button>
+                    />
                 </span>
             </>
         );
@@ -205,66 +191,66 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
         return (
             <>
                 <span>
-                    <p>Hit Points</p>
-                    <button
+                    <Button
+                        icon="pi pi-minus"
+                        text
+                        className="leftButton"
+                        severity="danger"
                         onClick={(_) => {
                             entity.damage(LocalNumericalState), SetControlState(ControlOptions.None);
                         }}
-                        className="leftButton"
                         disabled={readonly}
-                    >
-                        -
-                    </button>
-                    <input type="number" min={0} placeholder="Adjust" onChange={(e) => SetLocalNumericalState(parseInt(e.target.value))} disabled={readonly} />
-                    <button
+                    />
+                    <input type="number" min={0} placeholder="HP" onChange={(e) => SetLocalNumericalState(parseInt(e.target.value))} disabled={readonly} />
+                    <Button
+                        icon="pi pi-plus"
+                        text
+                        className="rightButton"
+                        severity="success"
                         onClick={(_) => {
                             entity.heal(LocalNumericalState), SetControlState(ControlOptions.None);
                         }}
-                        className="rightButton"
                         disabled={readonly}
-                    >
-                        +
-                    </button>
+                    />
                 </span>
                 <span>
-                    <p>Temp Hit Points</p>
-                    <input type="number" min={0} placeholder="Set" onChange={(e) => SetLocalNumericalState2(parseInt(e.target.value))} className="curveLeft" disabled={readonly} />
-                    <button
+                    <input type="number" min={0} placeholder="Temp HP" onChange={(e) => SetLocalNumericalState2(parseInt(e.target.value))} className="curveLeft" disabled={readonly} />
+                    <Button
+                        icon="pi pi-check"
+                        text
+                        severity="success"
                         onClick={(_) => {
                             entity.addTempHP(LocalNumericalState2), SetControlState(ControlOptions.None);
                         }}
                         className="rightButton"
                         disabled={readonly}
-                    >
-                        <GiCheckMark />
-                    </button>
+                    />
                 </span>
                 <span>
-                    <p>Max Hit Points</p>
-                    <input type="number" min={0} placeholder="Set" onChange={(e) => SetLocalNumericalState3(parseInt(e.target.value))} className="curveLeft" disabled={readonly} />
-                    <button
+                    <input type="number" min={0} placeholder="Max HP" onChange={(e) => SetLocalNumericalState3(parseInt(e.target.value))} className="curveLeft" disabled={readonly} />
+                    <Button
+                        icon="pi pi-check"
+                        text
+                        severity="success"
                         onClick={(_) => {
                             entity.setMaxHP(LocalNumericalState3), SetControlState(ControlOptions.None);
                         }}
                         className="rightButton"
                         disabled={readonly}
-                    >
-                        <GiCheckMark />
-                    </button>
+                    />
                 </span>
                 {!overviewOnly && (
                     <span>
-                        <button
+                        <Button
+                            severity="danger"
+                            icon={<GiDeathSkull />}
+                            text
                             onClick={(_) => {
                                 entity.kill(), SetControlState(ControlOptions.None);
                             }}
-                            className="icon"
+                            className="rounded"
                             disabled={readonly}
-                        >
-                            Kill
-                            <br />
-                            <GiDeathSkull />
-                        </button>
+                        />
                     </span>
                 )}
             </>
@@ -274,34 +260,36 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
     const renderACControl = () => {
         return (
             <span>
-                <p>Armor Class</p>
-                <button
+                <Button
+                    icon="pi pi-minus"
+                    text
+                    severity="danger"
                     onClick={(_) => {
                         entity.setACBonus(-LocalNumericalState), SetControlState(ControlOptions.None);
                     }}
                     className="leftButton"
                     disabled={readonly}
-                >
-                    -
-                </button>
+                />
                 <input
                     type="number"
                     min={0}
-                    placeholder="Set"
+                    placeholder="AC Bonus"
                     onChange={(e) => {
                         SetLocalNumericalState(parseInt(e.target.value));
                     }}
                     disabled={readonly}
+                    className="wide"
                 />
-                <button
+                <Button
+                    icon="pi pi-plus"
+                    text
+                    severity="success"
                     onClick={(_) => {
                         entity.setACBonus(LocalNumericalState), SetControlState(ControlOptions.None);
                     }}
                     className="rightButton"
                     disabled={readonly}
-                >
-                    +
-                </button>
+                />
             </span>
         );
     };
@@ -312,15 +300,14 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
                 {context.conditions.map((condition, ind) => (
                     <section key={ind}>
                         <label>
-                            <input
-                                type="checkbox"
-                                name={condition.Name}
-                                id={`${entity.ID}_${condition.Name}`}
-                                defaultChecked={entity.Conditions.has(condition.Name)}
+                            <Checkbox
+                                inputId={`${entity.ID}_${condition.Name}`}
+                                checked={entity.Conditions.has(condition.Name)}
                                 onChange={(e) => {
-                                    UpdateConditions(condition.Name, e.target.checked), renderTrigger();
+                                    UpdateConditions(condition.Name, e.checked || false), renderTrigger();
                                 }}
                                 disabled={readonly}
+                                variant="filled"
                             />
                             {condition.Name}
                         </label>
@@ -333,48 +320,51 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
     const renderSpellsControl = () => {
         return (
             <span className="spellsControl">
-                <section>
-                    <input
-                        type="checkbox"
-                        name="Concentration"
-                        id={`${entity.ID}_Concentration`}
-                        defaultChecked={entity.Concentration}
+                <label htmlFor={`${entity.ID}_Concentration`}>
+                    <Checkbox
+                        inputId={`${entity.ID}_Concentration`}
+                        checked={entity.Concentration}
                         onChange={(e) => {
-                            entity.setConcentration(e.target.checked), renderTrigger();
+                            entity.setConcentration(e.checked || false), renderTrigger();
                         }}
                         disabled={readonly}
+                        variant="filled"
                     />
-                    <label htmlFor={`${entity.ID}_Concentration`}>Concentration</label>
-                </section>
+                    Concentration
+                </label>
             </span>
         );
     };
 
     const renderNotesControl = () => {
         return (
-            <>
-                <textarea title="Notes" placeholder="Notes..." value={LocalStringState} onChange={(e) => SetLocalStringState(e.target.value)} disabled={readonly} />
-                <span>
-                    <button
+            <span className="notesControl">
+                <InputTextarea title="Notes" placeholder="Notes..." value={LocalStringState} onChange={(e) => SetLocalStringState(e.target.value)} disabled={readonly} />
+                <span className="justify-between">
+                    <Button
+                        icon="pi pi-times"
+                        label="Remove"
+                        outlined
                         onClick={(_) => {
                             entity.setNotes(""), SetControlState(ControlOptions.None);
                         }}
                         disabled={readonly}
-                    >
-                        X
-                    </button>
-                </span>
-                <span>
-                    <button
+                        severity="danger"
+                        className="rounded"
+                    />
+                    <Button
+                        icon="pi pi-check"
+                        label="Save"
+                        outlined
                         onClick={(_) => {
                             entity.setNotes(LocalStringState), SetControlState(ControlOptions.None);
                         }}
                         disabled={readonly}
-                    >
-                        <GiCheckMark />
-                    </button>
+                        severity="success"
+                        className="rounded"
+                    />
                 </span>
-            </>
+            </span>
         );
     };
 
@@ -382,14 +372,18 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
         return (
             <div className="entity overview">
                 <div className="displayCardInfo">
-                    <input
-                        type="number"
-                        min={0}
-                        defaultValue={entity.Initiative === 0 ? undefined : entity.Initiative}
-                        onChange={(e) => {
-                            entity.setInitiative(parseInt(e.target.value)) ?? 0;
-                        }}
-                    />
+                    {!editMode ? (
+                        <section>{entity.Initiative}</section>
+                    ) : (
+                        <input
+                            type="number"
+                            min={0}
+                            defaultValue={entity.Initiative === 0 ? undefined : entity.Initiative}
+                            onChange={(e) => {
+                                entity.setInitiative(parseInt(e.target.value)) ?? 0;
+                            }}
+                        />
+                    )}
                 </div>
                 <div className="displayCard" style={{ columnCount: 3 }}>
                     <h4 style={{ textDecoration: entity.CurrentHitPoints > 0 ? "" : "line-through 3px", columnSpan: "all" }}>
@@ -415,24 +409,27 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
                         </section>
                     ) : null}
                 </div>
-                <div className="displayCardControls">
-                    <div className="controls">
-                        <button onClick={(_) => deleteCallback(entity.ID)} disabled={locked || (!editMode && overviewOnly)} className="icon">
-                            <GiTrashCan />
-                            <br />
-                            {overviewOnly ? "" : "Delete"}
-                        </button>
-                        <button onClick={(_) => FlipControlState(ControlOptions.Display)} title="Display">
-                            <FaAddressCard />
-                        </button>
-                    </div>
-                    {ControlState === ControlOptions.None || ControlState === ControlOptions.Display ? null : (
-                        <div className="suboptions">
-                            {ControlState === ControlOptions.Settings ? renderSettingsControl() : null}
-                            {ControlState === ControlOptions.Notes ? renderNotesControl() : null}
+                {editMode && (
+                    <div className="displayCardControls">
+                        <div className="controls">
+                            <Button icon={<GiCog />} severity="secondary" outlined onClick={(_) => FlipControlState(ControlOptions.Settings)} disabled={readonly} />
+                            <Button icon={<GiHalfHeart />} severity="success" outlined onClick={(_) => FlipControlState(ControlOptions.Hitpoints)} disabled={readonly} />
+                            <Button icon={<GiShield />} severity="info" outlined onClick={(_) => FlipControlState(ControlOptions.AC)} disabled={readonly} />
+                            <Button icon={<GiChalkOutlineMurder />} severity="warning" outlined onClick={(_) => FlipControlState(ControlOptions.Conditions)} disabled={readonly} />
+                            <Button icon={<GiPencil />} outlined onClick={(_) => FlipControlState(ControlOptions.Notes)} disabled={readonly} />
+                            <Button icon={<FaAddressCard />} severity="help" outlined onClick={(_) => FlipControlState(ControlOptions.Display)} disabled={readonly} />
                         </div>
-                    )}
-                </div>
+                        {ControlState === ControlOptions.None || ControlState === ControlOptions.Display ? null : (
+                            <div className="suboptions narrow">
+                                {ControlState === ControlOptions.Settings ? renderSettingsControl() : null}
+                                {ControlState === ControlOptions.Hitpoints ? renderHitpointsControl() : null}
+                                {ControlState === ControlOptions.AC ? renderACControl() : null}
+                                {ControlState === ControlOptions.Conditions ? renderConditionsControl() : null}
+                                {ControlState === ControlOptions.Notes ? renderNotesControl() : null}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         );
 
@@ -507,30 +504,14 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
             </div>
             <div className="displayCardControls">
                 <div className="controls">
-                    <button onClick={(_) => FlipControlState(ControlOptions.Settings)} title="Settings">
-                        <GiCog />
-                    </button>
-                    <button onClick={(_) => FlipControlState(ControlOptions.Initiative)} title="Initiative">
-                        <GiHourglass />
-                    </button>
-                    <button onClick={(_) => FlipControlState(ControlOptions.Hitpoints)} title="HitPoints">
-                        <GiHalfHeart />
-                    </button>
-                    <button onClick={(_) => FlipControlState(ControlOptions.AC)} title="AC">
-                        <GiShield />
-                    </button>
-                    <button onClick={(_) => FlipControlState(ControlOptions.Conditions)} title="Conditions">
-                        <GiChalkOutlineMurder />
-                    </button>
-                    <button onClick={(_) => FlipControlState(ControlOptions.Spells)} title="Spells">
-                        <GiSpellBook />
-                    </button>
-                    <button onClick={(_) => FlipControlState(ControlOptions.Notes)} title="Notes">
-                        <GiPencil />
-                    </button>
-                    <button onClick={(_) => FlipControlState(ControlOptions.Display)} title="Display">
-                        <FaAddressCard />
-                    </button>
+                    <Button icon={<GiCog />} severity="secondary" outlined onClick={(_) => FlipControlState(ControlOptions.Settings)} disabled={readonly} />
+                    <Button icon={<GiHourglass />} outlined onClick={(_) => FlipControlState(ControlOptions.Initiative)} disabled={readonly} />
+                    <Button icon={<GiHalfHeart />} severity="success" outlined onClick={(_) => FlipControlState(ControlOptions.Hitpoints)} disabled={readonly} />
+                    <Button icon={<GiShield />} severity="info" outlined onClick={(_) => FlipControlState(ControlOptions.AC)} disabled={readonly} />
+                    <Button icon={<GiChalkOutlineMurder />} severity="warning" outlined onClick={(_) => FlipControlState(ControlOptions.Conditions)} disabled={readonly} />
+                    <Button icon={<GiSpellBook />} severity="danger" outlined onClick={(_) => FlipControlState(ControlOptions.Spells)} disabled={readonly} />
+                    <Button icon={<GiPencil />} outlined onClick={(_) => FlipControlState(ControlOptions.Notes)} disabled={readonly} />
+                    <Button icon={<FaAddressCard />} severity="help" outlined onClick={(_) => FlipControlState(ControlOptions.Display)} disabled={readonly} />
                 </div>
                 {ControlState === ControlOptions.None || ControlState === ControlOptions.Display ? null : (
                     <div className="suboptions">

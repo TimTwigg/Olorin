@@ -15,6 +15,7 @@
         "@tanstack/react-router": "latest",
         "@tanstack/react-table": "^8.20.6",
         "@vitejs/plugin-react": "latest",
+        "primeicons": "^7.0.0",
         "primereact": "^10.9.6",
         "react": "latest",
         "react-icons": "latest",

@@ -18,6 +18,8 @@ Custom Encounter Manager for D&D 5E.
     - Edit lairs
 - Add Environment?
     - Basically lair but tied to encounter rather than an entity
+- Changing which campaign an encounter is in should remove the players?
+- Rework to use PrimeReact
 
 ## Ideas
 

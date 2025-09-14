@@ -7,6 +7,8 @@ import * as api from "@src/controllers/api";
 import "@src/styles/main.scss";
 import "@src/styles/normalize.scss";
 import "primereact/resources/themes/bootstrap4-light-blue/theme.css";
+import "primeicons/primeicons.css";
+import "@src/styles/prime-react-overrides.scss";
 
 const TanStackRouterDevtools =
     import.meta.env.VITE_USE_TANSTACK_ROUTER_TOOLS == "true" && import.meta.env.DEV

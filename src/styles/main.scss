@@ -199,6 +199,8 @@ hr {
 }
 
 button {
+    border-radius: 0;
+
     &:hover {
         opacity: 0.75;
     }
@@ -207,6 +209,20 @@ button {
         background-color: v.$lightGray !important;
         color: v.$gray;
         opacity: 1;
+    }
+
+    &.leftButton {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+    }
+
+    &.rightButton {
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+    }
+
+    &.rounded {
+        border-radius: 5px;
     }
 }
 
