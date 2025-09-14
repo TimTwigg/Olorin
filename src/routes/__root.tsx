@@ -64,8 +64,9 @@ const NotFoundComponent = () => {
 };
 
 const loadContextData = async (context: ModelContext) => {
-    const [types, conditions, campaigns] = await Promise.all([api.getTypes(), api.getConditions(), api.getCampaigns()]);
+    const [types, sizes, conditions, campaigns] = await Promise.all([api.getTypes(), api.getSizes(), api.getConditions(), api.getCampaigns()]);
     context.creatureTypes = types.Types || [];
+    context.creatureSizes = sizes.Sizes || [];
     context.conditions = conditions.Conditions || [];
     context.campaigns = campaigns.Campaigns || [];
 };

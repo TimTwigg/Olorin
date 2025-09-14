@@ -161,8 +161,8 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
         return (
             <>
                 <Button icon={locked ? <AiFillLock /> : <SlLockOpen />} severity={locked ? "info" : "secondary"} outlined label={locked ? "Locked" : "Unlocked"} onClick={(_) => LockEntity(!locked)} className="rounded" />
-                {(!overviewOnly || editMode) && <Button icon={readonly ? <TbPencilOff /> : <TbPencil />} severity={readonly ? "secondary" : undefined} outlined label={readonly ? "Read Only" : "Edit"} onClick={(_) => SetReadonly(!readonly)} className="rounded" />}
-                {!overviewOnly && <Button icon={<GiTrashCan />} severity="danger" outlined label="Delete" onClick={(_) => deleteCallback(entity.ID)} disabled={locked || (!editMode && overviewOnly) || readonly} className="rounded" />}
+                <Button icon={readonly ? <TbPencilOff /> : <TbPencil />} severity={readonly ? "secondary" : undefined} outlined label={readonly ? "Read Only" : "Edit"} onClick={(_) => SetReadonly(!readonly)} className="rounded" />
+                <Button icon={<GiTrashCan />} severity="danger" outlined label="Delete" onClick={(_) => deleteCallback(entity.ID)} disabled={locked || (!editMode && overviewOnly) || readonly} className="rounded" />
             </>
         );
     };

@@ -6,6 +6,7 @@ export interface ModelContext {
     userOptions: UserOptions;
     conditions: Condition[];
     creatureTypes: string[];
+    creatureSizes: string[];
     campaigns: CampaignOverview[];
     technicalConfig: {
         cacheSizes: {

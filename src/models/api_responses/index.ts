@@ -5,17 +5,6 @@ import { StatBlockResponse, SingleStatBlockResponse } from "./statblockResponse"
 import { MetadataResponse } from "./metadataResponse";
 import { CampaignResponse, SingleCampaignResponse } from "./campaignResponse";
 import { TypeResponse } from "./typeResponse";
+import { SizeResponse } from "./sizeResponse";
 
-export type {
-    EncounterResponse,
-    SingleEncounterResponse,
-    ConditionResponse,
-    EntityResponse,
-    SingleEntityResponse,
-    StatBlockResponse,
-    SingleStatBlockResponse,
-    MetadataResponse,
-    CampaignResponse,
-    SingleCampaignResponse,
-    TypeResponse
-}
+export type { EncounterResponse, SingleEncounterResponse, ConditionResponse, EntityResponse, SingleEntityResponse, StatBlockResponse, SingleStatBlockResponse, MetadataResponse, CampaignResponse, SingleCampaignResponse, TypeResponse, SizeResponse };

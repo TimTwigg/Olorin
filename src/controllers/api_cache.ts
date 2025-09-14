@@ -33,6 +33,13 @@ const CACHE_EXCLUDED_ROUTES = [
 ]
 
 /**
+ * Functions that are cacheable.
+ */
+const CACHEABLE_FUNCTIONS = [
+    "request",
+]
+
+/**
  * Create a cache key based on the function name and its arguments.
  * 
  * @param func - the function name to create a cache key for
@@ -58,6 +65,16 @@ function getRouteFromCacheKey(cache_key: string): string {
         return args[0] || "";
     }
     return "";
+}
+
+/** Check if a function is cacheable.
+ * 
+ * @param func - the function name to check
+ * 
+ * @returns boolean - true if the function is cacheable, false otherwise
+ */
+function isCacheableFunction(func: string): boolean {
+    return CACHEABLE_FUNCTIONS.includes(func);
 }
 
 /**
@@ -109,6 +126,7 @@ function setCacheEntry(cache_key: string, data: any): void {
 export {
     APICacheEntry,
     createCacheKey,
+    isCacheableFunction,
     isCacheableRoute,
     checkCache,
     setCacheEntry

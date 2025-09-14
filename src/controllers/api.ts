@@ -24,18 +24,21 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
  * @returns Promise<any> - the result of the function call
  */
 async function api_wrapper(func: string, ...args: any): Promise<any> {
-    let cached_entry = caching.checkCache(caching.createCacheKey(func, args));
-    if (cached_entry !== null) {
-        return cached_entry.data;
-    } else {
-        let data: any;
-        if (func === "request") data = await _request(args[0], args[1]).then((data) => data);
-        else if (func === "push") data = _push(args[0], args[1]).then((data) => data);
-        else if (func === "delete") data = _delete(args[0], args[1]).then((data) => data);
-        else return null;
-        caching.setCacheEntry(caching.createCacheKey(func, args), data);
-        return data;
+    if (caching.isCacheableFunction(func) && caching.isCacheableRoute(args[0])) {
+        let cached_entry = caching.checkCache(caching.createCacheKey(func, args));
+        if (cached_entry !== null) {
+            return cached_entry.data;
+        }
     }
+    let data: any;
+    if (func === "request") data = await _request(args[0], args[1]).then((data) => data);
+    else if (func === "push") data = _push(args[0], args[1]).then((data) => data);
+    else if (func === "delete") data = _delete(args[0], args[1]).then((data) => data);
+    else return null;
+    if (caching.isCacheableFunction(func) && caching.isCacheableRoute(args[0])) {
+        caching.setCacheEntry(caching.createCacheKey(func, args), data);
+    }
+    return data;
 }
 
 /**
@@ -439,7 +442,7 @@ export async function createCampaign(campaign: Campaign): Promise<Campaign> {
     });
 }
 
-/** 
+/**
  * Fetch a player statblock from the server, either by ID or by Player object.
  *
  * @param id The ID of the player to fetch (optional if player is provided).
@@ -513,6 +516,18 @@ export async function getTypes(): Promise<api.TypeResponse> {
     return request("/type/all", {}).then((data: any) => {
         return {
             Types: data,
+        };
+    });
+}
+
+/** Retrieve all sizes from the server.
+ *
+ * @returns A list of sizes.
+ */
+export async function getSizes(): Promise<api.SizeResponse> {
+    return request("/size/all", {}).then((data: any) => {
+        return {
+            Sizes: data,
         };
     });
 }

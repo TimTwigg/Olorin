@@ -419,16 +419,6 @@ button.delete.button {
     float: right;
 }
 
-button.iconButton {
-    min-width: 3rem;
-    font-size: 2.5rem;
-    padding: 0 0.25rem;
-
-    svg {
-        font-size: 2rem;
-    }
-}
-
 /*
 *   Forms
 *   ================================================================
@@ -443,11 +433,9 @@ form {
 }
 
 input {
-    padding: 2px;
     border: ridge 1px v.$gray;
     line-height: 2rem;
     border-color: v.$lightGray;
-    padding: 5px;
 
     &:focus {
         outline: none;

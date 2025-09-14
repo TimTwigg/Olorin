@@ -8,6 +8,7 @@ export const router = createRouter({
         userOptions: new UserOptions(),
         conditions: [],
         creatureTypes: [],
+        creatureSizes: [],
         campaigns: [],
         technicalConfig: {
             cacheSizes: {
