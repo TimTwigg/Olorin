@@ -6,5 +6,6 @@ import { MetadataResponse } from "./metadataResponse";
 import { CampaignResponse, SingleCampaignResponse } from "./campaignResponse";
 import { TypeResponse } from "./typeResponse";
 import { SizeResponse } from "./sizeResponse";
+import { SourceResponse } from "./sourceResponse";
 
-export type { EncounterResponse, SingleEncounterResponse, ConditionResponse, EntityResponse, SingleEntityResponse, StatBlockResponse, SingleStatBlockResponse, MetadataResponse, CampaignResponse, SingleCampaignResponse, TypeResponse, SizeResponse };
+export type { EncounterResponse, SingleEncounterResponse, ConditionResponse, EntityResponse, SingleEntityResponse, StatBlockResponse, SingleStatBlockResponse, MetadataResponse, CampaignResponse, SingleCampaignResponse, TypeResponse, SizeResponse, SourceResponse };

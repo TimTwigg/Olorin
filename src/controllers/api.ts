@@ -520,7 +520,8 @@ export async function getTypes(): Promise<api.TypeResponse> {
     });
 }
 
-/** Retrieve all sizes from the server.
+/**
+ * Retrieve all sizes from the server.
  *
  * @returns A list of sizes.
  */
@@ -528,6 +529,19 @@ export async function getSizes(): Promise<api.SizeResponse> {
     return request("/size/all", {}).then((data: any) => {
         return {
             Sizes: data,
+        };
+    });
+}
+
+/**
+ * Retrieve all sources from the server.
+ *
+ * @returns A list of sources.
+ */
+export async function getUsedSources(): Promise<api.SourceResponse> {
+    return request("/source/used/all", {}).then((data: any) => {
+        return {
+            Sources: data,
         };
     });
 }

@@ -7,9 +7,11 @@ import { InputText } from "primereact/inputtext";
 import { IconField } from "primereact/iconField";
 import { InputIcon } from "primereact/inputicon";
 import { MultiSelect } from "primereact/multiselect";
-import { FilterMatchMode, FilterOperator } from "primereact/api";
+import { InputNumber } from "primereact/inputnumber";
+import { FilterMatchMode, FilterOperator, FilterService } from "primereact/api";
 
 import { EntityOverviewT } from "@src/models/entity";
+import * as api from "@src/controllers/api";
 import "@src/styles/tables.scss";
 
 type EntityTableProps = {
@@ -17,6 +19,14 @@ type EntityTableProps = {
     displayCallback: (id: number) => void;
     addCallback: (id: number) => void;
 };
+
+FilterService.register("custom_ChallengeRating", (value, filters) => {
+    const [from, to] = filters ?? [null, null];
+    if (from === null && to === null) return true;
+    if (from !== null && to === null) return from <= value;
+    if (from === null && to !== null) return value <= to;
+    return from <= value && value <= to;
+});
 
 export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityTableProps) => {
     const context = useRouteContext({ from: "__root__" });
@@ -27,6 +37,7 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
     const [globalFilterValue, setGlobalFilterValue] = React.useState<string>("");
     const [creatureTypes, setCreatureTypes] = React.useState<string[]>([]);
     const [creatureSizes, setCreatureSizes] = React.useState<string[]>([]);
+    const [sources, setSources] = React.useState<string[]>([]);
     const dataRef = React.useRef(0);
 
     const clearFilter = () => {
@@ -51,13 +62,8 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
             Name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
             Type: { value: null, matchMode: FilterMatchMode.IN },
             Size: { value: null, matchMode: FilterMatchMode.IN },
-            // "country.name": { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-            // representative: { value: null, matchMode: FilterMatchMode.IN },
-            // date: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] },
-            // balance: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
-            // status: { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
-            // activity: { value: null, matchMode: FilterMatchMode.BETWEEN },
-            // verified: { value: null, matchMode: FilterMatchMode.EQUALS },
+            ChallengeRating: { value: null, matchMode: FilterMatchMode.CUSTOM },
+            Source: { value: null, matchMode: FilterMatchMode.IN },
         });
         setGlobalFilterValue("");
     };
@@ -90,6 +96,20 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
         return <MultiSelect value={options.value} options={creatureSizes} itemTemplate={stringItemTemplate} onChange={(e) => options.filterApplyCallback(e.value)} placeholder="Any" className="p-column-filter" maxSelectedLabels={2} style={{ minWidth: "14rem" }} />;
     };
 
+    const sourceFilterTemplate = (options: ColumnFilterElementTemplateOptions) => {
+        return <MultiSelect value={options.value} options={sources} itemTemplate={stringItemTemplate} onChange={(e) => options.filterApplyCallback(e.value)} placeholder="Any" className="p-column-filter" maxSelectedLabels={2} style={{ minWidth: "14rem" }} />;
+    };
+
+    const crFilterTemplate = (options: ColumnFilterElementTemplateOptions) => {
+        const [from, to] = options.value || [null, null];
+        return (
+            <div>
+                <InputNumber value={from} onChange={(e) => options.filterApplyCallback([e.value, to])} className="w-full" placeholder="from" maxFractionDigits={2} />
+                <InputNumber value={to} onChange={(e) => options.filterApplyCallback([from, e.value])} className="w-full" placeholder="to" maxFractionDigits={2} />
+            </div>
+        );
+    };
+
     React.useEffect(() => {
         if (dataRef.current === 0 && creatures.length > 0) {
             setData(creatures);
@@ -98,6 +118,9 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
             setCreatureTypes(context.creatureTypes);
             setCreatureSizes(context.creatureSizes);
             setLoading(false);
+            api.getUsedSources().then((sources) => {
+                setSources(sources.Sources);
+            });
         }
     }, [creatures]);
 
@@ -105,15 +128,12 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
 
     return (
         <>
-            <p>
-                {}
-            </p>
-            <DataTable value={data} stripedRows paginator rows={25} rowsPerPageOptions={[10, 25, 50]} removableSort filters={filters} filterDisplay="menu" loading={loading} globalFilterFields={["Name", "Type", "Source"]} header={header}>
+            <DataTable value={data} stripedRows paginator rows={25} rowsPerPageOptions={[10, 25, 50]} removableSort filters={filters} filterDisplay="menu" loading={loading} globalFilterFields={["Name", "Type", "Source"]} header={header} emptyMessage="No creatures found.">
                 <Column field="Name" header="Name" filter style={{ minWidth: "8rem" }} />
                 <Column field="Type" header="Type" filter filterElement={typeFilterTemplate} showFilterMatchModes={false} />
                 <Column field="Size" header="Size" filter filterElement={sizeFilterTemplate} showFilterMatchModes={false} />
-                <Column field="ChallengeRating" header="CR" filter />
-                <Column field="Source" header="Source" filter />
+                <Column field="ChallengeRating" header="CR" filter filterElement={crFilterTemplate} showFilterMatchModes={false} showClearButton={false} />
+                <Column field="Source" header="Source" filter filterElement={sourceFilterTemplate} showFilterMatchModes={false} />
                 <Column body={(rowData) => <Button icon="pi pi-id-card" outlined className="iconButton" onClick={() => displayCallback(rowData.ID)} />} header="Display" />
                 <Column body={(rowData) => <Button icon="pi pi-plus" outlined className="iconButton" onClick={() => addCallback(rowData.ID)} />} header="Add" />
             </DataTable>
