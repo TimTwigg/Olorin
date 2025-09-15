@@ -134,8 +134,8 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
                 <Column field="Size" header="Size" filter filterElement={sizeFilterTemplate} showFilterMatchModes={false} />
                 <Column field="ChallengeRating" header="CR" filter filterElement={crFilterTemplate} showFilterMatchModes={false} showClearButton={false} />
                 <Column field="Source" header="Source" filter filterElement={sourceFilterTemplate} showFilterMatchModes={false} />
-                <Column body={(rowData) => <Button icon="pi pi-id-card" outlined className="iconButton" onClick={() => displayCallback(rowData.ID)} />} header="Display" />
-                <Column body={(rowData) => <Button icon="pi pi-plus" outlined className="iconButton" onClick={() => addCallback(rowData.ID)} />} header="Add" />
+                <Column body={(rowData) => <Button icon="pi pi-id-card" outlined severity="help" onClick={() => displayCallback(rowData.ID)} />} header="Display" />
+                <Column body={(rowData) => <Button icon="pi pi-plus" outlined severity="success" onClick={() => addCallback(rowData.ID)} />} header="Add" />
             </DataTable>
         </>
     );

@@ -5,6 +5,7 @@ import { UserOptions } from "@src/models/userOptions";
 export const router = createRouter({
     routeTree,
     context: {
+        loaded: false,
         userOptions: new UserOptions(),
         conditions: [],
         creatureTypes: [],

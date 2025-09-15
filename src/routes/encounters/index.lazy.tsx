@@ -1,16 +1,25 @@
 import * as React from "react";
-import { createLazyFileRoute, useRouteContext } from "@tanstack/react-router";
+import { createLazyFileRoute, useRouteContext, useNavigate } from "@tanstack/react-router";
 import { toast } from "react-toastify";
 import { ConfirmDialog, DialogOptions } from "primereact/confirmdialog";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
+import { DataTable, DataTableFilterMeta } from "primereact/datatable";
+import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
+import { InputText } from "primereact/inputtext";
+import { IconField } from "primereact/iconField";
+import { InputIcon } from "primereact/inputicon";
+import { MultiSelect } from "primereact/multiselect";
+import { Calendar } from "primereact/calendar";
+import { Menu } from "primereact/menu";
+import { FilterMatchMode, FilterOperator, PrimeIcons } from "primereact/api";
 import { IoWarningSharp } from "react-icons/io5";
 import Session, { SessionAuth } from "supertokens-auth-react/recipe/session";
 
 import * as api from "@src/controllers/api";
 import { Encounter, EncounterOverview } from "@src/models/encounter";
 import { newLocalDate } from "@src/controllers/utils";
-import { EncountersTable } from "@src/components/encountersTable";
+import { displayDate } from "@src/controllers/utils";
 
 export const Route = createLazyFileRoute("/encounters/")({
     component: Encounters,
@@ -18,6 +27,7 @@ export const Route = createLazyFileRoute("/encounters/")({
 
 function Encounters() {
     const context = useRouteContext({ from: "__root__" });
+    const navigate = useNavigate({ from: "/encounters" });
 
     const [encounters, SetEncounters] = React.useState<EncounterOverview[]>([]);
     const getEncountersRef = React.useRef(0);
@@ -33,6 +43,10 @@ function Encounters() {
     const [LocalStringState1, SetLocalStringState1] = React.useState<string>("");
     const [LocalStringState2, SetLocalStringState2] = React.useState<string>("");
     const [LocalStringState3, SetLocalStringState3] = React.useState<string>("");
+
+    const [filters, setFilters] = React.useState<DataTableFilterMeta>();
+    const [loading, setLoading] = React.useState<boolean>(true);
+    const [globalFilterValue, setGlobalFilterValue] = React.useState<string>("");
 
     const createNewEncounter = () => {
         SetLocalStringState1("");
@@ -65,12 +79,93 @@ function Encounters() {
         });
     };
 
+    const clearFilter = () => {
+        initFilters();
+    };
+
+    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        let _filters = { ...filters };
+
+        if (_filters["global"] && "value" in _filters["global"]) {
+            (_filters["global"] as { value: any }).value = value;
+        }
+
+        setFilters(_filters);
+        setGlobalFilterValue(value);
+    };
+
+    const initFilters = () => {
+        setFilters({
+            global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+            Name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+            Description: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+            "Metadata.Campaign": { value: null, matchMode: FilterMatchMode.IN },
+            "Metadata.CreationDate": { value: null, matchMode: FilterMatchMode.DATE_IS },
+            "Metadata.AccessedDate": { value: null, matchMode: FilterMatchMode.DATE_IS },
+        });
+        setGlobalFilterValue("");
+    };
+
+    const renderHeader = () => {
+        return (
+            <div className="justify-between">
+                <Button icon="pi pi-filter-slash" label="Clear" outlined onClick={clearFilter} />
+                <IconField iconPosition="left">
+                    <InputIcon className="pi pi-search" />
+                    <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
+                </IconField>
+            </div>
+        );
+    };
+
+    const stringItemTemplate = (option: any) => {
+        return (
+            <div>
+                <span>{option}</span>
+            </div>
+        );
+    };
+
+    const campaignFilterTemplate = (options: ColumnFilterElementTemplateOptions) => {
+        return <MultiSelect value={options.value} options={context.campaigns.map((c) => c.Name)} itemTemplate={stringItemTemplate} onChange={(e) => options.filterApplyCallback(e.value)} placeholder="Any" className="p-column-filter" maxSelectedLabels={2} style={{ minWidth: "14rem" }} />;
+    };
+
+    const dateFilterTemplate = (options: ColumnFilterElementTemplateOptions) => {
+        return <Calendar value={options.value} onChange={(e) => options.filterCallback(e.value, options.index)} dateFormat="mm/dd/yy" placeholder="mm/dd/yyyy" mask="99/99/9999" />;
+    };
+
+    const optionsBodyTemplate = (rowData: EncounterOverview) => {
+        const menuRef = React.createRef<Menu>();
+
+        const items = [
+            {
+                label: "Delete Encounter",
+                icon: "pi pi-fw pi-trash",
+                command: () => {
+                    deleteEncounter(rowData);
+                },
+            },
+        ];
+
+        return (
+            <div>
+                <Menu model={items} ref={menuRef} popup />
+                <Button icon={PrimeIcons.BARS} outlined severity="info" onClick={(e) => menuRef.current?.toggle(e)} />
+            </div>
+        );
+    };
+
+    const header = renderHeader();
+
     React.useEffect(() => {
         if (getEncountersRef.current === 0) {
             getEncountersRef.current = 1;
             api.getEncounters().then((res) => {
                 SetEncounters(res.Encounters);
             });
+            initFilters();
+            setLoading(false);
         }
     }, [getEncountersRef]);
 
@@ -89,7 +184,14 @@ function Encounters() {
                 </button>
             </div>
             <div className="break" />
-            <EncountersTable encounters={encounters} className="ten columns offset-by-one column" deleteCallback={deleteEncounter} />
+            <DataTable value={encounters} stripedRows paginator rows={10} rowsPerPageOptions={[5, 10, 25]} removableSort filters={filters} filterDisplay="menu" loading={loading} globalFilterFields={["Name", "Description", "Campaign"]} header={header} emptyMessage="No encounters found." className="ten columns offset-by-one column" style={{ fontSize: "1.5rem" }} onRowClick={(e) => (navigate({ to: `/encounters/${(e.data as EncounterOverview).id}` }))} rowClassName={(_) => "data-table-clickable-row"}>
+                <Column field="Name" header="Name" filter />
+                <Column field="Description" header="Description" filter />
+                <Column field="Metadata.Campaign" header="Campaign" filter filterElement={campaignFilterTemplate} showFilterMatchModes={false} />
+                <Column field="Metadata.CreationDate" header="Creation Date" dataType="date" body={(rowData) => displayDate(rowData.Metadata.CreationDate)} filter filterElement={dateFilterTemplate} />
+                <Column field="Metadata.AccessedDate" header="Last Accessed" dataType="date" body={(rowData) => displayDate(rowData.Metadata.AccessedDate)} filter filterElement={dateFilterTemplate} />
+                <Column body={optionsBodyTemplate} header="Options" />
+            </DataTable>
             <ConfirmDialog
                 visible={dialogOptions.visible}
                 onHide={() => {

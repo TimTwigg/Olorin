@@ -1,9 +1,12 @@
+@use "sass:color";
+
 .p-checkbox {
     margin: 2px 5px 2px 0; // align better
     scale: 0.8; // make a little smaller
 }
 
-.p-button-icon-only { // buttons with only an icon
+.p-button-icon-only {
+    // buttons with only an icon
     padding: 2px;
     height: fit-content;
     width: fit-content;
@@ -13,4 +16,13 @@
         height: 3rem;
         padding: 0;
     }
+}
+
+.p-datatable {
+    font-size: 1.1rem; // make text a little larger
+}
+
+.data-table-clickable-row:hover { // custom class to make rows look clickable
+    background-color: rgba(0, 0, 0, 0.15) !important;
+    cursor: pointer;
 }

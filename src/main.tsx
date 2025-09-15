@@ -11,8 +11,11 @@ import { EmailPasswordPreBuiltUI } from "supertokens-auth-react/recipe/emailpass
 import { ThirdPartyPreBuiltUI } from "supertokens-auth-react/recipe/thirdparty/prebuiltui";
 import Session from "supertokens-auth-react/recipe/session";
 import { SuperTokensWrapper } from "supertokens-auth-react";
-import * as api from "@src/controllers/api";
+
+import { PrimeReactProvider } from "primereact/api";
 import { ContentProps } from "primereact/dialog";
+
+import * as api from "@src/controllers/api";
 
 // Initialize SuperTokens
 SuperTokens.init({
@@ -85,7 +88,9 @@ if (!rootElement.innerHTML) {
                     getRoutingComponent([ThirdPartyPreBuiltUI, EmailPasswordPreBuiltUI])
                 ) : (
                     <SuperTokensWrapper>
-                        <RouterProvider router={router} />
+                        <PrimeReactProvider>
+                            <RouterProvider router={router} />
+                        </PrimeReactProvider>
                     </SuperTokensWrapper>
                 )}
             </StrictMode>

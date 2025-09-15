@@ -64,11 +64,12 @@ const NotFoundComponent = () => {
 };
 
 const loadContextData = async (context: ModelContext) => {
-    const [types, sizes, conditions, campaigns] = await Promise.all([api.getTypes(), api.getSizes(), api.getConditions(), api.getCampaigns()]);
+    const [types, sizes, conditions, campaigns] = await Promise.all([api.getTypes(), api.getSizes(), api.getConditions(), api.getCampaigns(1)]);
     context.creatureTypes = types.Types || [];
     context.creatureSizes = sizes.Sizes || [];
     context.conditions = conditions.Conditions || [];
     context.campaigns = campaigns.Campaigns || [];
+    context.loaded = true;
 };
 
 export const Route = createRootRouteWithContext<ModelContext>()({
