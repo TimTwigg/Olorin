@@ -7,8 +7,6 @@ Custom Encounter Manager for D&D 5E.
 - Entity Display Spells Control
 - Add file upload to contact form
 - Create players within campaign
-- Add players from linked campaign into encounter
-    - Multicheckbox style
 - Design
     - Encounter runtime page
         - replace right-side controls with runtime controls
@@ -20,6 +18,7 @@ Custom Encounter Manager for D&D 5E.
     - Basically lair but tied to encounter rather than an entity
 - Changing which campaign an encounter is in should remove the players?
 - Rework to use PrimeReact
+- Active encounter page not correctly loading Started/Round/Turn metadata
 
 ## Ideas
 

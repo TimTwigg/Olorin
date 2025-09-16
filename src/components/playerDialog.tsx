@@ -9,7 +9,7 @@ import * as api from "@src/controllers/api";
 
 type PlayerDialogProps = {
     visible: boolean;
-    campaign: string;
+    campaign: number;
     currentPlayersIDs: number[];
     onClose: () => void;
     callback: (ids: number[]) => void;
@@ -57,15 +57,15 @@ export function PlayerDialog({ visible, campaign, currentPlayersIDs, onClose, ca
         if (playersRef.current === 0) {
             playersRef.current = 1;
             api.getCampaign(campaign).then((res) => {
-                let campaign = res.Campaign;
-                if (campaign) {
-                    setCampaignPlayers(campaign.Players);
+                let c = res.Campaign;
+                if (c) {
+                    setCampaignPlayers(c.Players);
                 }
             });
         }
     }, []);
 
-    if (!visible || campaign === "") return null;
+    if (!visible || campaign === 0) return null;
 
     return (
         <Dialog header="Add Players" visible={visible} style={{ width: "50vw" }} onHide={CloseDialog} className="playerDialog" footer={footer_content}>

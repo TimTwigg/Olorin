@@ -2,7 +2,7 @@ import * as React from "react";
 import { createFileRoute, useRouteContext, Link } from "@tanstack/react-router";
 import { toast } from "react-toastify";
 import { ConfirmDialog, DialogOptions } from "primereact/confirmdialog";
-import { AutoComplete } from "primereact/autocomplete";
+import { Dropdown } from "primereact/dropdown";
 import Session, { SessionAuth } from "supertokens-auth-react/recipe/session";
 
 import * as api from "@src/controllers/api";
@@ -17,6 +17,7 @@ import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { LairDisplay, LairDialog, LairBlockDisplay } from "@src/components/lair";
 import { EntityTable } from "@src/components/entityTable";
 import { PlayerDialog } from "@src/components/playerDialog";
+import { CampaignOverview } from "@src/models/campaign";
 
 export const Route = createFileRoute("/encounters/$encounterID")({
     loader: async ({ params: { encounterID } }) => {
@@ -44,17 +45,16 @@ function ActiveEncounter() {
 
     const context = useRouteContext({ from: "__root__" });
 
+    const [sectionKey, setSectionKey] = React.useState<number>(0); // Used to force re-render of sections
     const [EditingEncounter, SetEditingEncounter] = React.useState<boolean>(false);
     const [runningEncounter, SetRunningEncounter] = React.useState<boolean>(false);
-    const [EncounterIsActive, SetEncounterIsActive] = React.useState<boolean>(false);
     const [backupEncounter, SetBackupEncounter] = React.useState<Encounter | null>(null);
     const [DisplayEntityType, SetDisplayEntityType] = React.useState<"statblock" | "lair" | "">("");
     const [DisplayEntity, SetDisplayEntity] = React.useState<StatBlock | Lair | undefined>();
     const [CreatureList, SetCreatureList] = React.useState<EntityOverview[]>([]);
     const [LocalStringState1, SetLocalStringState1] = React.useState<string>("");
     const [LocalStringState2, SetLocalStringState2] = React.useState<string>("");
-    const [LocalStringState3, SetLocalStringState3] = React.useState<string>("");
-    const [campaignSelectionOptions, SetCampaignSelectionOptions] = React.useState<string[]>([]);
+    const [selectedCampaign, SetSelectedCampaign] = React.useState<CampaignOverview | null>(null);
     const [LairDialogVisible, SetLairDialogVisible] = React.useState<boolean>(false);
     const [LairDialogList, SetLairDialogList] = React.useState<Lair[]>([]);
     const [dialogOptions, SetDialogOptions] = React.useState<DialogOptions>({
@@ -73,9 +73,7 @@ function ActiveEncounter() {
      * Trigger a re-render of the Encounter Display.
      */
     async function TriggerReRender() {
-        // This is a hack to force a re-render of the Encounter Display
-        // React rerenders if a state changes
-        if (activeEncounter) SetActiveEncounter(activeEncounter.copy(), false);
+        setSectionKey((prev) => prev + 1);
     }
 
     /** Set the active encounter locally, optionally saving it to the API.
@@ -94,6 +92,7 @@ function ActiveEncounter() {
      */
     const saveEncounter = (notify: boolean) => {
         if (!activeEncounter) return;
+        console.log(activeEncounter.Metadata.CampaignID);
         api.saveEncounter(activeEncounter).then((res) => {
             if (res) {
                 SetActiveEncounter(res, false);
@@ -143,7 +142,8 @@ function ActiveEncounter() {
      */
     const deleteEntity = (entityID: string) => {
         if (!activeEncounter) return;
-        SetActiveEncounter(activeEncounter.removeEntity(entityID).copy(), false);
+        SetActiveEncounter(activeEncounter.removeEntity(entityID), false);
+        TriggerReRender();
     };
 
     /**
@@ -172,8 +172,8 @@ function ActiveEncounter() {
         }
         // If the user is entering edit mode, load the state of the Encounter
         SetLocalStringState1(activeEncounter.Name || "");
-        SetLocalStringState2(activeEncounter.Metadata.Campaign || "");
-        SetLocalStringState3(activeEncounter.Description || "");
+        SetSelectedCampaign(context.campaigns.find((c) => c.id === activeEncounter.Metadata.CampaignID) || null);
+        SetLocalStringState2(activeEncounter.Description || "");
         SetBackupEncounter(activeEncounter ? activeEncounter.copy() : null);
     };
 
@@ -182,7 +182,8 @@ function ActiveEncounter() {
      */
     const loadEncounterFromBackup = () => {
         if (!backupEncounter || !activeEncounter) return;
-        SetActiveEncounter(activeEncounter.withEntities(backupEncounter.Entities).withLair(backupEncounter.Lair).setInitiativeOrder().copy(), false);
+        SetActiveEncounter(activeEncounter.withEntities(backupEncounter.Entities).withLair(backupEncounter.Lair).setInitiativeOrder(), false);
+        TriggerReRender();
         SetBackupEncounter(null);
     };
 
@@ -191,27 +192,24 @@ function ActiveEncounter() {
      */
     const startEncounter = () => {
         if (!activeEncounter) return;
-        SetEncounterIsActive(true);
         let meta = activeEncounter.Metadata;
         if (!activeEncounter.Metadata.Started) {
             meta.Turn = 1;
             meta.Round = 1;
         }
         SetActiveEncounter(
-            activeEncounter
-                .setInitiativeOrder()
-                .withMetadata({
-                    Started: true,
-                    AccessedDate: newLocalDate(),
-                    Turn: meta.Turn,
-                    Round: meta.Round,
-                })
-                .copy(),
+            activeEncounter.setInitiativeOrder().withMetadata({
+                Started: true,
+                AccessedDate: newLocalDate(),
+                Turn: meta.Turn,
+                Round: meta.Round,
+            }),
             runningEncounter
         );
         SetRunningEncounter(!runningEncounter);
         loadEncounterFromBackup();
         SetDisplayEntity(undefined);
+        TriggerReRender();
     };
 
     /**
@@ -255,9 +253,9 @@ function ActiveEncounter() {
         SetActiveEncounter(
             activeEncounter
                 .withName(LocalStringState1)
-                .withDescription(LocalStringState3)
+                .withDescription(LocalStringState2)
                 .withMetadata({
-                    Campaign: LocalStringState2,
+                    CampaignID: selectedCampaign?.id || -1,
                     AccessedDate: newLocalDate(),
                 })
                 .setInitiativeOrder(),
@@ -353,7 +351,6 @@ function ActiveEncounter() {
                     setDisplay={(statblock) => {
                         SetDisplayEntity(statblock), SetDisplayEntityType("statblock");
                     }}
-                    renderTrigger={TriggerReRender}
                     overviewOnly={overviewOnly}
                     editMode={EditingEncounter}
                     isActive={entity.ID === activeEncounter.ActiveID}
@@ -379,7 +376,7 @@ function ActiveEncounter() {
                 window.location.href = "/auth";
             }}
         >
-            <div className="playScreen container">
+            <div key={sectionKey} className="playScreen container">
                 <section className="justify-between">
                     <span className="three columns">
                         <Link to="/encounters">
@@ -406,23 +403,19 @@ function ActiveEncounter() {
                         </span>
                         <br />
                         <span>
-                            <strong>Campaign:</strong>{" "}
+                            <strong>CampaignID:</strong>{" "}
                             {EditingEncounter ? (
-                                <AutoComplete
-                                    value={LocalStringState2}
+                                <Dropdown
+                                    value={selectedCampaign}
                                     onChange={(e) => {
-                                        SetLocalStringState2(e.value);
+                                        SetSelectedCampaign(e.value);
                                     }}
-                                    suggestions={campaignSelectionOptions}
-                                    completeMethod={(e) => {
-                                        SetCampaignSelectionOptions(context.campaigns.filter((c) => c.Name.toLowerCase().startsWith(e.query.toLowerCase())).map((c) => c.Name));
-                                    }}
-                                    placeholder="Campaign Name"
-                                    dropdown
-                                    forceSelection
+                                    options={context.campaigns}
+                                    optionLabel="Name"
+                                    placeholder="CampaignID Name"
                                 />
                             ) : (
-                                activeEncounter.Metadata.Campaign
+                                activeEncounter.getCampaignNameFromContext(context.campaigns)
                             )}
                         </span>
                     </section>
@@ -433,10 +426,10 @@ function ActiveEncounter() {
                     <input
                         type="text"
                         className="ten columns descriptionEdit"
-                        defaultValue={LocalStringState3}
+                        defaultValue={LocalStringState2}
                         placeholder="Encounter Description"
                         onChange={(e) => {
-                            SetLocalStringState3(e.target.value);
+                            SetLocalStringState2(e.target.value);
                         }}
                     />
                 ) : (
@@ -455,11 +448,11 @@ function ActiveEncounter() {
                             {EditingEncounter ? "Cancel" : "Edit Mode"}
                         </button>
                         <button onClick={startEncounter} disabled={EditingEncounter}>
-                            {runningEncounter ? "Pause" : EncounterIsActive ? "Resume" : "Start"} Encounter
+                            {runningEncounter ? "Pause" : activeEncounter.Metadata.Started ? "Resume" : "Start"} Encounter
                         </button>
                         <button
                             onClick={() => {
-                                SetActiveEncounter(activeEncounter.reset(), true), SetEncounterIsActive(false); /*, TriggerReRender()*/
+                                SetActiveEncounter(activeEncounter.reset(), true);
                             }}
                             disabled={runningEncounter || EditingEncounter}
                         >
@@ -585,7 +578,7 @@ function ActiveEncounter() {
             />
             <PlayerDialog
                 visible={openPlayerDialog}
-                campaign={activeEncounter.Metadata.Campaign || ""}
+                campaign={activeEncounter.Metadata.CampaignID!}
                 currentPlayersIDs={activeEncounter.Entities.filter((ent) => ent.EntityType === EntityType.Player).map((ent) => ent.DBID)}
                 onClose={() => SetOpenPlayerDialog(false)}
                 callback={(ids) => {

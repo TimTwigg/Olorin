@@ -71,7 +71,7 @@ declare module "primereact/confirmdialog" {
         accept?: () => void;
         reject?: () => void;
         defaultFocus?: "accept" | "reject" | undefined;
-        icon?: React.ReactNode;
+        icon?: React.ReactNode|string;
         content?: (props: ContentProps) => React.ReactNode;
         footer?: React.ReactNode;
     };

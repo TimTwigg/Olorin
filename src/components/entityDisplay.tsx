@@ -21,7 +21,6 @@ type EntityDisplayProps = {
     entity: Entity;
     deleteCallback: (id: string) => void;
     setDisplay?: (statblock?: StatBlock) => void;
-    renderTrigger?: () => void;
     overviewOnly?: boolean;
     editMode?: boolean;
     isActive?: boolean;
@@ -82,7 +81,7 @@ function renderConditions(conditions: SmartMap<string, number>): JSX.Element {
     );
 }
 
-export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderTrigger, overviewOnly, editMode, isActive }: EntityDisplayProps) {
+export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overviewOnly, editMode, isActive }: EntityDisplayProps) {
     const context = useRouteContext({ from: "__root__" });
 
     if (!entity || !entity.Name) {
@@ -99,17 +98,17 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
     const [LocalStringState, SetLocalStringState] = React.useState<string>("");
     const [readonly, SetReadonly] = React.useState<boolean>(false);
     const [locked, SetLocked] = React.useState<boolean>(false);
+    const [sectionKey, SetSectionKey] = React.useState<number>(0); // Used to force re-render of sections
 
     setDisplay =
         setDisplay ||
         ((_: any) => {
             console.log(`No display callback found for entity: ${entity ? entity.Name : "undefined"}`);
         });
-    renderTrigger =
-        renderTrigger ||
-        (() => {
-            console.log("No render trigger found");
-        });
+
+    const TriggerLocalRerender = () => {
+        SetSectionKey((prev) => prev + 1);
+    };
 
     const FlipExpandedState = () => {
         if (ExpandedState && ControlState !== ControlOptions.None) SetControlState(ControlOptions.None);
@@ -177,7 +176,7 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
                         text
                         severity="success"
                         onClick={(_) => {
-                            entity.setInitiative(LocalNumericalState), SetControlState(ControlOptions.None), renderTrigger();
+                            entity.setInitiative(LocalNumericalState), SetControlState(ControlOptions.None), TriggerLocalRerender();
                         }}
                         className="rightButton"
                         disabled={readonly}
@@ -304,7 +303,8 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
                                 inputId={`${entity.ID}_${condition.Name}`}
                                 checked={entity.Conditions.has(condition.Name)}
                                 onChange={(e) => {
-                                    UpdateConditions(condition.Name, e.checked || false), renderTrigger();
+                                    UpdateConditions(condition.Name, e.checked || false);
+                                    TriggerLocalRerender();
                                 }}
                                 disabled={readonly}
                                 variant="filled"
@@ -325,7 +325,8 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
                         inputId={`${entity.ID}_Concentration`}
                         checked={entity.Concentration}
                         onChange={(e) => {
-                            entity.setConcentration(e.checked || false), renderTrigger();
+                            entity.setConcentration(e.checked || false);
+                            TriggerLocalRerender();
                         }}
                         disabled={readonly}
                         variant="filled"
@@ -434,7 +435,7 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, renderT
         );
 
     return (
-        <div className={"entity" + (isActive ? " active" : "")} ref={ref}>
+        <div key={sectionKey} className={"entity" + (isActive ? " active" : "")} ref={ref}>
             <div className="displayCardInfo">
                 <section>{entity.Initiative}</section>
             </div>

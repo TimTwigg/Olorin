@@ -15,12 +15,13 @@ import { Campaign } from "@src/models/campaign";
 import { Player } from "@src/models/player";
 import * as api from "@src/controllers/api";
 
-export const Route = createFileRoute("/campaigns/$campaignName")({
-    loader: async ({ params: { campaignName } }) => {
+export const Route = createFileRoute("/campaigns/$campaignID")({
+    loader: async ({ params: { campaignID } }) => {
         document.body.style.cursor = "wait";
+        let id = parseInt(campaignID);
         const activeCampaign =
             (await api
-                .getCampaign(campaignName)
+                .getCampaign(id)
                 .then((res) => {
                     return res ? res.Campaign : null;
                 })

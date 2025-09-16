@@ -170,7 +170,7 @@ export async function getEncounters(): Promise<api.EncounterResponse> {
                 return new EncounterOverview(encounter.ID, encounter.Name, encounter.Description, {
                     CreationDate: dateFromString(encounter.Metadata.CreationDate),
                     AccessedDate: dateFromString(encounter.Metadata.AccessedDate),
-                    Campaign: encounter.Metadata.Campaign,
+                    CampaignID: encounter.Metadata.CampaignID,
                     Started: encounter.Metadata.Started,
                     Round: encounter.Metadata.Round,
                     Turn: encounter.Metadata.Turn,
@@ -363,7 +363,7 @@ export async function getCampaigns(detailLevel: APIDetailLevel = 1): Promise<api
         return {
             Campaigns: data.map((c: any) => {
                 if (detailLevel === 1) {
-                    return new CampaignOverview(c.Name, c.Description, dateFromString(c.CreationDate), dateFromString(c.LastModified));
+                    return new CampaignOverview(c.ID, c.Name, c.Description, dateFromString(c.CreationDate), dateFromString(c.LastModified));
                 } else {
                     return Campaign.loadFromJSON(c);
                 }
@@ -375,13 +375,13 @@ export async function getCampaigns(detailLevel: APIDetailLevel = 1): Promise<api
 /**
  * Fetch a single campaign from the server.
  *
- * @param campaignName The name of the campaign to fetch.
+ * @param campaignID The ID of the campaign to fetch.
  *
  * @returns The campaign data.
  */
-export async function getCampaign(campaignName: string): Promise<api.SingleCampaignResponse> {
+export async function getCampaign(campaignID: number): Promise<api.SingleCampaignResponse> {
     return request("/campaign", {
-        name: campaignName,
+        id: campaignID,
         detail_level: 2,
     }).then((data: any) => {
         return {
@@ -409,13 +409,13 @@ export async function saveCampaign(campaign: Campaign): Promise<Campaign> {
 /**
  * Delete a campaign from the server.
  *
- * @param campaignName The name of the campaign to delete.
+ * @param campaignID The ID of the campaign to delete.
  *
  * @returns A boolean indicating success or failure.
  */
-export async function deleteCampaign(campaignName: string): Promise<boolean> {
+export async function deleteCampaign(campaignID: number): Promise<boolean> {
     return deleteRequest("/campaign", {
-        id: campaignName,
+        id: campaignID,
     }).then(
         () => {
             return true;

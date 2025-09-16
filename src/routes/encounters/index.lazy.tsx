@@ -20,6 +20,8 @@ import * as api from "@src/controllers/api";
 import { Encounter, EncounterOverview } from "@src/models/encounter";
 import { newLocalDate } from "@src/controllers/utils";
 import { displayDate } from "@src/controllers/utils";
+import { CampaignOverview } from "@src/models/campaign";
+import { Skeleton } from "primereact/skeleton";
 
 export const Route = createLazyFileRoute("/encounters/")({
     component: Encounters,
@@ -42,16 +44,17 @@ function Encounters() {
     const [openCreationDialog, SetOpenCreationDialog] = React.useState<boolean>(false);
     const [LocalStringState1, SetLocalStringState1] = React.useState<string>("");
     const [LocalStringState2, SetLocalStringState2] = React.useState<string>("");
-    const [LocalStringState3, SetLocalStringState3] = React.useState<string>("");
+    const [LocalCampaignState, SetLocalCampaignState] = React.useState<CampaignOverview | null>(null);
 
     const [filters, setFilters] = React.useState<DataTableFilterMeta>();
     const [loading, setLoading] = React.useState<boolean>(true);
     const [globalFilterValue, setGlobalFilterValue] = React.useState<string>("");
+    const [tableKey, setTableKey] = React.useState<number>(0); // Used to force table re-render
 
     const createNewEncounter = () => {
         SetLocalStringState1("");
         SetLocalStringState2("");
-        SetLocalStringState3("");
+        SetLocalCampaignState(null);
         SetOpenCreationDialog(true);
     };
 
@@ -135,6 +138,12 @@ function Encounters() {
         return <Calendar value={options.value} onChange={(e) => options.filterCallback(e.value, options.index)} dateFormat="mm/dd/yy" placeholder="mm/dd/yyyy" mask="99/99/9999" />;
     };
 
+    const campaignBodyTemplate = (rowData: EncounterOverview) => {
+        if (!context.loaded) return <Skeleton width="10rem" />;
+        const campaign = context.campaigns.find((c: CampaignOverview) => c.id === rowData.Metadata.CampaignID);
+        return <span>{campaign ? campaign.Name : rowData.Metadata.CampaignID}</span>;
+    }
+
     const optionsBodyTemplate = (rowData: EncounterOverview) => {
         const menuRef = React.createRef<Menu>();
 
@@ -156,6 +165,14 @@ function Encounters() {
         );
     };
 
+    const finishLoadingAfterContext = (callback: () => void) => {
+        if (context.loaded) {
+            callback();
+            return;
+        }
+        setTimeout(() => finishLoadingAfterContext(callback), 500);
+    };
+
     const header = renderHeader();
 
     React.useEffect(() => {
@@ -165,7 +182,10 @@ function Encounters() {
                 SetEncounters(res.Encounters);
             });
             initFilters();
-            setLoading(false);
+            finishLoadingAfterContext(() => {
+                setLoading(false);
+                setTableKey((prev) => prev + 1); // Force table re-render after context is loaded
+            });
         }
     }, [getEncountersRef]);
 
@@ -184,12 +204,30 @@ function Encounters() {
                 </button>
             </div>
             <div className="break" />
-            <DataTable value={encounters} stripedRows paginator rows={10} rowsPerPageOptions={[5, 10, 25]} removableSort filters={filters} filterDisplay="menu" loading={loading} globalFilterFields={["Name", "Description", "Campaign"]} header={header} emptyMessage="No encounters found." className="ten columns offset-by-one column" style={{ fontSize: "1.5rem" }} onRowClick={(e) => (navigate({ to: `/encounters/${(e.data as EncounterOverview).id}` }))} rowClassName={(_) => "data-table-clickable-row"}>
-                <Column field="Name" header="Name" filter />
-                <Column field="Description" header="Description" filter />
-                <Column field="Metadata.Campaign" header="Campaign" filter filterElement={campaignFilterTemplate} showFilterMatchModes={false} />
-                <Column field="Metadata.CreationDate" header="Creation Date" dataType="date" body={(rowData) => displayDate(rowData.Metadata.CreationDate)} filter filterElement={dateFilterTemplate} />
-                <Column field="Metadata.AccessedDate" header="Last Accessed" dataType="date" body={(rowData) => displayDate(rowData.Metadata.AccessedDate)} filter filterElement={dateFilterTemplate} />
+            <DataTable
+                key={tableKey}
+                value={encounters}
+                stripedRows
+                paginator
+                rows={10}
+                rowsPerPageOptions={[5, 10, 25]}
+                removableSort
+                filters={filters}
+                filterDisplay="menu"
+                loading={loading}
+                globalFilterFields={["Name", "Description", "Campaign"]}
+                header={header}
+                emptyMessage="No encounters found."
+                className="ten columns offset-by-one column"
+                style={{ fontSize: "1.5rem" }}
+                onRowClick={(e) => navigate({ to: `/encounters/${(e.data as EncounterOverview).id}` })}
+                rowClassName={(_) => "data-table-clickable-row"}
+            >
+                <Column field="Name" header="Name" filter sortable />
+                <Column field="Description" header="Description" filter sortable />
+                <Column field="Metadata.Campaign" header="Campaign" filter filterElement={campaignFilterTemplate} body={campaignBodyTemplate} showFilterMatchModes={false} sortable />
+                <Column field="Metadata.CreationDate" header="Creation Date" dataType="date" body={(rowData) => displayDate(rowData.Metadata.CreationDate)} filter filterElement={dateFilterTemplate} sortable />
+                <Column field="Metadata.AccessedDate" header="Last Accessed" dataType="date" body={(rowData) => displayDate(rowData.Metadata.AccessedDate)} filter filterElement={dateFilterTemplate} sortable />
                 <Column body={optionsBodyTemplate} header="Options" />
             </DataTable>
             <ConfirmDialog
@@ -226,11 +264,11 @@ function Encounters() {
                         <Button
                             label="Done"
                             onClick={() => {
-                                if (LocalStringState1 == "" || LocalStringState2 == "" || LocalStringState3 == "") {
+                                if (LocalStringState1 == "" || LocalStringState2 == "" || LocalCampaignState == null) {
                                     toast.error("All fields are required.");
                                     return;
                                 }
-                                api.saveEncounter(new Encounter(0, LocalStringState1, LocalStringState2, LocalStringState3, { AccessedDate: newLocalDate(), CreationDate: newLocalDate() }))
+                                api.saveEncounter(new Encounter(0, LocalStringState1, LocalStringState2, LocalCampaignState.id, { AccessedDate: newLocalDate(), CreationDate: newLocalDate() }))
                                     .then((res) => {
                                         if (res) {
                                             window.location.replace(`/encounters/${res.id}`);
@@ -258,12 +296,12 @@ function Encounters() {
                     <input id="encounter-description" type="text" value={LocalStringState2} onChange={(e) => SetLocalStringState2(e.target.value)} placeholder="Encounter Description" />
                     <br />
                     <label htmlFor="encounter-campaign">Campaign</label>
-                    <select id="encounter-campaign" value={LocalStringState3} onChange={(e) => SetLocalStringState3(e.target.value)}>
-                        <option value="" defaultChecked disabled>
+                    <select id="encounter-campaign" value={LocalCampaignState?.id || 0} onChange={(e) => SetLocalCampaignState(context.campaigns.find(campaign => campaign.id === parseInt(e.target.value)) || null)}>
+                        <option value="0" defaultChecked disabled>
                             Select Campaign
                         </option>
                         {context.campaigns.map((campaign) => (
-                            <option key={campaign.Name} value={campaign.Name}>
+                            <option key={campaign.id} value={campaign.id}>
                                 {campaign.Name}
                             </option>
                         ))}

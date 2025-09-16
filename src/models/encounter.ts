@@ -3,11 +3,12 @@ import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { CounterMap } from "@src/models/data_structures/counterMap";
 import { Lair } from "@src/models/lair";
 import { deepCopy, dateFromString, newLocalDate } from "@src/controllers/utils";
+import { CampaignOverview } from "@src/models/campaign";
 
 export type EncounterMetadata = {
     CreationDate?: Date;
     AccessedDate?: Date;
-    Campaign?: string;
+    CampaignID?: number;
     Started?: boolean;
     Round?: number;
     Turn?: number;
@@ -33,7 +34,7 @@ export class EncounterOverview implements EncounterOverviewT {
         this.Metadata = {
             CreationDate: metadata.CreationDate === undefined ? newLocalDate() : metadata.CreationDate,
             AccessedDate: metadata.AccessedDate === undefined ? newLocalDate() : metadata.AccessedDate,
-            Campaign: metadata.Campaign === undefined ? "" : metadata.Campaign,
+            CampaignID: metadata.CampaignID === undefined ? -1 : metadata.CampaignID,
             Started: metadata.Started === undefined ? false : metadata.Started,
             Turn: metadata.Turn === undefined ? 1 : metadata.Turn,
             Round: metadata.Round === undefined ? 1 : metadata.Round,
@@ -53,22 +54,18 @@ export class Encounter {
     ActiveID: string = "";
     InitiativeOrder: [string, number][] = [];
 
-    constructor(id: number, name: string = "", description: string = "", Campaign: string = "", metadata: EncounterMetadata = {}) {
+    constructor(id: number, name: string = "", description: string = "", CampaignID: number = -1, metadata: EncounterMetadata = {}) {
         this.id = id;
         this.Name = name;
         this.Description = description;
         this.Metadata = {
             CreationDate: metadata.CreationDate === undefined ? newLocalDate() : metadata.CreationDate,
             AccessedDate: metadata.AccessedDate === undefined ? newLocalDate() : metadata.AccessedDate,
-            Campaign: metadata.Campaign === undefined ? Campaign : metadata.Campaign,
+            CampaignID: metadata.CampaignID === undefined ? CampaignID : metadata.CampaignID,
             Started: metadata.Started === undefined ? false : metadata.Started,
             Turn: metadata.Turn === undefined ? 1 : metadata.Turn,
             Round: metadata.Round === undefined ? 1 : metadata.Round,
         };
-
-        if (Campaign !== "") {
-            console.log("[WARNING] Encounter created with campaign: " + Campaign);
-        }
     }
 
     /**
@@ -236,7 +233,7 @@ export class Encounter {
         this.Metadata = {
             CreationDate: metadata.CreationDate === undefined ? this.Metadata.CreationDate : metadata.CreationDate,
             AccessedDate: metadata.AccessedDate === undefined ? this.Metadata.AccessedDate : metadata.AccessedDate,
-            Campaign: metadata.Campaign === undefined ? this.Metadata.Campaign : metadata.Campaign,
+            CampaignID: metadata.CampaignID === undefined ? this.Metadata.CampaignID : metadata.CampaignID,
             Started: metadata.Started === undefined ? this.Metadata.Started : metadata.Started,
             Turn: metadata.Turn === undefined ? this.Metadata.Turn : metadata.Turn,
             Round: metadata.Round === undefined ? this.Metadata.Round : metadata.Round,
@@ -265,6 +262,18 @@ export class Encounter {
         this.LairOwnerID = lair !== undefined ? lair.OwningEntityDBID : -1;
         this.setInitiativeOrder();
         return this;
+    }
+
+    /**
+     * Get the name of the CampaignID this encounter belongs to
+     * 
+     * @param campaigns the list of campaigns to search
+     * 
+     * @returns the name of the CampaignID, or an empty string if not found
+     */
+    getCampaignNameFromContext(campaigns: CampaignOverview[]): string {
+        let CampaignID = campaigns.find((c) => c.id === this.Metadata.CampaignID);
+        return CampaignID ? CampaignID.Name : "";
     }
 
     /**
@@ -312,11 +321,11 @@ export class Encounter {
     }
 
     public static loadFromJSON(json: any): Encounter {
-        let encounter = new Encounter(json.ID, json.Name, json.Description, "", json.Metadata);
+        let encounter = new Encounter(json.ID, json.Name, json.Description, -1, json.Metadata);
         encounter.Metadata = {
             CreationDate: json.Metadata.CreationDate === undefined ? newLocalDate() : dateFromString(json.Metadata.CreationDate),
             AccessedDate: json.Metadata.AccessedDate === undefined ? newLocalDate() : dateFromString(json.Metadata.AccessedDate),
-            Campaign: json.Metadata.Campaign === undefined ? "" : json.Metadata.Campaign,
+            CampaignID: json.Metadata.CampaignID === undefined ? -1 : json.Metadata.CampaignID,
             Started: json.Metadata.Started === undefined ? false : json.Metadata.Started,
             Round: json.Metadata.Round === undefined ? 1 : json.Metadata.Round,
             Turn: json.Metadata.Turn === undefined ? 1 : json.Metadata.Turn,
