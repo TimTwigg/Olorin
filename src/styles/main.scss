@@ -20,6 +20,10 @@
 */
 
 @use 'variables' as v;
+@import './themes.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* 
 *   Grid
@@ -148,7 +152,6 @@ h5 {  font-size: 1.8rem;   line-height: 1.4;    letter-spacing: -.08rem;  }
 h1 {
     text-align: center;
     font-weight: bold;
-    margin-top: 30px;
 }
 
 /* Larger than phablet */
@@ -273,10 +276,6 @@ nav {
         justify-content: space-between;
         gap: 1rem;
     }
-
-    a {    
-        margin: 0 0.75rem;
-    }
 }
 
 /*
@@ -363,12 +362,13 @@ nav {
 *   ================================================================
 */
 
-a {
-    background-color: transparent;
-    transition: .5s ease;
-    color: v.$blue;
-    text-decoration: none;
-}
+// Commented out - now using Tailwind for link styling
+// a {
+//     background-color: transparent;
+//     transition: .5s ease;
+//     color: v.$blue;
+//     text-decoration: none;
+// }
 
 .big.button {
     background-color: v.$gray;
@@ -688,10 +688,10 @@ td {
     height: 1.75em;
 }
 
-.flex {
-    display: flex;
-    flex-wrap: wrap;
-}
+// .flex {
+//     display: flex;
+//     flex-wrap: wrap;
+// }
 
 .gap-1 {
     gap: 1px;

@@ -19,6 +19,9 @@ Custom Encounter Manager for D&D 5E.
 - Changing which campaign an encounter is in should remove the players?
 - Rework to use PrimeReact
 - Active encounter page not correctly loading Started/Round/Turn metadata
+- Continue reworking for tailwind and css instead of scss classes
+- Fix all the errors on logged-out homepage load
+- Add public routes?
 
 ## Ideas
 
