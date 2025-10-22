@@ -6,6 +6,7 @@ export const router = createRouter({
     routeTree,
     context: {
         loaded: false,
+        isAuthenticated: false,
         userOptions: new UserOptions(),
         conditions: [],
         creatureTypes: [],

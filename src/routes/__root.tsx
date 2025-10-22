@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { createRootRouteWithContext, Link, Outlet, useRouter } from "@tanstack/react-router";
+import { createRootRouteWithContext, Link, Outlet, useRouter, useRouteContext } from "@tanstack/react-router";
 import { ToastContainer } from "react-toastify";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import Session from "supertokens-auth-react/recipe/session";
@@ -28,6 +28,8 @@ type ErrorComponentProps = {
 };
 
 const NavBar = () => {
+    const context = useRouteContext({ from: "__root__" });
+
     const router = useRouter();
     const [isDarkMode, setIsDarkMode] = React.useState(() => {
         return document.documentElement.classList.contains("dark");
@@ -41,7 +43,7 @@ const NavBar = () => {
     const metaRef = React.useRef<number>(0);
 
     React.useEffect(() => {
-        if (metaRef.current === 0) {
+        if (metaRef.current === 0 && context.isAuthenticated) {
             metaRef.current = 1;
             api.getDisplayName().then((name) => {
                 if (name) setDisplayName(name);
@@ -253,6 +255,7 @@ const loadContextData = async (context: ModelContext) => {
     }
 
     context.loaded = true;
+    context.isAuthenticated = isAuthenticated;
 };
 
 function RootComponent() {

@@ -210,9 +210,9 @@ function Dashboard() {
                                     </Link>
                                 </div>
                             ) : (
-                                <div className="space-y-3" key="recent-campaigns-list">
-                                    {campaigns.slice(0, 5).map((campaign) => (
-                                        <div key={campaign.ID} onClick={() => (window.location.href = `/campaigns/${campaign.ID}`)} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-accent-500 dark:hover:border-accent-500 transition-colors cursor-pointer">
+                                <div className="space-y-3">
+                                    {campaigns.slice(0, 5).map((campaign, i) => (
+                                        <div key={i} onClick={() => (window.location.href = `/campaigns/${campaign.ID}`)} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-accent-500 dark:hover:border-accent-500 transition-colors cursor-pointer">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
                                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{campaign.Name}</h3>

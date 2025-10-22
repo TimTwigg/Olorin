@@ -18,8 +18,8 @@
 - Rework to use PrimeReact
 - Active encounter page not correctly loading Started/Round/Turn metadata
 - Continue reworking for tailwind and css instead of scss classes
-- Fix all the errors on logged-out homepage load
 - Add public routes?
+- Add logged-in version of the landing page (in addition to the dashboard page?)
 
 ## Ideas
 

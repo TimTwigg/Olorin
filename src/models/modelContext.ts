@@ -4,6 +4,7 @@ import { CampaignOverview } from "@src/models/campaign";
 
 export interface ModelContext {
     loaded: boolean;
+    isAuthenticated: boolean;
     userOptions: UserOptions;
     conditions: Condition[];
     creatureTypes: string[];
