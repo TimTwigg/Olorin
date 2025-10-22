@@ -1,8 +1,9 @@
 import React, { Suspense } from "react";
-import { createRootRouteWithContext, Link, Outlet } from "@tanstack/react-router";
+import { createRootRouteWithContext, Link, Outlet, useRouter } from "@tanstack/react-router";
 import { ToastContainer } from "react-toastify";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import Session from "supertokens-auth-react/recipe/session";
 import { ModelContext } from "@src/models/modelContext";
-import { OptionBox } from "@src/components/optionBox";
 import { useTheme } from "@src/hooks/useTheme";
 import * as api from "@src/controllers/api";
 import "@src/styles/main.scss";
@@ -27,6 +28,7 @@ type ErrorComponentProps = {
 };
 
 const NavBar = () => {
+    const router = useRouter();
     const [isDarkMode, setIsDarkMode] = React.useState(() => {
         return document.documentElement.classList.contains("dark");
     });
@@ -34,6 +36,33 @@ const NavBar = () => {
     const [colorScheme, setColorScheme] = React.useState(() => {
         return document.documentElement.getAttribute("data-color-scheme") || "gandalf-grey";
     });
+
+    const [displayName, setDisplayName] = React.useState<string | null>(null);
+    const metaRef = React.useRef<number>(0);
+
+    React.useEffect(() => {
+        if (metaRef.current === 0) {
+            metaRef.current = 1;
+            api.getDisplayName().then((name) => {
+                if (name) setDisplayName(name);
+                else {
+                    Session.doesSessionExist().then((exists) => {
+                        if (exists) {
+                            Session.getUserId().then((userId) => {
+                                if (userId) {
+                                    setDisplayName(userId);
+                                } else {
+                                    setDisplayName(null);
+                                }
+                            });
+                        } else {
+                            setDisplayName(null);
+                        }
+                    });
+                }
+            });
+        }
+    }, []);
 
     const toggleTheme = () => {
         const newIsDark = !isDarkMode;
@@ -56,6 +85,12 @@ const NavBar = () => {
     const changeColorScheme = (scheme: string) => {
         setColorScheme(scheme);
         document.documentElement.setAttribute("data-color-scheme", scheme);
+    };
+
+    const signOut = async () => {
+        await Session.signOut();
+        router.invalidate();
+        window.location.href = "/";
     };
 
     return (
@@ -109,7 +144,46 @@ const NavBar = () => {
                     </div>
 
                     {/* User Menu */}
-                    <OptionBox />
+                    <div className="relative">
+                        {displayName ? (
+                            <Menu as="div" className="relative">
+                                <MenuButton className="flex items-center gap-2 px-4 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                    <i className="pi pi-user"></i>
+                                    <span>
+                                        {displayName.substring(0, 20)}
+                                        {displayName.length > 20 ? "..." : ""}
+                                    </span>
+                                    <i className="pi pi-chevron-down text-xs"></i>
+                                </MenuButton>
+                                <MenuItems className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg focus:outline-none z-50">
+                                    <div className="py-1">
+                                        <MenuItem>
+                                            <Link to="/profile" className="w-full px-4 py-2 text-base text-gray-700 dark:text-gray-300 flex items-center gap-2 data-[focus]:bg-gray-100 dark:data-[focus]:bg-gray-700">
+                                                <i className="pi pi-user"></i>
+                                                Profile
+                                            </Link>
+                                        </MenuItem>
+                                        <MenuItem>
+                                            <button onClick={signOut} className="w-full text-left px-4 py-2 text-base text-gray-700 dark:text-gray-300 flex items-center gap-2 data-[focus]:bg-gray-100 dark:data-[focus]:bg-gray-700">
+                                                <i className="pi pi-sign-out"></i>
+                                                Sign Out
+                                            </button>
+                                        </MenuItem>
+                                    </div>
+                                </MenuItems>
+                            </Menu>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    window.location.href = "/auth";
+                                }}
+                                className="flex items-center gap-2 px-4 py-2 bg-accent-600 hover:bg-accent-700 text-white rounded-md text-base font-medium transition-colors"
+                            >
+                                <i className="pi pi-sign-in"></i>
+                                Sign In
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </nav>
@@ -142,43 +216,40 @@ const NotFoundComponent = () => {
 };
 
 const loadContextData = async (context: ModelContext) => {
-    // Load public data (doesn't require authentication)
-    try {
-        const [types, sizes, conditions] = await Promise.all([api.getTypes(), api.getSizes(), api.getConditions()]);
-        context.creatureTypes = types.Types || [];
-        context.creatureSizes = sizes.Sizes || [];
-        context.conditions = conditions.Conditions || [];
-    } catch (error) {
-        console.error("Error loading public data:", error);
+    // Check if user is authenticated before making authenticated API calls
+    const isAuthenticated = await Session.doesSessionExist();
+    if (!isAuthenticated) {
+        context.campaigns = [];
+        context.creatureTypes = [];
+        context.creatureSizes = [];
+        context.conditions = [];
+        context.loaded = true;
+        return;
     }
 
-    // Load user-specific data (requires authentication)
-    try {
-        const campaigns = await api.getCampaigns(1);
-        context.campaigns = campaigns.Campaigns || [];
-    } catch (error) {
-        // User not authenticated - use empty array
-        context.campaigns = [];
-    }
+    // TODO: Should these be public?
+    const [types, sizes, conditions] = await Promise.all([api.getTypes(), api.getSizes(), api.getConditions()]);
+    context.creatureTypes = types.Types || [];
+    context.creatureSizes = sizes.Sizes || [];
+    context.conditions = conditions.Conditions || [];
+
+    // Load user campaigns
+    const campaigns = await api.getCampaigns(1);
+    context.campaigns = campaigns.Campaigns || [];
 
     // Load theme and color scheme from metadata (requires authentication)
-    try {
-        const metadata = await api.getMetadata();
-        if (metadata.Metadata.has("theme")) {
-            const themeValue = metadata.Metadata.get("theme");
-            if (themeValue === "light" || themeValue === "dark" || themeValue === "system") {
-                context.userOptions.theme = themeValue;
-            }
+    const metadata = await api.getMetadata();
+    if (metadata.Metadata.has("theme")) {
+        const themeValue = metadata.Metadata.get("theme");
+        if (themeValue === "light" || themeValue === "dark" || themeValue === "system") {
+            context.userOptions.theme = themeValue;
         }
-        if (metadata.Metadata.has("colorScheme")) {
-            const colorSchemeValue = metadata.Metadata.get("colorScheme");
-            if (colorSchemeValue === "gandalf-grey" || colorSchemeValue === "gandalf-white" || colorSchemeValue === "valinor" || colorSchemeValue === "mithrandir") {
-                context.userOptions.colorScheme = colorSchemeValue;
-            }
+    }
+    if (metadata.Metadata.has("colorScheme")) {
+        const colorSchemeValue = metadata.Metadata.get("colorScheme");
+        if (colorSchemeValue === "gandalf-grey" || colorSchemeValue === "gandalf-white" || colorSchemeValue === "valinor" || colorSchemeValue === "mithrandir") {
+            context.userOptions.colorScheme = colorSchemeValue;
         }
-    } catch (error) {
-        // User not authenticated or metadata not available - use defaults
-        console.log("Theme/color scheme not loaded from metadata, using defaults");
     }
 
     context.loaded = true;
