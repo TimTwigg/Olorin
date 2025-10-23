@@ -51,7 +51,7 @@ function Profile() {
 
     const SaveMetadata = async () => {
         setSaving(true);
-        let new_meta = new Map<string, string>(metadata);
+        const new_meta = new Map<string, string>(metadata);
         new_meta.set("displayName", displayName);
         new_meta.set("theme", theme);
         new_meta.set("colorScheme", colorScheme);
@@ -67,7 +67,7 @@ function Profile() {
 
             toast.success("Profile updated successfully!");
             setTimeout(() => window.location.reload(), 500);
-        } catch (error) {
+        } catch {
             toast.error("Failed to update profile");
             setSaving(false);
         }

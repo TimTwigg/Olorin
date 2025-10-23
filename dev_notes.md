@@ -1,4 +1,4 @@
-# Claude Development Notes for Olorin
+# Development Notes for Olorin
 
 This document contains key architectural decisions, design guidelines, and migration notes for the Olorin TTRPG campaign management application.
 
@@ -10,25 +10,41 @@ Olorin is a tabletop RPG (TTRPG) campaign management tool built with:
 - PrimeReact for UI components
 - Tailwind CSS for styling (migrating from SCSS)
 
+## Important Files
+- [CLAUDE.md](CLAUDE.md) - Instructions for Claude Code instances
+- [claude_todos.md](claude_todos.md) - Claude's open/incomplete tasks (updated at end of each session)
+- [todo.md](todo.md) - Developer's personal todo list
+
+## Table of Contents
+- [Active Migration: SCSS → Tailwind + PrimeReact](#active-migration-scss--tailwind--primereact)
+- [CSS Variables Theme System](#css-variables-theme-system)
+- [Theme System Architecture (Light/Dark Mode)](#theme-system-architecture-lightdark-mode)
+- [Page Redesigns Completed](#page-redesigns-completed)
+- [Design Patterns & Best Practices](#design-patterns--best-practices)
+- [Router & Navigation](#router--navigation)
+- [State Management](#state-management)
+- [Authentication](#authentication)
+- [API Integration](#api-integration)
+- [Performance & Loading](#performance--loading)
+- [Design Philosophy](#design-philosophy)
+- [Environment & Build](#environment--build)
+- [Common Issues & Troubleshooting](#common-issues--troubleshooting)
+- [Future Considerations](#future-considerations)
+- [Quick Reference](#quick-reference)
+
 ## Active Migration: SCSS → Tailwind + PrimeReact
 
 ### Guidelines
 1. **DO NOT delete SCSS files** - Comment out styles instead
 2. **Comment pattern**: Add explanatory comments when commenting out SCSS
+
    ```scss
-   // Commented out - now using Tailwind for [specific purpose]
+   // Commented out on [date] - now using [Tailwind/PrimeReact Theme] for [specific purpose]
    // [original code]
    ```
+
 3. **Eventually remove ~90% of SCSS** - Long-term goal
 4. **Use Tailwind + PrimeReact themes** instead of custom SCSS classes
-
-### SCSS Files Modified
-- `src/styles/main.scss`: Commented out global `a` link styles (line 368-374), added themes.css import
-- `src/styles/normalize.scss`: Commented out `a:hover` underline styles (line 129-132)
-
-### Key Fixes Applied
-- **Font Size Override**: All major pages use `style={{ fontSize: '16px' }}` on root div to override SCSS `html { font-size: 62.5% }` setting
-- **Tailwind Dark Mode**: Changed from `darkMode: "media"` to `darkMode: "class"` in `tailwind.config.js`
 
 ## CSS Variables Theme System
 
@@ -69,6 +85,7 @@ The app uses a **CSS variables-based theming system** that allows users to selec
 - Temporary controls in navbar for testing (theme toggle + color scheme dropdown)
 
 ### Color Usage Pattern
+
 ```tsx
 // Old hardcoded approach (don't use):
 className="text-red-600 bg-amber-500"
@@ -208,7 +225,8 @@ className="text-primary-600 bg-accent-500"
 - **Root loader must await** `loadContextData(context)` to set `context.loaded = true`
 
 ### Route Structure
-```
+
+```text
 /                           - Home (landing or dashboard based on auth)
 /profile                    - User profile settings
 /library                    - Library landing page
@@ -222,6 +240,7 @@ className="text-primary-600 bg-accent-500"
 ## State Management
 
 ### Context (ModelContext)
+
 ```typescript
 {
     loaded: boolean;  // MUST be true before dashboard renders
@@ -239,6 +258,7 @@ className="text-primary-600 bg-accent-500"
 ```
 
 ### User Options
+
 ```typescript
 {
     defaultColumns: number;
@@ -258,6 +278,19 @@ className="text-primary-600 bg-accent-500"
 - Changed from `window.location.href` to `Link` component
 - Prevents full page reload and context loss
 - Maintains theme state across navigation
+
+## API Integration
+
+### Architecture
+- **API Client**: `src/controllers/api.ts` - handles all backend communication
+- **Caching**: `src/controllers/api_cache.ts` - manages API response caching
+- Cache configuration in `context.technicalConfig.cacheSizes`
+
+### Best Practices
+- Use the centralized API controller for all backend requests
+- Leverage caching for frequently accessed data (e.g., stat blocks)
+- Handle loading and error states consistently across components
+- API calls should be made in route loaders or component effects, not in render
 
 ## Performance & Loading
 
@@ -291,6 +324,61 @@ className="text-primary-600 bg-accent-500"
 - Keep components focused and reusable
 - Type safety with ColorScheme type for easy maintenance
 
+## Environment & Build
+
+### Development Commands
+- **Development server**: `npm run dev` (typically handled by user)
+- **Build**: `npm run build` (typically handled by user)
+- **Linting**: `npm run lint` (run after making code changes)
+
+### Environment Variables
+- Environment variables should be documented here as they are added
+- Use `.env.template` as a reference for required variables
+
+### Important Notes
+- Claude should not run `npm run dev` or `npm run build` unless explicitly requested
+- Always run `npm run lint` after making code changes to catch issues
+- No automated testing is currently set up
+
+## Common Issues & Troubleshooting
+
+### Context Not Loading
+**Symptoms**: Dashboard shows loading spinners indefinitely, context data is undefined
+**Solutions**:
+- Ensure root loader awaits `loadContextData(context)` in `src/routes/__root.tsx`
+- Check that `context.loaded` is true before accessing context data in components
+- Verify API endpoints are responding correctly
+
+### Theme Not Applying
+**Symptoms**: Colors don't change when switching themes or color schemes
+**Solutions**:
+- Verify `useTheme()` is only called in root component (not individual pages)
+- Check that CSS variables are defined in `src/styles/themes.css`
+- Ensure `data-color-scheme` attribute is set on `<html>` element
+- Verify PrimeReact theme CSS file is being loaded
+
+### Navigation Issues
+**Symptoms**: Context lost during navigation, full page reload on navigation
+**Solutions**:
+- Use TanStack Router `Link` component, not `window.location.href`
+- Ensure routes are properly configured in router
+- Check that `Link` components have correct `to` prop
+
+### Styling Issues
+**Symptoms**: Dark mode not working, custom styles not applying
+**Solutions**:
+- Ensure `dark` class is on `<html>` element for dark mode
+- Check that Tailwind classes include `dark:` variants
+- Verify CSS variables are being used (`primary-*`, `accent-*`) instead of hardcoded colors
+- Review SCSS migration guidelines - ensure old SCSS isn't conflicting
+
+### API/Caching Issues
+**Symptoms**: Stale data, failed requests
+**Solutions**:
+- Check `src/controllers/api.ts` for error handling
+- Review cache configuration in `context.technicalConfig.cacheSizes`
+- Verify backend API is running and accessible
+
 ## Future Considerations
 
 1. **Complete SCSS removal**: Continue commenting out and replacing SCSS with Tailwind
@@ -299,12 +387,16 @@ className="text-primary-600 bg-accent-500"
 4. **Mobile responsiveness**: Test and optimize for smaller screens
 5. **Active link highlighting**: Add visual indication of current page in nav bar
 6. **Additional color schemes**: Easy to add more Middle-earth inspired themes
+7. **Testing strategy**: Consider adding unit tests, integration tests, or E2E tests
+8. **Error boundaries**: Implement React error boundaries for better error handling
+9. **Performance monitoring**: Consider adding performance tracking for API calls and renders
 
 ## Quick Reference
 
 ### Common Patterns
 
 **Page Container:**
+
 ```tsx
 <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8" style={{ fontSize: "16px" }}>
     <div className="max-w-4xl mx-auto px-4">
@@ -314,6 +406,7 @@ className="text-primary-600 bg-accent-500"
 ```
 
 **Card:**
+
 ```tsx
 <Card className="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
     {/* Card content */}
@@ -321,6 +414,7 @@ className="text-primary-600 bg-accent-500"
 ```
 
 **Button with Accent Color:**
+
 ```tsx
 <Button
     label="Save"
@@ -331,6 +425,7 @@ className="text-primary-600 bg-accent-500"
 ```
 
 **Link (Navigation):**
+
 ```tsx
 <Link to="/path" className="text-gray-700 dark:text-gray-300 hover:text-accent-600 dark:hover:text-accent-400">
     Link Text
@@ -338,11 +433,13 @@ className="text-primary-600 bg-accent-500"
 ```
 
 **Themed Icon:**
+
 ```tsx
 <i className="pi pi-compass text-accent-500 dark:text-accent-400"></i>
 ```
 
 **Gradient with Theme Colors:**
+
 ```tsx
 <div className="bg-gradient-to-br from-primary-700 to-primary-900 dark:from-primary-800 dark:to-primary-950">
     {/* Hero content */}
@@ -352,18 +449,20 @@ className="text-primary-600 bg-accent-500"
 ### Adding a New Color Scheme
 
 1. Add CSS variables to `src/styles/themes.css`:
-```css
-[data-color-scheme="new-theme"] {
-    --color-primary-500: R G B;
-    --color-accent-500: R G B;
-    /* ... other shades */
-}
-```
+
+    ```css
+    [data-color-scheme="new-theme"] {
+        --color-primary-500: R G B;
+        --color-accent-500: R G B;
+        /* ... other shades */
+    }
+    ```
 
 2. Update type in `src/models/userOptions.ts`:
-```typescript
-export type ColorScheme = "gandalf-grey" | "gandalf-white" | "valinor" | "mithrandir" | "new-theme";
-```
+
+    ```typescript
+    export type ColorScheme = "gandalf-grey" | "gandalf-white" | "valinor" | "mithrandir" | "new-theme";
+    ```
 
 3. Add option to profile dropdown (and temp navbar dropdown if still present)
 
@@ -371,5 +470,5 @@ export type ColorScheme = "gandalf-grey" | "gandalf-white" | "valinor" | "mithra
 
 ---
 
-**Last Updated:** October 2025 (Session: CSS Variables Theming System + Home Page Loading Fix)
+**Last Updated:** 22 October 2025 (Session: Documentation improvements - added TOC, API integration, troubleshooting, and environment sections) <br>
 **Status:** Active development - CSS variables theming system complete, ongoing SCSS → Tailwind migration

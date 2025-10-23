@@ -16,10 +16,12 @@
     - Basically lair but tied to encounter rather than an entity
 - Changing which campaign an encounter is in should remove the players?
 - Rework to use PrimeReact
+- Review custom Card component (src/components/card.tsx) - consider migrating to PrimeReact Card
 - Active encounter page not correctly loading Started/Round/Turn metadata
 - Continue reworking for tailwind and css instead of scss classes
 - Add public routes?
 - Add logged-in version of the landing page (in addition to the dashboard page?)
+- Optimize where api calls are made - loader vs in render
 
 ## Ideas
 
