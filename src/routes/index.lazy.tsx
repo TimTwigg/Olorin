@@ -3,6 +3,7 @@ import { createLazyFileRoute, Link, useRouteContext } from "@tanstack/react-rout
 import Session from "supertokens-auth-react/recipe/session";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
+import { CampaignOverview } from "@src/models/campaign";
 
 export const Route = createLazyFileRoute("/")({
     component: Index,
@@ -104,7 +105,7 @@ function LandingPage() {
 // Dashboard for logged-in users
 function Dashboard() {
     const context = useRouteContext({ from: "__root__" });
-    const [campaigns, setCampaigns] = React.useState<any[]>([]);
+    const [campaigns, setCampaigns] = React.useState<CampaignOverview[]>([]);
     const [stats, setStats] = React.useState({
         campaigns: 0,
         encounters: 0,

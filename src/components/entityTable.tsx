@@ -46,7 +46,7 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        let _filters = { ...filters };
+        const _filters = { ...filters };
 
         if (_filters["global"] && "value" in _filters["global"]) {
             (_filters["global"] as { value: any }).value = value;

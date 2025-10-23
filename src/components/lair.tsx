@@ -141,7 +141,8 @@ export function LairDialog({ visible, selectedOwningEntityDBID, lairs, onClose, 
                 value={"none"}
                 checked={radio_value === -1}
                 onChange={() => {
-                    setRadioValue(-1), setSelectedLair(undefined);
+                    setRadioValue(-1);
+                    setSelectedLair(undefined);
                 }}
             />
             <label htmlFor={"lair_dialog_none"}>None</label>
@@ -154,7 +155,8 @@ export function LairDialog({ visible, selectedOwningEntityDBID, lairs, onClose, 
                         value={l.OwningEntityDBID}
                         checked={l.OwningEntityDBID === radio_value}
                         onChange={() => {
-                            setRadioValue(l.OwningEntityDBID), setSelectedLair(l);
+                            setRadioValue(l.OwningEntityDBID);
+                            setSelectedLair(l);
                         }}
                     />
                     <label htmlFor={"lair_dialog" + l.Name}>{l.Name}</label>

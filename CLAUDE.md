@@ -31,11 +31,13 @@
 - Create high-level plan and todo list for code changes, present for approval before implementing
 - Run linting after changes: `npm run lint`
 - Update [dev notes](dev_notes.md) when applicable (general principles, not changelog)
-- **At the end of each session**: Update [claude_todos.md](claude_todos.md) with any incomplete tasks or work in progress
+- **IMPORTANT - Update [claude_todos.md](claude_todos.md) proactively**:
+    - Update IMMEDIATELY after completing a set of related tasks (don't wait for user to remind you)
     - Only track YOUR incomplete tasks (not user's todos)
     - Remove completed items
     - Keep notes brief but informative
     - If all tasks complete, clear the file and note "No open tasks"
+    - This is YOUR responsibility - the user should never have to remind you to update it
 
 ## Important Notes
 - Developer typically handles `npm run dev` and `npm run build` - do not run these unless explicitly asked

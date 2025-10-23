@@ -18,7 +18,7 @@ import * as api from "@src/controllers/api";
 export const Route = createFileRoute("/campaigns/$campaignID")({
     loader: async ({ params: { campaignID } }) => {
         document.body.style.cursor = "wait";
-        let id = parseInt(campaignID);
+        const id = parseInt(campaignID);
         const activeCampaign =
             (await api
                 .getCampaign(id)
@@ -125,7 +125,7 @@ function ActiveCampaign() {
                 <hr />
                 <section id="campaignPlayerArea" className="flex">
                     {activeCampaign.Players.map((player, index) => {
-                        let foot = (
+                        const foot = (
                             <div className="right">
                                 <ButtonGroup>
                                     <Button label="Edit" outlined onClick={() => editPlayer(player)} />
@@ -133,7 +133,7 @@ function ActiveCampaign() {
                                 </ButtonGroup>
                             </div>
                         );
-                        let head = (
+                        const head = (
                             <div className="right">
                                 <Tag value={player.StatBlock.Description.Category === "Player" ? "Player" : "NPC"} severity={player.StatBlock.Description.Category === "Player" ? "success" : "info"} rounded />
                             </div>
@@ -152,11 +152,11 @@ function ActiveCampaign() {
             <ConfirmDialog
                 visible={confirmDialogOptions.visible}
                 onHide={() => {
-                    SetConfirmDialogOptions({
+                    (SetConfirmDialogOptions({
                         ...confirmDialogOptions,
                         visible: false,
                     }),
-                        confirmDialogOptions.onHide();
+                        confirmDialogOptions.onHide());
                 }}
                 header={confirmDialogOptions.label}
                 message={confirmDialogOptions.message}
@@ -188,7 +188,7 @@ function ActiveCampaign() {
                             label="Done"
                             onClick={() => {
                                 if (LocalPlayerState) {
-                                    let p = LocalPlayerState;
+                                    const p = structuredClone(LocalPlayerState);
                                     p.StatBlock.Name = LocalStringState1;
                                     p.StatBlock.ChallengeRating = LocalNumberState1;
                                     p.StatBlock.Description.Type = LocalStringState3;

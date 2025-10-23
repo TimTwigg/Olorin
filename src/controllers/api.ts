@@ -25,7 +25,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
  */
 async function api_wrapper(func: string, ...args: any): Promise<any> {
     if (caching.isCacheableFunction(func) && caching.isCacheableRoute(args[0])) {
-        let cached_entry = caching.checkCache(caching.createCacheKey(func, args));
+        const cached_entry = caching.checkCache(caching.createCacheKey(func, args));
         if (cached_entry !== null) {
             return cached_entry.data;
         }
@@ -324,7 +324,7 @@ export async function setMetadata(metadata: Map<string, string>): Promise<api.Me
  */
 export async function getDisplayName(): Promise<string | null> {
     return getMetadata().then((data) => {
-        let name = data.Metadata.dGet("displayName", data.Metadata.dGet("email", ""));
+        const name = data.Metadata.dGet("displayName", data.Metadata.dGet("email", ""));
         if (name && name.length > 0) {
             return name;
         }

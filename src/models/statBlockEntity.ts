@@ -17,7 +17,7 @@ export class StatBlockEntity implements Entity {
     Speed;
     Conditions = new SmartMap<string, number>();
     SpellSaveDC;
-    SpellSlots = new SmartMap<number, { total: number, used: number }>();
+    SpellSlots = new SmartMap<number, { total: number; used: number }>();
     Concentration = false;
     Notes = "";
     IsHostile;
@@ -45,15 +45,15 @@ export class StatBlockEntity implements Entity {
         this.ChallengeRating = statBlock.ChallengeRating;
         this.EntityType = entityType;
 
-        for (let stat of statBlock.Stats.Abilities.keysAsArray()) {
-            let item = statBlock.Details.SavingThrows.find((s) => s.Name === stat);
-            let mod = item ? item.Override !== 0 ? item.Override : modifierOf(statBlock.Stats.Abilities.dGet(stat, 10)) + (item.Level * statBlock.ProficiencyBonus) : modifierOf(statBlock.Stats.Abilities.get(stat)!);
+        for (const stat of statBlock.Stats.Abilities.keysAsArray()) {
+            const item = statBlock.Details.SavingThrows.find((s) => s.Name === stat);
+            const mod = item ? (item.Override !== 0 ? item.Override : modifierOf(statBlock.Stats.Abilities.dGet(stat, 10)) + item.Level * statBlock.ProficiencyBonus) : modifierOf(statBlock.Stats.Abilities.get(stat)!);
             this.SavingThrows.set(stat, mod);
         }
     }
 
     tick(): void {
-        for (let cond of this.Conditions.keys()) {
+        for (const cond of this.Conditions.keys()) {
             this.Conditions.set(cond, this.Conditions.dGet(cond, 0) + 1);
         }
     }
@@ -75,13 +75,13 @@ export class StatBlockEntity implements Entity {
     }
 
     damage(amount: number): void {
-        let dmg = Math.max(amount - this.TempHitPoints, 0);
+        const dmg = Math.max(amount - this.TempHitPoints, 0);
         this.TempHitPoints = Math.max(this.TempHitPoints - amount, 0);
         this.CurrentHitPoints = Math.max(this.CurrentHitPoints - dmg, 0);
     }
 
     setMaxHP(amount: number): void {
-        let missing = amount > this.MaxHitPoints ? this.MaxHitPoints - this.CurrentHitPoints : 0;
+        const missing = amount > this.MaxHitPoints ? this.MaxHitPoints - this.CurrentHitPoints : 0;
         this.MaxHitPoints = Math.max(amount, 0);
         this.CurrentHitPoints = this.MaxHitPoints - missing;
     }
@@ -114,13 +114,13 @@ export class StatBlockEntity implements Entity {
     }
 
     addSpellSlot(level: number): void {
-        let slot = this.SpellSlots.dGet(level, { total: 0, used: 0 });
+        const slot = this.SpellSlots.dGet(level, { total: 0, used: 0 });
         slot.total++;
         this.SpellSlots.set(level, slot);
     }
 
     removeSpellSlot(level: number): void {
-        let slot = this.SpellSlots.dGet(level, { total: 0, used: 0 });
+        const slot = this.SpellSlots.dGet(level, { total: 0, used: 0 });
         if (slot.total <= 0) throw new Error("No Spell Slots of that level");
         slot.total--;
         if (slot.used > slot.total) slot.used = slot.total;
@@ -128,7 +128,7 @@ export class StatBlockEntity implements Entity {
     }
 
     useSpellSlot(level: number): void {
-        let slot = this.SpellSlots.dGet(level, { total: 0, used: 0 });
+        const slot = this.SpellSlots.dGet(level, { total: 0, used: 0 });
         if (slot.used >= slot.total) throw new Error("No More Spell Slots of that level");
         slot.used++;
         this.SpellSlots.set(level, slot);
@@ -173,7 +173,7 @@ export class StatBlockEntity implements Entity {
     }
 
     copy(): StatBlockEntity {
-        let copy = new StatBlockEntity(this.StatBlock, this.Initiative, this.IsHostile);
+        const copy = new StatBlockEntity(this.StatBlock, this.Initiative, this.IsHostile);
         copy.ID = this.ID;
         copy.Name = this.Name;
         copy.Suffix = this.Suffix;
@@ -197,8 +197,8 @@ export class StatBlockEntity implements Entity {
     }
 
     public static loadFromJSON(json: any): Entity {
-        let statblock = parseDataAsStatBlock(json.Displayable);
-        let ent = new StatBlockEntity(statblock, json.Initiative, json.IsHostile, json.EntityType);
+        const statblock = parseDataAsStatBlock(json.Displayable);
+        const ent = new StatBlockEntity(statblock, json.Initiative, json.IsHostile, json.EntityType);
         ent.Name = json.Name;
         ent.Suffix = json.Suffix;
         ent.CurrentHitPoints = json.CurrentHitPoints;
@@ -206,11 +206,11 @@ export class StatBlockEntity implements Entity {
         ent.TempHitPoints = json.TempHitPoints;
         ent.ArmorClassBonus = json.ArmorClassBonus;
         ent.Conditions = new SmartMap<string, number>();
-        for (let cond in json.Conditions) {
+        for (const cond in json.Conditions) {
             ent.Conditions.set(cond, json.Conditions[cond]);
         }
-        ent.SpellSlots = new SmartMap<number, { total: number, used: number }>();
-        for (let slot in json.SpellSlots) {
+        ent.SpellSlots = new SmartMap<number, { total: number; used: number }>();
+        for (const slot in json.SpellSlots) {
             ent.SpellSlots.set(parseInt(slot), json.SpellSlots[slot]);
         }
         ent.Concentration = json.Concentration;

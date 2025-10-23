@@ -7,18 +7,20 @@ export function modifierOf(score: number): number {
 }
 
 export function hashCode(str: string): number {
-    var hash = 0, i, chr;
+    let hash = 0,
+        i,
+        chr;
     if (str.length === 0) return hash;
     for (i = 0; i < str.length; i++) {
         chr = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + chr;
+        hash = (hash << 5) - hash + chr;
         hash |= 0;
     }
     return hash;
 }
 
 export function deepCopy<T>(obj: T): T {
-    var copy: any;
+    let copy: any;
 
     // Handle the 3 simple types, and null or undefined
     if (null == obj || "object" != typeof obj) return obj;
@@ -33,7 +35,7 @@ export function deepCopy<T>(obj: T): T {
     // Handle Array
     if (obj instanceof Array) {
         copy = [];
-        for (var i = 0, len = obj.length; i < len; i++) {
+        for (let i = 0, len = obj.length; i < len; i++) {
             copy[i] = deepCopy(obj[i]);
         }
         return copy;
@@ -42,7 +44,7 @@ export function deepCopy<T>(obj: T): T {
     // Handle Object
     if (obj instanceof Object) {
         copy = {};
-        for (var attr in obj) {
+        for (const attr in obj) {
             if (obj.hasOwnProperty(attr)) copy[attr] = deepCopy(obj[attr]);
         }
         return copy;
@@ -52,16 +54,16 @@ export function deepCopy<T>(obj: T): T {
 }
 
 export function dateFromString(dateString: string): Date {
-    let year = parseInt(dateString.substring(0, 4));
-    let month = parseInt(dateString.substring(5, 7)) - 1;
-    let day = parseInt(dateString.substring(8, 10));
+    const year = parseInt(dateString.substring(0, 4));
+    const month = parseInt(dateString.substring(5, 7)) - 1;
+    const day = parseInt(dateString.substring(8, 10));
     return new Date(year, month, day);
 }
 
 export function displayDate(date: Date): string {
-    return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
 
 export function newLocalDate(): Date {
-    return new Date(Date.now() - new Date().getTimezoneOffset()*60000);
+    return new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
 }

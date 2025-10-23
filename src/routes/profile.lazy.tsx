@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createLazyFileRoute, useRouteContext } from "@tanstack/react-router";
+import { createLazyFileRoute } from "@tanstack/react-router";
 import Session, { SessionAuth } from "supertokens-auth-react/recipe/session";
 import { toast } from "react-toastify";
 import { InputText } from "primereact/inputtext";
@@ -15,7 +15,6 @@ export const Route = createLazyFileRoute("/profile")({
 });
 
 function Profile() {
-    const context = useRouteContext({ from: "__root__" });
     const [metadata, SetMetadata] = React.useState<Map<string, string>>(new Map<string, string>());
     const metaRef = React.useRef<number>(0);
     const [saving, setSaving] = React.useState(false);
@@ -60,10 +59,6 @@ function Profile() {
             const data = await api.setMetadata(new_meta);
             SetMetadata(data.Metadata);
             SetLocalVariables(data.Metadata);
-
-            // Update the context with the new theme and color scheme
-            context.userOptions.theme = theme;
-            context.userOptions.colorScheme = colorScheme;
 
             toast.success("Profile updated successfully!");
             setTimeout(() => window.location.reload(), 500);

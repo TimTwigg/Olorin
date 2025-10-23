@@ -84,12 +84,7 @@ function renderConditions(conditions: SmartMap<string, number>): JSX.Element {
 export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overviewOnly, editMode, isActive }: EntityDisplayProps) {
     const context = useRouteContext({ from: "__root__" });
 
-    if (!entity || !entity.Name) {
-        console.log(entity);
-
-        return <div className="entity">Error: No entity provided</div>;
-    }
-
+    // All hooks must be called before any conditional returns
     const [ExpandedState, SetExpandedState] = React.useState<boolean>(false);
     const [ControlState, SetControlState] = React.useState<ControlOptions>(ControlOptions.None);
     const [LocalNumericalState, SetLocalNumericalState] = React.useState<number>(0);
@@ -99,6 +94,12 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overvie
     const [readonly, SetReadonly] = React.useState<boolean>(false);
     const [locked, SetLocked] = React.useState<boolean>(false);
     const [sectionKey, SetSectionKey] = React.useState<number>(0); // Used to force re-render of sections
+
+    if (!entity || !entity.Name) {
+        console.log(entity);
+
+        return <div className="entity">Error: No entity provided</div>;
+    }
 
     setDisplay =
         setDisplay ||
@@ -176,7 +177,9 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overvie
                         text
                         severity="success"
                         onClick={(_) => {
-                            entity.setInitiative(LocalNumericalState), SetControlState(ControlOptions.None), TriggerLocalRerender();
+                            entity.setInitiative(LocalNumericalState);
+                            SetControlState(ControlOptions.None);
+                            TriggerLocalRerender();
                         }}
                         className="rightButton"
                         disabled={readonly}
@@ -196,7 +199,8 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overvie
                         className="leftButton"
                         severity="danger"
                         onClick={(_) => {
-                            entity.damage(LocalNumericalState), SetControlState(ControlOptions.None);
+                            entity.damage(LocalNumericalState);
+                            SetControlState(ControlOptions.None);
                         }}
                         disabled={readonly}
                     />
@@ -207,7 +211,8 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overvie
                         className="rightButton"
                         severity="success"
                         onClick={(_) => {
-                            entity.heal(LocalNumericalState), SetControlState(ControlOptions.None);
+                            entity.heal(LocalNumericalState);
+                            SetControlState(ControlOptions.None);
                         }}
                         disabled={readonly}
                     />
@@ -219,7 +224,8 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overvie
                         text
                         severity="success"
                         onClick={(_) => {
-                            entity.addTempHP(LocalNumericalState2), SetControlState(ControlOptions.None);
+                            entity.addTempHP(LocalNumericalState2);
+                            SetControlState(ControlOptions.None);
                         }}
                         className="rightButton"
                         disabled={readonly}
@@ -232,7 +238,8 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overvie
                         text
                         severity="success"
                         onClick={(_) => {
-                            entity.setMaxHP(LocalNumericalState3), SetControlState(ControlOptions.None);
+                            entity.setMaxHP(LocalNumericalState3);
+                            SetControlState(ControlOptions.None);
                         }}
                         className="rightButton"
                         disabled={readonly}
@@ -245,7 +252,8 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overvie
                             icon={<GiDeathSkull />}
                             text
                             onClick={(_) => {
-                                entity.kill(), SetControlState(ControlOptions.None);
+                                entity.kill();
+                                SetControlState(ControlOptions.None);
                             }}
                             className="rounded"
                             disabled={readonly}
@@ -264,7 +272,8 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overvie
                     text
                     severity="danger"
                     onClick={(_) => {
-                        entity.setACBonus(-LocalNumericalState), SetControlState(ControlOptions.None);
+                        entity.setACBonus(-LocalNumericalState);
+                        SetControlState(ControlOptions.None);
                     }}
                     className="leftButton"
                     disabled={readonly}
@@ -284,7 +293,8 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overvie
                     text
                     severity="success"
                     onClick={(_) => {
-                        entity.setACBonus(LocalNumericalState), SetControlState(ControlOptions.None);
+                        entity.setACBonus(LocalNumericalState);
+                        SetControlState(ControlOptions.None);
                     }}
                     className="rightButton"
                     disabled={readonly}
@@ -347,7 +357,8 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overvie
                         label="Remove"
                         outlined
                         onClick={(_) => {
-                            entity.setNotes(""), SetControlState(ControlOptions.None);
+                            entity.setNotes("");
+                            SetControlState(ControlOptions.None);
                         }}
                         disabled={readonly}
                         severity="danger"
@@ -358,7 +369,8 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overvie
                         label="Save"
                         outlined
                         onClick={(_) => {
-                            entity.setNotes(LocalStringState), SetControlState(ControlOptions.None);
+                            entity.setNotes(LocalStringState);
+                            SetControlState(ControlOptions.None);
                         }}
                         disabled={readonly}
                         severity="success"
@@ -381,7 +393,7 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overvie
                             min={0}
                             defaultValue={entity.Initiative === 0 ? undefined : entity.Initiative}
                             onChange={(e) => {
-                                entity.setInitiative(parseInt(e.target.value)) ?? 0;
+                                entity.setInitiative(parseInt(e.target.value) ?? 0);
                             }}
                         />
                     )}

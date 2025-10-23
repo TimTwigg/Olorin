@@ -13,7 +13,7 @@ interface StatBlockListProps {
     context: ModelContext;
 }
 
-export function StatBlockList({ filter, context }: StatBlockListProps) {
+export function StatBlockList({ filter, context: _context }: StatBlockListProps) {
     const [statBlocks, setStatBlocks] = React.useState<EntityOverview[]>([]);
     const [filteredBlocks, setFilteredBlocks] = React.useState<EntityOverview[]>([]);
     const [loading, setLoading] = React.useState(true);
@@ -132,21 +132,9 @@ export function StatBlockList({ filter, context }: StatBlockListProps) {
                     <Dropdown value={sourceFilter} onChange={(e) => setSourceFilter(e.value)} options={uniqueSources} placeholder="Filter by Source" showClear className="min-w-[150px] text-base" />
 
                     <div className="flex items-center gap-2">
-                        <InputText
-                            type="number"
-                            value={crMinFilter?.toString() ?? ""}
-                            onChange={(e) => setCrMinFilter(e.target.value ? Number(e.target.value) : null)}
-                            placeholder="Min CR"
-                            className="w-24 text-base"
-                        />
+                        <InputText type="number" value={crMinFilter?.toString() ?? ""} onChange={(e) => setCrMinFilter(e.target.value ? Number(e.target.value) : null)} placeholder="Min CR" className="w-24 text-base" />
                         <span className="text-gray-600 dark:text-gray-400">-</span>
-                        <InputText
-                            type="number"
-                            value={crMaxFilter?.toString() ?? ""}
-                            onChange={(e) => setCrMaxFilter(e.target.value ? Number(e.target.value) : null)}
-                            placeholder="Max CR"
-                            className="w-24 text-base"
-                        />
+                        <InputText type="number" value={crMaxFilter?.toString() ?? ""} onChange={(e) => setCrMaxFilter(e.target.value ? Number(e.target.value) : null)} placeholder="Max CR" className="w-24 text-base" />
                     </div>
 
                     {(searchQuery || typeFilter || sourceFilter || crMinFilter !== null || crMaxFilter !== null) && (

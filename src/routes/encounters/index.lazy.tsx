@@ -91,7 +91,7 @@ function Encounters() {
         const _filters = { ...filters };
 
         if (_filters["global"] && "value" in _filters["global"]) {
-            (_filters["global"] as { value: any }).value = value;
+            (_filters["global"] as { value: string }).value = value;
         }
 
         setFilters(_filters);
@@ -122,7 +122,7 @@ function Encounters() {
         );
     };
 
-    const stringItemTemplate = (option: any) => {
+    const stringItemTemplate = (option: string) => {
         return (
             <div>
                 <span>{option}</span>
@@ -142,7 +142,7 @@ function Encounters() {
         if (!context.loaded) return <Skeleton width="10rem" />;
         const campaign = context.campaigns.find((c: CampaignOverview) => c.id === rowData.Metadata.CampaignID);
         return <span>{campaign ? campaign.Name : rowData.Metadata.CampaignID}</span>;
-    }
+    };
 
     const optionsBodyTemplate = (rowData: EncounterOverview) => {
         const menuRef = React.createRef<Menu>();
@@ -233,7 +233,8 @@ function Encounters() {
             <ConfirmDialog
                 visible={dialogOptions.visible}
                 onHide={() => {
-                    SetDialogOptions({ ...dialogOptions, visible: false }), dialogOptions.onHide();
+                    SetDialogOptions({ ...dialogOptions, visible: false });
+                    dialogOptions.onHide();
                 }}
                 header={dialogOptions.label}
                 message={dialogOptions.message}
@@ -296,7 +297,7 @@ function Encounters() {
                     <input id="encounter-description" type="text" value={LocalStringState2} onChange={(e) => SetLocalStringState2(e.target.value)} placeholder="Encounter Description" />
                     <br />
                     <label htmlFor="encounter-campaign">Campaign</label>
-                    <select id="encounter-campaign" value={LocalCampaignState?.id || 0} onChange={(e) => SetLocalCampaignState(context.campaigns.find(campaign => campaign.id === parseInt(e.target.value)) || null)}>
+                    <select id="encounter-campaign" value={LocalCampaignState?.id || 0} onChange={(e) => SetLocalCampaignState(context.campaigns.find((campaign) => campaign.id === parseInt(e.target.value)) || null)}>
                         <option value="0" defaultChecked disabled>
                             Select Campaign
                         </option>

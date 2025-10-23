@@ -57,7 +57,7 @@ export function PlayerDialog({ visible, campaign, currentPlayersIDs, onClose, ca
         if (playersRef.current === 0) {
             playersRef.current = 1;
             api.getCampaign(campaign).then((res) => {
-                let c = res.Campaign;
+                const c = res.Campaign;
                 if (c) {
                     setCampaignPlayers(c.Players);
                 }

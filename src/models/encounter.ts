@@ -75,8 +75,8 @@ export class Encounter {
      * @returns the updated encounter
      */
     addEntity(entity: Entity): Encounter {
-        let entityCounts = new CounterMap<string>();
-        for (let e of this.Entities) {
+        const entityCounts = new CounterMap<string>();
+        for (const e of this.Entities) {
             entityCounts.increment(e.Name);
         }
         if (entityCounts.get(entity.Name) === 1) {
@@ -84,7 +84,7 @@ export class Encounter {
                 if (e.Name === entity.Name) e.setSuffix("1");
             });
         }
-        let num = entityCounts.get(entity.Name)! + 1 || 0;
+        const num = entityCounts.get(entity.Name)! + 1 || 0;
         if (num > 0) entity.setSuffix(num.toString());
         this.Entities.push(entity);
         return this.setInitiativeOrder();
@@ -99,7 +99,7 @@ export class Encounter {
     removeEntity(entityID: string): Encounter {
         this.Entities = this.Entities.filter((e) => e.ID !== entityID);
         if (entityID === this.ActiveID) {
-            let pos = this.InitiativeOrder.findIndex((id) => id[0] === entityID);
+            const pos = this.InitiativeOrder.findIndex((id) => id[0] === entityID);
             this.ActiveID = this.InitiativeOrder[pos + 1][0] || this.InitiativeOrder[0][0] || "";
         }
         this.InitiativeOrder = this.InitiativeOrder.filter((id) => id[0] !== entityID);
@@ -113,11 +113,11 @@ export class Encounter {
      * @returns the updated encounter
      */
     recalculateEntitySuffixes(): Encounter {
-        let entityCounts = new CounterMap<string>();
-        let nameCounts = new CounterMap<string>();
-        for (let e of this.Entities) entityCounts.increment(e.Name);
-        for (let e of this.Entities) {
-            let num = entityCounts.get(e.Name);
+        const entityCounts = new CounterMap<string>();
+        const nameCounts = new CounterMap<string>();
+        for (const e of this.Entities) entityCounts.increment(e.Name);
+        for (const e of this.Entities) {
+            const num = entityCounts.get(e.Name);
             if (num! < 2) {
                 e.setSuffix("");
                 continue;
@@ -134,7 +134,7 @@ export class Encounter {
      * @returns the updated encounter
      */
     tick(): Encounter {
-        for (let ent of this.Entities) {
+        for (const ent of this.Entities) {
             if (ent.ID === this.ActiveID) {
                 ent.tick();
                 break;
@@ -156,7 +156,7 @@ export class Encounter {
      * @returns the updated encounter
      */
     clear(): Encounter {
-        let ents: Entity[] = [];
+        const ents: Entity[] = [];
         this.Entities.forEach((e) => {
             if (e.EncounterLocked) ents.push(e);
         });
@@ -266,13 +266,13 @@ export class Encounter {
 
     /**
      * Get the name of the CampaignID this encounter belongs to
-     * 
+     *
      * @param campaigns the list of campaigns to search
-     * 
+     *
      * @returns the name of the CampaignID, or an empty string if not found
      */
     getCampaignNameFromContext(campaigns: CampaignOverview[]): string {
-        let CampaignID = campaigns.find((c) => c.id === this.Metadata.CampaignID);
+        const CampaignID = campaigns.find((c) => c.id === this.Metadata.CampaignID);
         return CampaignID ? CampaignID.Name : "";
     }
 
@@ -282,7 +282,7 @@ export class Encounter {
      * @returns a new encounter
      */
     copy(): Encounter {
-        let newEncounter = new Encounter(this.id, this.Name, this.Description);
+        const newEncounter = new Encounter(this.id, this.Name, this.Description);
         Object.assign(newEncounter, this);
         newEncounter.Entities = this.Entities.map((e) => e.copy());
         if (newEncounter.Entities.length === 0) return newEncounter;
@@ -290,7 +290,7 @@ export class Encounter {
         newEncounter.setInitiativeOrder();
         if (!this.Metadata.Started) this.ActiveID = this.InitiativeOrder[0][0];
         else {
-            let index = this.InitiativeOrder.findIndex((item) => item[0] === this.ActiveID);
+            const index = this.InitiativeOrder.findIndex((item) => item[0] === this.ActiveID);
             if (index === -1) {
                 newEncounter.ActiveID = this.InitiativeOrder[0][0];
             } else {
@@ -315,13 +315,13 @@ export class Encounter {
     }
 
     public static InitiativeSortKey(a: [string, number], b: [string, number]): number {
-        let num_a = a[0].endsWith("lair") ? a[1] - 0.5 : a[1];
-        let num_b = b[0].endsWith("lair") ? b[1] - 0.5 : b[1];
+        const num_a = a[0].endsWith("lair") ? a[1] - 0.5 : a[1];
+        const num_b = b[0].endsWith("lair") ? b[1] - 0.5 : b[1];
         return num_b - num_a;
     }
 
     public static loadFromJSON(json: any): Encounter {
-        let encounter = new Encounter(json.ID, json.Name, json.Description, -1, json.Metadata);
+        const encounter = new Encounter(json.ID, json.Name, json.Description, -1, json.Metadata);
         encounter.Metadata = {
             CreationDate: json.Metadata.CreationDate === undefined ? newLocalDate() : dateFromString(json.Metadata.CreationDate),
             AccessedDate: json.Metadata.AccessedDate === undefined ? newLocalDate() : dateFromString(json.Metadata.AccessedDate),

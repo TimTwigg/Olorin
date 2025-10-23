@@ -45,8 +45,8 @@ export class Campaign {
     }
 
     withUpdatedPlayer(player: Player): Campaign {
-        const updatedPlayers = this.Players.map(p => p.RowID === player.RowID ? player : p);
-        let c =  new Campaign(this.id, this.Name, this.Description, updatedPlayers);
+        const updatedPlayers = this.Players.map((p) => (p.RowID === player.RowID ? player : p));
+        const c = new Campaign(this.id, this.Name, this.Description, updatedPlayers);
         c.CreationDate = this.CreationDate;
         c.LastModified = newLocalDate();
         return c;
@@ -54,7 +54,7 @@ export class Campaign {
 
     public static loadFromJSON(json: any): Campaign {
         const players = json.Players ? json.Players.map((p: any) => Player.loadFromJSON(p)) : [];
-        let c = new Campaign(json.id, json.Name, json.Description, players);
+        const c = new Campaign(json.id, json.Name, json.Description, players);
         c.CreationDate = dateFromString(json.CreationDate);
         c.LastModified = dateFromString(json.LastModified);
         return c;

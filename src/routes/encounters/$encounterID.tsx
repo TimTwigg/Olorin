@@ -21,7 +21,7 @@ import { CampaignOverview } from "@src/models/campaign";
 
 export const Route = createFileRoute("/encounters/$encounterID")({
     loader: async ({ params: { encounterID } }) => {
-        let id = parseInt(encounterID);
+        const id = parseInt(encounterID);
         document.body.style.cursor = "wait";
         const activeEncounter =
             (await api
@@ -39,12 +39,8 @@ export const Route = createFileRoute("/encounters/$encounterID")({
 function ActiveEncounter() {
     const [activeEncounter, _SetActiveEncounter] = React.useState<Encounter | null>(Route.useLoaderData().activeEncounter);
 
-    if (!activeEncounter) {
-        return <div>Loading...</div>;
-    }
-
+    // All hooks must be called before any conditional returns
     const context = useRouteContext({ from: "__root__" });
-
     const [sectionKey, setSectionKey] = React.useState<number>(0); // Used to force re-render of sections
     const [EditingEncounter, SetEditingEncounter] = React.useState<boolean>(false);
     const [runningEncounter, SetRunningEncounter] = React.useState<boolean>(false);
@@ -67,7 +63,11 @@ function ActiveEncounter() {
     });
     const [FullStatBlockList, SetFullStatBlockList] = React.useState<StatBlock[]>([]);
     const [openPlayerDialog, SetOpenPlayerDialog] = React.useState<boolean>(false);
-    var refs: Map<string, React.RefObject<HTMLDivElement>> = new Map();
+    let refs: Map<string, React.RefObject<HTMLDivElement>> = new Map();
+
+    if (!activeEncounter) {
+        return <div>Loading...</div>;
+    }
 
     /**
      * Trigger a re-render of the Encounter Display.
@@ -107,8 +107,8 @@ function ActiveEncounter() {
      * @param entity The Entity to add to the list
      */
     const appendToStatBlockList = (statblock: StatBlock) => {
-        let list = FullStatBlockList;
-        let newLength = list.push(statblock);
+        const list = FullStatBlockList;
+        const newLength = list.push(statblock);
         if (newLength > context.technicalConfig.cacheSizes.statblocks) list.shift();
         SetFullStatBlockList(list);
     };
@@ -192,7 +192,7 @@ function ActiveEncounter() {
      */
     const startEncounter = () => {
         if (!activeEncounter) return;
-        let meta = activeEncounter.Metadata;
+        const meta = activeEncounter.Metadata;
         if (!activeEncounter.Metadata.Started) {
             meta.Turn = 1;
             meta.Round = 1;
@@ -219,7 +219,7 @@ function ActiveEncounter() {
     const addMiscEntity = (entityID: number, entityType: EntityType = EntityType.StatBlock) => {
         if (!activeEncounter) return;
         // Check if entity is in the cache
-        let entity = FullStatBlockList.find((ent) => ent.ID === entityID);
+        const entity = FullStatBlockList.find((ent) => ent.ID === entityID);
         // Entity is not in cache
         if (!entity) {
             getStatBlock(entityID, entityType).then((statblock) => {
@@ -286,7 +286,7 @@ function ActiveEncounter() {
      * @param entityID The ID of the entity to display
      */
     const displayMiscEntity = (entityID: number) => {
-        let entity = FullStatBlockList.find((ent) => ent.ID === entityID);
+        const entity = FullStatBlockList.find((ent) => ent.ID === entityID);
         if (entity) {
             SetDisplayEntity(entity);
             SetDisplayEntityType("statblock");
@@ -320,10 +320,10 @@ function ActiveEncounter() {
      */
     const renderEntities = (overviewOnly: boolean) => {
         if (!activeEncounter || activeEncounter.Entities.length === 0) return <></>;
-        let ids = activeEncounter.InitiativeOrder.sort(Encounter.InitiativeSortKey);
+        const ids = activeEncounter.InitiativeOrder.sort(Encounter.InitiativeSortKey);
         refs = new Map();
         return ids.map((id, ind) => {
-            let ref = React.createRef<HTMLDivElement>();
+            const ref = React.createRef<HTMLDivElement>();
             refs.set(id[0], ref);
             if (id[0] === `${activeEncounter.LairOwnerID}_lair`)
                 return (
@@ -334,11 +334,12 @@ function ActiveEncounter() {
                         overviewOnly={overviewOnly}
                         isActive={activeEncounter.ActiveID === `${activeEncounter.LairOwnerID}_lair`}
                         setDisplay={(lair) => {
-                            SetDisplayEntity(lair), SetDisplayEntityType("lair");
+                            SetDisplayEntity(lair);
+                            SetDisplayEntityType("lair");
                         }}
                     />
                 );
-            let entity = activeEncounter.Entities.find((ent) => ent.ID === id[0]);
+            const entity = activeEncounter.Entities.find((ent) => ent.ID === id[0]);
             if (!entity) {
                 throw new Error("Entity not found in Encounter");
             }
@@ -349,7 +350,8 @@ function ActiveEncounter() {
                     entity={entity}
                     deleteCallback={deleteEntity}
                     setDisplay={(statblock) => {
-                        SetDisplayEntity(statblock), SetDisplayEntityType("statblock");
+                        SetDisplayEntity(statblock);
+                        SetDisplayEntityType("statblock");
                     }}
                     overviewOnly={overviewOnly}
                     editMode={EditingEncounter}
@@ -365,7 +367,7 @@ function ActiveEncounter() {
      */
     const ScrollToEntity = (entityID: string) => {
         if (!refs.has(entityID)) return;
-        let ref = refs.get(entityID);
+        const ref = refs.get(entityID);
         if (ref && ref.current) ref.current.scrollIntoView({ behavior: "smooth", block: "center" });
     };
 
@@ -441,7 +443,8 @@ function ActiveEncounter() {
                     <section id="buttonSet1" className="five columns">
                         <button
                             onClick={() => {
-                                initializeStatesForEditing(), SetEditingEncounter(!EditingEncounter);
+                                initializeStatesForEditing();
+                                SetEditingEncounter(!EditingEncounter);
                             }}
                             disabled={runningEncounter}
                         >
@@ -497,7 +500,9 @@ function ActiveEncounter() {
                                 <section>Turn: {activeEncounter.Metadata.Turn}</section>
                                 <button
                                     onClick={() => {
-                                        SetActiveEncounter(activeEncounter.tick(), activeEncounter.Metadata.Turn === 1), ScrollToEntity(activeEncounter.ActiveID), TriggerReRender();
+                                        SetActiveEncounter(activeEncounter.tick(), activeEncounter.Metadata.Turn === 1);
+                                        ScrollToEntity(activeEncounter.ActiveID);
+                                        TriggerReRender();
                                     }}
                                 >
                                     NEXT
@@ -508,7 +513,8 @@ function ActiveEncounter() {
                             <div id="EncounterEditControls">
                                 <button
                                     onClick={() => {
-                                        SetActiveEncounter(activeEncounter.randomizeInitiative(), false), TriggerReRender();
+                                        SetActiveEncounter(activeEncounter.randomizeInitiative(), false);
+                                        TriggerReRender();
                                     }}
                                     disabled={!EditingEncounter}
                                 >
@@ -516,7 +522,8 @@ function ActiveEncounter() {
                                 </button>
                                 <button
                                     onClick={() => {
-                                        SetActiveEncounter(activeEncounter.clear(), false), TriggerReRender();
+                                        SetActiveEncounter(activeEncounter.clear(), false);
+                                        TriggerReRender();
                                     }}
                                     disabled={!EditingEncounter}
                                 >
@@ -559,7 +566,8 @@ function ActiveEncounter() {
             <ConfirmDialog
                 visible={dialogOptions.visible}
                 onHide={() => {
-                    SetDialogOptions({ ...dialogOptions, visible: false }), dialogOptions.onHide();
+                    SetDialogOptions({ ...dialogOptions, visible: false });
+                    dialogOptions.onHide();
                 }}
                 header={dialogOptions.label}
                 message={dialogOptions.message}

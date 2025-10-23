@@ -16,8 +16,8 @@ export class SmartMap<keyType, valueType> extends Map<keyType, valueType> {
     }
 
     copy(): SmartMap<keyType, valueType> {
-        let _copy = new SmartMap<keyType, valueType>();
-        for (let [key, value] of this.entries()) {
+        const _copy = new SmartMap<keyType, valueType>();
+        for (const [key, value] of this.entries()) {
             _copy.set(key, value);
         }
         return _copy;
