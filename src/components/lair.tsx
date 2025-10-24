@@ -8,14 +8,13 @@ import { Lair } from "@src/models/lair";
 import "@src/styles/lair.scss";
 
 type LairProps = {
-    ref?: React.RefObject<HTMLDivElement>;
     lair: Lair;
     overviewOnly?: boolean;
     isActive?: boolean;
     setDisplay?: (lair?: Lair) => void;
 };
 
-export function LairDisplay({ ref, lair, overviewOnly, isActive, setDisplay }: LairProps) {
+export const LairDisplay = React.forwardRef<HTMLDivElement, LairProps>(function LairDisplay({ lair, overviewOnly, isActive, setDisplay }, ref) {
     setDisplay =
         setDisplay ||
         ((lair?: Lair) => {
@@ -34,7 +33,7 @@ export function LairDisplay({ ref, lair, overviewOnly, isActive, setDisplay }: L
             </div>
         </div>
     );
-}
+});
 
 type LairBlockProps = {
     lair: Lair;

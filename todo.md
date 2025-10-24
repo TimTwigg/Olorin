@@ -22,6 +22,7 @@
 - Add public routes?
 - Add logged-in version of the landing page (in addition to the dashboard page?)
 - Optimize where api calls are made - loader vs in render
+- Make design more responsive for screen sizes
 
 ## Ideas
 

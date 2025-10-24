@@ -63,7 +63,7 @@ function ActiveEncounter() {
     });
     const [FullStatBlockList, SetFullStatBlockList] = React.useState<StatBlock[]>([]);
     const [openPlayerDialog, SetOpenPlayerDialog] = React.useState<boolean>(false);
-    let refs: Map<string, React.RefObject<HTMLDivElement>> = new Map();
+    const refsMap = React.useRef<Map<string, HTMLDivElement | null>>(new Map());
 
     if (!activeEncounter) {
         return <div>Loading...</div>;
@@ -193,16 +193,12 @@ function ActiveEncounter() {
     const startEncounter = () => {
         if (!activeEncounter) return;
         const meta = activeEncounter.Metadata;
-        if (!activeEncounter.Metadata.Started) {
-            meta.Turn = 1;
-            meta.Round = 1;
-        }
         SetActiveEncounter(
             activeEncounter.setInitiativeOrder().withMetadata({
                 Started: true,
                 AccessedDate: newLocalDate(),
-                Turn: meta.Turn,
-                Round: meta.Round,
+                Turn: meta.Started ? meta.Turn : 1,
+                Round: meta.Started ? meta.Round : 1,
             }),
             runningEncounter
         );
@@ -321,15 +317,19 @@ function ActiveEncounter() {
     const renderEntities = (overviewOnly: boolean) => {
         if (!activeEncounter || activeEncounter.Entities.length === 0) return <></>;
         const ids = activeEncounter.InitiativeOrder.sort(Encounter.InitiativeSortKey);
-        refs = new Map();
         return ids.map((id, ind) => {
-            const ref = React.createRef<HTMLDivElement>();
-            refs.set(id[0], ref);
+            const refCallback = (element: HTMLDivElement | null) => {
+                if (element) {
+                    refsMap.current.set(id[0], element);
+                } else {
+                    refsMap.current.delete(id[0]);
+                }
+            };
             if (id[0] === `${activeEncounter.LairOwnerID}_lair`)
                 return (
                     <LairDisplay
                         key={`${activeEncounter.LairOwnerID}_lair${ind}`}
-                        ref={ref}
+                        ref={refCallback}
                         lair={activeEncounter.Lair!}
                         overviewOnly={overviewOnly}
                         isActive={activeEncounter.ActiveID === `${activeEncounter.LairOwnerID}_lair`}
@@ -346,7 +346,7 @@ function ActiveEncounter() {
             return (
                 <EntityDisplay
                     key={`${entity.Name}${ind}`}
-                    ref={ref}
+                    ref={refCallback}
                     entity={entity}
                     deleteCallback={deleteEntity}
                     setDisplay={(statblock) => {
@@ -366,9 +366,27 @@ function ActiveEncounter() {
      * @param entityID The ID of the active entity
      */
     const ScrollToEntity = (entityID: string) => {
-        if (!refs.has(entityID)) return;
-        const ref = refs.get(entityID);
-        if (ref && ref.current) ref.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (!refsMap.current.has(entityID)) return;
+        const element = refsMap.current.get(entityID);
+        if (!element) return;
+
+        // Get the scrollable container
+        const container = document.getElementById("EncounterList");
+        if (!container) return;
+
+        // Get the positions relative to the viewport
+        const containerRect = container.getBoundingClientRect();
+        const elementRect = element.getBoundingClientRect();
+
+        // Calculate how far the element is from the top of the container (in the current scroll position)
+        const elementRelativeTop = elementRect.top - containerRect.top;
+
+        // Calculate the scroll position needed to center the element
+        // Current scroll + element position relative to container top - half container height + half element height
+        const scrollTop = container.scrollTop + elementRelativeTop - (container.clientHeight / 2) + (elementRect.height / 2);
+
+        // Scroll to the calculated position
+        container.scrollTop = scrollTop;
     };
 
     return (
@@ -500,9 +518,13 @@ function ActiveEncounter() {
                                 <section>Turn: {activeEncounter.Metadata.Turn}</section>
                                 <button
                                     onClick={() => {
-                                        SetActiveEncounter(activeEncounter.tick(), activeEncounter.Metadata.Turn === 1);
-                                        ScrollToEntity(activeEncounter.ActiveID);
+                                        const newEncounter = activeEncounter.tick();
+                                        SetActiveEncounter(newEncounter, activeEncounter.Metadata.Turn === 1);
                                         TriggerReRender();
+                                        // Scroll after re-render completes
+                                        setTimeout(() => {
+                                            ScrollToEntity(newEncounter.ActiveID);
+                                        }, 0);
                                     }}
                                 >
                                     NEXT

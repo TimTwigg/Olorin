@@ -17,7 +17,6 @@ import { StatBlock } from "@src/models/statBlock";
 import "@src/styles/entityDisplay.scss";
 
 type EntityDisplayProps = {
-    ref?: React.RefObject<HTMLDivElement>;
     entity: Entity;
     deleteCallback: (id: string) => void;
     setDisplay?: (statblock?: StatBlock) => void;
@@ -81,7 +80,7 @@ function renderConditions(conditions: SmartMap<string, number>): JSX.Element {
     );
 }
 
-export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overviewOnly, editMode, isActive }: EntityDisplayProps) {
+export const EntityDisplay = React.forwardRef<HTMLDivElement, EntityDisplayProps>(function EntityDisplay({ entity, deleteCallback, setDisplay, overviewOnly, editMode, isActive }, ref) {
     const context = useRouteContext({ from: "__root__" });
 
     // All hooks must be called before any conditional returns
@@ -540,4 +539,4 @@ export function EntityDisplay({ ref, entity, deleteCallback, setDisplay, overvie
             </div>
         </div>
     );
-}
+});

@@ -13,49 +13,47 @@
 
 ## Current Open Tasks
 
-### Lint Error Fixes (Session: 2025-10-22 - Continued)
+### Lint Error Fixes (Session: 2025-10-23)
 
-**Massive Progress This Session!**
-- Started: 227 problems (217 errors, 10 warnings)
-- Current: **76 problems (66 errors, 10 warnings)**
-- **Fixed 151 errors total! (227 → 76)**
+**Progress**:
+- Started this session: 76 problems (66 errors, 10 warnings)
+- Current: **75 problems (65 errors, 10 warnings)**
+- Fixed 1 error this session (immutability in encounters/$encounterID.tsx)
 
-**What Was Fixed This Session**:
-1. ✅ Context immutability in profile.lazy.tsx - removed direct context mutation (1 error)
-2. ✅ 3 'any' type errors - properly typed in encounters and index routes (3 errors)
-3. ✅ 4 prefer-const errors in campaigns/$campaignID.tsx (4 errors)
-4. ✅ State mutation issue - used structuredClone() for proper cloning (2 errors)
-5. ✅ 30 unused variable errors - added ESLint config for `_` prefix pattern (30 errors)
-6. ✅ 10 unused expression errors - changed comma operators to semicolons (10 errors)
-7. ✅ 9 React Hook errors in entityDisplay.tsx - moved hooks before conditional returns (9 errors)
-8. ✅ **63 prefer-const errors** - auto-fixed with `npx eslint . --fix` (63 errors)
-9. ✅ 11 unused expression errors - fixed comma operators in lair, encounters (11 errors)
-10. ✅ 15 React Hook errors in encounters/$encounterID.tsx - moved hooks before early return (15 errors)
-11. ✅ 3 unused variable errors - prefixed with `_` (context, TData, TValue) (3 errors)
+**Major Work Completed This Session**:
+1. ✅ **Fixed React forwardRef implementation** - Converted EntityDisplay and LairDisplay components to properly use React.forwardRef
+2. ✅ **Fixed ScrollToEntity functionality** - Implemented proper ref handling with callback refs and fixed scroll timing issue
+   - Problem: `TriggerReRender()` was resetting scroll position immediately after setting it
+   - Solution: Used `setTimeout(() => ScrollToEntity(...), 0)` to scroll after re-render completes
+   - Note: Currently works but not smooth; can be improved later with smooth scrolling
+3. ✅ **Fixed immutability errors** - Used `useRef` for refsMap instead of `let` variable
 
-**Remaining Work** (66 errors, 10 warnings):
+**Remaining Work** (75 problems: 65 errors, 10 warnings):
 
-The remaining issues are mostly:
-- More 'any' type errors throughout the codebase
-- React Hook dependency warnings (useEffect missing dependencies)
-- Possibly more immutability issues
-- Other TypeScript type errors
+Categorized by type:
+- **Category 1**: `@typescript-eslint/no-explicit-any` (40 errors) - case by case review needed
+- **Category 2**: `no-prototype-builtins` (6 errors) - easy fix with `Object.hasOwn()`
+- **Category 3**: `react-hooks/exhaustive-deps` (10 warnings) - needs careful dependency management
+- **Category 4**: `@typescript-eslint/no-unused-expressions` (2 errors) - likely comma operators
+- **Category 6**: Complex dependency array in tableFilter.tsx (2 errors)
 
 **Next Steps**:
-1. Categorize the remaining 66 errors by type
-2. Fix 'any' type errors where possible
-3. Address React Hook dependency warnings carefully
-4. Handle any remaining edge cases
+1. Category 4: Fix unused expression errors (2 errors) - easy
+2. Category 2: Fix no-prototype-builtins errors (6 errors) - easy
+3. Category 6: Fix complex dependency array issues in tableFilter.tsx (2 errors) - medium
+4. Category 3: Fix React Hook exhaustive-deps warnings (10 warnings) - medium/hard
+5. Category 1: Fix TypeScript no-explicit-any errors case-by-case (40 errors) - case by case
 
 ---
 
 ## Notes
 
 - Developer prefers incremental fixes, not all at once
-- ESLint config updated to allow `_` prefix for intentionally unused variables
-- Auto-fix capability (`npx eslint . --fix`) is very effective for simple fixes like prefer-const
-- Updated CLAUDE.md to remind future Claude instances to proactively update this file
+- When fixing refs, use proper React patterns (forwardRef for components, callback refs for dynamic lists)
+- Scroll timing issues: Always scroll AFTER re-renders complete using setTimeout
+- ESLint config allows `_` prefix for intentionally unused variables
+- Smooth scrolling improvement can be tackled in a future session
 
 ---
 
-**Last Updated**: 2025-10-22
+**Last Updated**: 2025-10-23
