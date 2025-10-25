@@ -89,5 +89,5 @@ export interface Entity {
 }
 
 export function isEntity(arg: object): arg is Entity {
-    return arg.hasOwnProperty("EntityType");
+    return Object.hasOwn(arg, "EntityType");
 }

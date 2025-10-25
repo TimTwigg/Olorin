@@ -69,54 +69,69 @@ export class Encounter {
     }
 
     /**
+     * Create a shallow copy of this encounter (immutability helper)
+     * @private
+     */
+    private clone(): Encounter {
+        const newEncounter = new Encounter(this.id, this.Name, this.Description, -1, this.Metadata);
+        Object.assign(newEncounter, this);
+        // Deep copy arrays to prevent mutations
+        newEncounter.Entities = [...this.Entities];
+        newEncounter.InitiativeOrder = [...this.InitiativeOrder];
+        return newEncounter;
+    }
+
+    /**
      * Add an entity to the encounter
      *
      * @param entity the new entity
-     * @returns the updated encounter
+     * @returns a new encounter with the entity added
      */
     addEntity(entity: Entity): Encounter {
+        const newEncounter = this.clone();
         const entityCounts = new CounterMap<string>();
-        for (const e of this.Entities) {
+        for (const e of newEncounter.Entities) {
             entityCounts.increment(e.Name);
         }
         if (entityCounts.get(entity.Name) === 1) {
-            this.Entities.forEach((e) => {
+            newEncounter.Entities.forEach((e) => {
                 if (e.Name === entity.Name) e.setSuffix("1");
             });
         }
         const num = entityCounts.get(entity.Name)! + 1 || 0;
         if (num > 0) entity.setSuffix(num.toString());
-        this.Entities.push(entity);
-        return this.setInitiativeOrder();
+        newEncounter.Entities.push(entity);
+        return newEncounter.setInitiativeOrder();
     }
 
     /**
      * Remove an entity from the encounter
      *
      * @param entity the id of the entity to remove
-     * @returns the updated encounter
+     * @returns a new encounter with the entity removed
      */
     removeEntity(entityID: string): Encounter {
-        this.Entities = this.Entities.filter((e) => e.ID !== entityID);
-        if (entityID === this.ActiveID) {
-            const pos = this.InitiativeOrder.findIndex((id) => id[0] === entityID);
-            this.ActiveID = this.InitiativeOrder[pos + 1][0] || this.InitiativeOrder[0][0] || "";
+        const newEncounter = this.clone();
+        newEncounter.Entities = newEncounter.Entities.filter((e) => e.ID !== entityID);
+        if (entityID === newEncounter.ActiveID) {
+            const pos = newEncounter.InitiativeOrder.findIndex((id) => id[0] === entityID);
+            newEncounter.ActiveID = newEncounter.InitiativeOrder[pos + 1]?.[0] || newEncounter.InitiativeOrder[0]?.[0] || "";
         }
-        this.InitiativeOrder = this.InitiativeOrder.filter((id) => id[0] !== entityID);
-        this.recalculateEntitySuffixes();
-        return this;
+        newEncounter.InitiativeOrder = newEncounter.InitiativeOrder.filter((id) => id[0] !== entityID);
+        return newEncounter.recalculateEntitySuffixes();
     }
 
     /**
      * Recalculate the suffixes of all entities in the encounter
      *
-     * @returns the updated encounter
+     * @returns a new encounter with recalculated suffixes
      */
     recalculateEntitySuffixes(): Encounter {
+        const newEncounter = this.clone();
         const entityCounts = new CounterMap<string>();
         const nameCounts = new CounterMap<string>();
-        for (const e of this.Entities) entityCounts.increment(e.Name);
-        for (const e of this.Entities) {
+        for (const e of newEncounter.Entities) entityCounts.increment(e.Name);
+        for (const e of newEncounter.Entities) {
             const num = entityCounts.get(e.Name);
             if (num! < 2) {
                 e.setSuffix("");
@@ -125,143 +140,147 @@ export class Encounter {
             nameCounts.increment(e.Name);
             e.setSuffix(nameCounts.get(e.Name)!.toString());
         }
-        return this;
+        return newEncounter;
     }
 
     /**
      * Tick the encounter, advancing the state of the active entity
      *
-     * @returns the updated encounter
+     * @returns a new encounter with updated turn state
      */
     tick(): Encounter {
-        for (const ent of this.Entities) {
-            if (ent.ID === this.ActiveID) {
+        const newEncounter = this.clone();
+        for (const ent of newEncounter.Entities) {
+            if (ent.ID === newEncounter.ActiveID) {
                 ent.tick();
                 break;
             }
         }
-        let num = this.Metadata.Turn!;
-        if (num === this.InitiativeOrder.length) {
-            this.Metadata.Round!++;
+        let num = newEncounter.Metadata.Turn!;
+        if (num === newEncounter.InitiativeOrder.length) {
+            newEncounter.Metadata = {...newEncounter.Metadata, Round: (newEncounter.Metadata.Round || 1) + 1};
             num = 0;
         }
-        this.Metadata.Turn = num + 1;
-        this.ActiveID = this.InitiativeOrder[num][0];
-        return this;
+        newEncounter.Metadata = {...newEncounter.Metadata, Turn: num + 1};
+        newEncounter.ActiveID = newEncounter.InitiativeOrder[num][0];
+        return newEncounter;
     }
 
     /**
      * Clear all non-locked entities from the encounter
      *
-     * @returns the updated encounter
+     * @returns a new encounter with non-locked entities removed
      */
     clear(): Encounter {
-        const ents: Entity[] = [];
-        this.Entities.forEach((e) => {
-            if (e.EncounterLocked) ents.push(e);
-        });
-        this.Entities = ents;
-        return this;
+        const newEncounter = this.clone();
+        newEncounter.Entities = newEncounter.Entities.filter((e) => e.EncounterLocked);
+        return newEncounter;
     }
 
     /**
      * Reset the state of the encounter and all contained entities
      *
-     * @returns the updated encounter
+     * @returns a new encounter with reset state
      */
     reset(): Encounter {
-        this.Entities.forEach((e) => e.resetAll());
-        this.Metadata.Turn = 1;
-        this.Metadata.Round = 1;
-        this.Metadata.Started = false;
-        this.ActiveID = "";
-        this.setInitiativeOrder();
-        this.recalculateEntitySuffixes();
-        return this;
+        const newEncounter = this.clone();
+        newEncounter.Entities.forEach((e) => e.resetAll());
+        newEncounter.Metadata = {...newEncounter.Metadata, Turn: 1, Round: 1, Started: false};
+        newEncounter.ActiveID = "";
+        return newEncounter.setInitiativeOrder().recalculateEntitySuffixes();
     }
 
     /**
      * Randomize the initiative of all entities in the encounter
      *
-     * @returns the updated encounter
+     * @returns a new encounter with randomized initiative
      */
     randomizeInitiative(): Encounter {
-        this.Entities.forEach((e) => e.randomizeInitiative());
-        this.setInitiativeOrder();
-        return this;
+        const newEncounter = this.clone();
+        newEncounter.Entities.forEach((e) => e.randomizeInitiative());
+        return newEncounter.setInitiativeOrder();
     }
 
     /**
      * Set the initiative order of the encounter
      *
-     * @returns the updated encounter
+     * @returns a new encounter with updated initiative order
      */
     setInitiativeOrder(): Encounter {
-        this.InitiativeOrder = this.Entities.map((e) => [e.ID, e.Initiative]);
-        if (this.HasLair && this.LairOwnerID > 0) this.InitiativeOrder.push([`${this.LairOwnerID}_lair`, this.Lair?.Initiative || 20]);
-        this.InitiativeOrder.sort(Encounter.InitiativeSortKey);
-        if (!this.Metadata.Started && this.InitiativeOrder.length > 0) this.ActiveID = this.InitiativeOrder[0][0];
-        return this;
+        const newEncounter = this.clone();
+        newEncounter.InitiativeOrder = newEncounter.Entities.map((e) => [e.ID, e.Initiative]);
+        if (newEncounter.HasLair && newEncounter.LairOwnerID > 0) {
+            newEncounter.InitiativeOrder.push([`${newEncounter.LairOwnerID}_lair`, newEncounter.Lair?.Initiative || 20]);
+        }
+        newEncounter.InitiativeOrder.sort(Encounter.InitiativeSortKey);
+        if (!newEncounter.Metadata.Started && newEncounter.InitiativeOrder.length > 0) {
+            newEncounter.ActiveID = newEncounter.InitiativeOrder[0][0];
+        }
+        return newEncounter;
     }
 
     /**
      * Update the encounter name
      *
-     * @returns the updated encounter
+     * @returns a new encounter with updated name
      */
     withName(name: string): Encounter {
-        this.Name = name;
-        return this;
+        const newEncounter = this.clone();
+        newEncounter.Name = name;
+        return newEncounter;
     }
 
     /**
      * Update the encounter description
      *
-     * @returns the updated encounter
+     * @returns a new encounter with updated description
      */
     withDescription(description: string): Encounter {
-        this.Description = description;
-        return this;
+        const newEncounter = this.clone();
+        newEncounter.Description = description;
+        return newEncounter;
     }
 
     /**
      * Update the encounter metadata
      *
-     * @returns the updated encounter
+     * @returns a new encounter with updated metadata
      */
     withMetadata(metadata: EncounterMetadata): Encounter {
-        this.Metadata = {
-            CreationDate: metadata.CreationDate === undefined ? this.Metadata.CreationDate : metadata.CreationDate,
-            AccessedDate: metadata.AccessedDate === undefined ? this.Metadata.AccessedDate : metadata.AccessedDate,
-            CampaignID: metadata.CampaignID === undefined ? this.Metadata.CampaignID : metadata.CampaignID,
-            Started: metadata.Started === undefined ? this.Metadata.Started : metadata.Started,
-            Turn: metadata.Turn === undefined ? this.Metadata.Turn : metadata.Turn,
-            Round: metadata.Round === undefined ? this.Metadata.Round : metadata.Round,
+        const newEncounter = this.clone();
+        newEncounter.Metadata = {
+            CreationDate: metadata.CreationDate === undefined ? newEncounter.Metadata.CreationDate : metadata.CreationDate,
+            AccessedDate: metadata.AccessedDate === undefined ? newEncounter.Metadata.AccessedDate : metadata.AccessedDate,
+            CampaignID: metadata.CampaignID === undefined ? newEncounter.Metadata.CampaignID : metadata.CampaignID,
+            Started: metadata.Started === undefined ? newEncounter.Metadata.Started : metadata.Started,
+            Turn: metadata.Turn === undefined ? newEncounter.Metadata.Turn : metadata.Turn,
+            Round: metadata.Round === undefined ? newEncounter.Metadata.Round : metadata.Round,
         };
-        return this;
+        return newEncounter;
     }
 
     /**
      * Update the encounter entity list
      *
-     * @returns the updated encounter
+     * @returns a new encounter with updated entity list
      */
     withEntities(entities: Entity[]): Encounter {
-        this.Entities = entities;
-        return this;
+        const newEncounter = this.clone();
+        newEncounter.Entities = entities;
+        return newEncounter;
     }
 
     /**
      * Update the encounter lair
      *
-     * @returns the updated encounter
+     * @returns a new encounter with updated lair
      */
     withLair(lair: Lair | undefined): Encounter {
-        this.HasLair = lair !== undefined;
-        this.Lair = lair;
-        this.LairOwnerID = lair !== undefined ? lair.OwningEntityDBID : -1;
-        this.setInitiativeOrder();
-        return this;
+        const newEncounter = this.clone();
+        newEncounter.HasLair = lair !== undefined;
+        newEncounter.Lair = lair;
+        newEncounter.LairOwnerID = lair !== undefined ? lair.OwningEntityDBID : -1;
+        return newEncounter.setInitiativeOrder();
     }
 
     /**
@@ -282,12 +301,12 @@ export class Encounter {
      * @returns a new encounter
      */
     copy(): Encounter {
-        const newEncounter = new Encounter(this.id, this.Name, this.Description);
+        let newEncounter = new Encounter(this.id, this.Name, this.Description);
         Object.assign(newEncounter, this);
         newEncounter.Entities = this.Entities.map((e) => e.copy());
         if (newEncounter.Entities.length === 0) return newEncounter;
         newEncounter.ActiveID = this.ActiveID;
-        newEncounter.setInitiativeOrder();
+        newEncounter = newEncounter.setInitiativeOrder();
         if (!this.Metadata.Started) this.ActiveID = this.InitiativeOrder[0][0];
         else {
             const index = this.InitiativeOrder.findIndex((item) => item[0] === this.ActiveID);
@@ -335,7 +354,6 @@ export class Encounter {
         encounter.HasLair = json.HasLair;
         encounter.LairOwnerID = json.LairOwnerID || -1;
         encounter.Lair = json.Lair ? Lair.loadFromJSON(json.Lair) : undefined;
-        encounter.setInitiativeOrder();
-        return encounter;
+        return encounter.setInitiativeOrder();
     }
 }

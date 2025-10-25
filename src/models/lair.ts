@@ -33,5 +33,5 @@ export class Lair {
 }
 
 export function isLair(arg: object): arg is Lair {
-    return (arg.hasOwnProperty("Name") && arg.hasOwnProperty("Description") && arg.hasOwnProperty("Initiative")) && !arg.hasOwnProperty("EntityType");
+    return (Object.hasOwn(arg, "Name") && Object.hasOwn(arg, "Description") && Object.hasOwn(arg, "Initiative")) && !Object.hasOwn(arg, "EntityType");
 }

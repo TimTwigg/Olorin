@@ -41,7 +41,6 @@ function ActiveEncounter() {
 
     // All hooks must be called before any conditional returns
     const context = useRouteContext({ from: "__root__" });
-    const [sectionKey, setSectionKey] = React.useState<number>(0); // Used to force re-render of sections
     const [EditingEncounter, SetEditingEncounter] = React.useState<boolean>(false);
     const [runningEncounter, SetRunningEncounter] = React.useState<boolean>(false);
     const [backupEncounter, SetBackupEncounter] = React.useState<Encounter | null>(null);
@@ -69,13 +68,6 @@ function ActiveEncounter() {
         return <div>Loading...</div>;
     }
 
-    /**
-     * Trigger a re-render of the Encounter Display.
-     */
-    async function TriggerReRender() {
-        setSectionKey((prev) => prev + 1);
-    }
-
     /** Set the active encounter locally, optionally saving it to the API.
      *
      * @param enc The encounter to set as active
@@ -83,19 +75,21 @@ function ActiveEncounter() {
      * @param notify Whether to notify the user of success/failure
      */
     const SetActiveEncounter = (enc: Encounter, save: boolean = true, notify: boolean = false) => {
-        if (save) saveEncounter(notify);
-        else _SetActiveEncounter(enc);
+        _SetActiveEncounter(enc);  // Always update state first
+        if (save) saveEncounter(enc, notify);  // Pass enc explicitly to avoid stale closure
     };
 
     /**
      * Save the Encounter to the API
+     * @param enc The encounter to save
+     * @param notify Whether to notify the user of success/failure
      */
-    const saveEncounter = (notify: boolean) => {
-        if (!activeEncounter) return;
-        console.log(activeEncounter.Metadata.CampaignID);
-        api.saveEncounter(activeEncounter).then((res) => {
+    const saveEncounter = (enc: Encounter, notify: boolean) => {
+        if (!enc) return;
+        api.saveEncounter(enc).then((res) => {
             if (res) {
-                SetActiveEncounter(res, false);
+                // Don't update state here - we already set it correctly in SetActiveEncounter
+                // Updating from server response was causing race condition where state would jump back
                 if (notify) toast.success("Encounter saved successfully to server.");
             } else toast.error("Failed to save Encounter to server.");
         });
@@ -143,7 +137,6 @@ function ActiveEncounter() {
     const deleteEntity = (entityID: string) => {
         if (!activeEncounter) return;
         SetActiveEncounter(activeEncounter.removeEntity(entityID), false);
-        TriggerReRender();
     };
 
     /**
@@ -183,7 +176,6 @@ function ActiveEncounter() {
     const loadEncounterFromBackup = () => {
         if (!backupEncounter || !activeEncounter) return;
         SetActiveEncounter(activeEncounter.withEntities(backupEncounter.Entities).withLair(backupEncounter.Lair).setInitiativeOrder(), false);
-        TriggerReRender();
         SetBackupEncounter(null);
     };
 
@@ -205,7 +197,6 @@ function ActiveEncounter() {
         SetRunningEncounter(!runningEncounter);
         loadEncounterFromBackup();
         SetDisplayEntity(undefined);
-        TriggerReRender();
     };
 
     /**
@@ -226,7 +217,6 @@ function ActiveEncounter() {
         else {
             SetActiveEncounter(activeEncounter.addEntity(new StatBlockEntity(entity, 0, entityType !== EntityType.Player, entityType)), false);
         }
-        TriggerReRender();
     };
 
     /**
@@ -370,23 +360,12 @@ function ActiveEncounter() {
         const element = refsMap.current.get(entityID);
         if (!element) return;
 
-        // Get the scrollable container
-        const container = document.getElementById("EncounterList");
-        if (!container) return;
-
-        // Get the positions relative to the viewport
-        const containerRect = container.getBoundingClientRect();
-        const elementRect = element.getBoundingClientRect();
-
-        // Calculate how far the element is from the top of the container (in the current scroll position)
-        const elementRelativeTop = elementRect.top - containerRect.top;
-
-        // Calculate the scroll position needed to center the element
-        // Current scroll + element position relative to container top - half container height + half element height
-        const scrollTop = container.scrollTop + elementRelativeTop - (container.clientHeight / 2) + (elementRect.height / 2);
-
-        // Scroll to the calculated position
-        container.scrollTop = scrollTop;
+        // Scroll the element into view with smooth behavior and center alignment
+        element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest'
+        });
     };
 
     return (
@@ -396,7 +375,7 @@ function ActiveEncounter() {
                 window.location.href = "/auth";
             }}
         >
-            <div key={sectionKey} className="playScreen container">
+            <div className="playScreen container">
                 <section className="justify-between">
                     <span className="three columns">
                         <Link to="/encounters">
@@ -520,8 +499,7 @@ function ActiveEncounter() {
                                     onClick={() => {
                                         const newEncounter = activeEncounter.tick();
                                         SetActiveEncounter(newEncounter, activeEncounter.Metadata.Turn === 1);
-                                        TriggerReRender();
-                                        // Scroll after re-render completes
+                                        // Scroll after re-render completes (no TriggerReRender needed - SetActiveEncounter already triggers re-render)
                                         setTimeout(() => {
                                             ScrollToEntity(newEncounter.ActiveID);
                                         }, 0);
@@ -536,7 +514,6 @@ function ActiveEncounter() {
                                 <button
                                     onClick={() => {
                                         SetActiveEncounter(activeEncounter.randomizeInitiative(), false);
-                                        TriggerReRender();
                                     }}
                                     disabled={!EditingEncounter}
                                 >
@@ -545,7 +522,6 @@ function ActiveEncounter() {
                                 <button
                                     onClick={() => {
                                         SetActiveEncounter(activeEncounter.clear(), false);
-                                        TriggerReRender();
                                     }}
                                     disabled={!EditingEncounter}
                                 >

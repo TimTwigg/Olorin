@@ -193,11 +193,11 @@ function Campaigns() {
             <ConfirmDialog
                 visible={confirmDialogOptions.visible}
                 onHide={() => {
-                    (SetConfirmDialogOptions({
+                    SetConfirmDialogOptions({
                         ...confirmDialogOptions,
                         visible: false,
-                    }),
-                        confirmDialogOptions.onHide());
+                    });
+                    confirmDialogOptions.onHide();
                 }}
                 header={confirmDialogOptions.label}
                 message={confirmDialogOptions.message}
