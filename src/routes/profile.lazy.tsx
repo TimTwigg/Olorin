@@ -42,11 +42,11 @@ function Profile() {
         }
     };
 
-    const SetLocalVariables = (data: Map<string, string>) => {
+    const SetLocalVariables = React.useCallback((data: Map<string, string>) => {
         SetIfAvailable("displayName", data, SetDisplayName);
         SetIfAvailable("theme", data, (val) => SetTheme(val as "light" | "dark" | "system"));
         SetIfAvailable("colorScheme", data, (val) => SetColorScheme(val as ColorScheme));
-    };
+    }, []);
 
     const SaveMetadata = async () => {
         setSaving(true);
@@ -76,7 +76,7 @@ function Profile() {
                 SetLocalVariables(data.Metadata);
             });
         }
-    }, []);
+    }, [SetLocalVariables]);
 
     return (
         <SessionAuth

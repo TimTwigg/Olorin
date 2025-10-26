@@ -26,17 +26,7 @@ export function StatBlockList({ filter, context: _context }: StatBlockListProps)
 
     const PAGE_SIZE = 50;
 
-    // Load stat blocks
-    React.useEffect(() => {
-        loadStatBlocks();
-    }, [currentPage, filter]);
-
-    // Filter stat blocks when search or filters change
-    React.useEffect(() => {
-        filterStatBlocks();
-    }, [statBlocks, searchQuery, typeFilter, sourceFilter, crMinFilter, crMaxFilter]);
-
-    const loadStatBlocks = async () => {
+    const loadStatBlocks = React.useCallback(async () => {
         setLoading(true);
         try {
             const response = await api.getEntities(currentPage, 1);
@@ -54,9 +44,9 @@ export function StatBlockList({ filter, context: _context }: StatBlockListProps)
         } finally {
             setLoading(false);
         }
-    };
+    }, [currentPage, filter]);
 
-    const filterStatBlocks = () => {
+    const filterStatBlocks = React.useCallback(() => {
         let filtered = [...statBlocks];
 
         // Search filter
@@ -84,7 +74,17 @@ export function StatBlockList({ filter, context: _context }: StatBlockListProps)
         }
 
         setFilteredBlocks(filtered);
-    };
+    }, [statBlocks, searchQuery, typeFilter, sourceFilter, crMinFilter, crMaxFilter]);
+
+    // Load stat blocks
+    React.useEffect(() => {
+        loadStatBlocks();
+    }, [loadStatBlocks]);
+
+    // Filter stat blocks when search or filters change
+    React.useEffect(() => {
+        filterStatBlocks();
+    }, [filterStatBlocks]);
 
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         setCurrentPage(event.page + 1);

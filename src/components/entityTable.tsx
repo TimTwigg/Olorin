@@ -122,7 +122,7 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
                 setSources(sources.Sources);
             });
         }
-    }, [creatures]);
+    }, [creatures, context.creatureTypes, context.creatureSizes]);
 
     const header = renderHeader();
 

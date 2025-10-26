@@ -64,7 +64,7 @@ const NavBar = () => {
                 }
             });
         }
-    }, []);
+    }, [context.isAuthenticated]);
 
     const toggleTheme = () => {
         const newIsDark = !isDarkMode;

@@ -63,7 +63,7 @@ export function PlayerDialog({ visible, campaign, currentPlayersIDs, onClose, ca
                 }
             });
         }
-    }, []);
+    }, [campaign]);
 
     if (!visible || campaign === 0) return null;
 

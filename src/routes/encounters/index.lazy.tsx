@@ -165,13 +165,13 @@ function Encounters() {
         );
     };
 
-    const finishLoadingAfterContext = (callback: () => void) => {
+    const finishLoadingAfterContext = React.useCallback(function finishLoading(callback: () => void) {
         if (context.loaded) {
             callback();
             return;
         }
-        setTimeout(() => finishLoadingAfterContext(callback), 500);
-    };
+        setTimeout(() => finishLoading(callback), 500);
+    }, [context.loaded]);
 
     const header = renderHeader();
 
@@ -187,7 +187,7 @@ function Encounters() {
                 setTableKey((prev) => prev + 1); // Force table re-render after context is loaded
             });
         }
-    }, [getEncountersRef]);
+    }, [getEncountersRef, finishLoadingAfterContext]);
 
     return (
         <SessionAuth

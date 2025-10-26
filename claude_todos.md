@@ -16,22 +16,24 @@
 
 ### Lint Error Fixes (Ongoing)
 
-**Current Status**: **67 problems (57 errors, 10 warnings)** - down from 75!
+**Current Status**: **55 problems (55 errors, 0 warnings)** - down from 75!
 
 **Progress this session**:
-- ✅ Fixed Category 4: `@typescript-eslint/no-unused-expressions` (2 errors) - converted comma operators to separate statements
-- ✅ Fixed Category 2: `no-prototype-builtins` (6 errors) - replaced `.hasOwnProperty()` with `Object.hasOwn()`
+- ✅ Deleted unused `tableFilter.tsx` component (4 problems eliminated)
+- ✅ Deleted unused `debouncedInput.tsx` component (1 problem eliminated)
+- ✅ Fixed ALL react-hooks/exhaustive-deps warnings (7 warnings fixed)
+    - Added missing dependencies to useEffect hooks
+    - Wrapped functions in useCallback to prevent infinite loops
+    - Files fixed: entityTable.tsx, playerDialog.tsx, statBlockList.tsx, __root.tsx, encounters/index.lazy.tsx, profile.lazy.tsx
 
-**Remaining work** (67 problems):
-- **Category 1**: `@typescript-eslint/no-explicit-any` (~40 errors) - case by case review needed
-- **Category 3**: `react-hooks/exhaustive-deps` (~9 warnings) - needs careful dependency management
-- **Category 6**: Complex dependency array in tableFilter.tsx (1 error, 1 warning)
+**Remaining work** (55 errors):
+- **Category 1**: `@typescript-eslint/no-explicit-any` (55 errors) - case by case review needed
+    - Most are in `src/controllers/api.ts` (35 errors)
+    - Others in models (10 errors), components (3 errors), routes (7 errors)
 
 **Next Steps** (when resuming lint fixes):
-1. **Category 6** (tableFilter.tsx) - Replace `column.getFacetedUniqueValues()` with just `column` in dependency array
-   - This will fix both the complex expression error AND the missing dependency warning (2 problems total)
-2. **Category 3** - Fix React Hook exhaustive-deps warnings (~9 warnings) - medium/hard
-3. **Category 1** - Fix TypeScript no-explicit-any errors case-by-case (~40 errors) - varies
+1. **Category 1** - Fix TypeScript no-explicit-any errors case-by-case (55 errors) - varies in difficulty
+   - Consider starting with api.ts since it has the most (35 errors)
 
 ---
 
@@ -65,14 +67,14 @@
 
 - Added `clone()` helper method for creating new instances
 - Refactored **14 methods** to return new instances instead of mutating `this`:
-  - `addEntity()`, `removeEntity()`, `recalculateEntitySuffixes()`, `tick()`
-  - `clear()`, `reset()`, `randomizeInitiative()`, `setInitiativeOrder()`
-  - `withName()`, `withDescription()`, `withMetadata()`, `withEntities()`, `withLair()`
-  - Fixed `copy()` to capture return values
+    - `addEntity()`, `removeEntity()`, `recalculateEntitySuffixes()`, `tick()`
+    - `clear()`, `reset()`, `randomizeInitiative()`, `setInitiativeOrder()`
+    - `withName()`, `withDescription()`, `withMetadata()`, `withEntities()`, `withLair()`
+    - Fixed `copy()` to capture return values
 
 - Fixed bugs where return values were discarded:
-  - `loadFromJSON()` - Now returns `encounter.setInitiativeOrder()`
-  - `copy()` - Now captures `newEncounter = newEncounter.setInitiativeOrder()`
+    - `loadFromJSON()` - Now returns `encounter.setInitiativeOrder()`
+    - `copy()` - Now captures `newEncounter = newEncounter.setInitiativeOrder()`
 
 #### Phase 2: Cleaned Up Encounter Page
 **File**: `src/routes/encounters/$encounterID.tsx`
