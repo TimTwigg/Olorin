@@ -213,11 +213,11 @@ function Dashboard() {
                             ) : (
                                 <div className="space-y-3">
                                     {campaigns.slice(0, 5).map((campaign, i) => (
-                                        <div key={i} onClick={() => (window.location.href = `/campaigns/${campaign.ID}`)} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-accent-500 dark:hover:border-accent-500 transition-colors cursor-pointer">
+                                        <div key={i} onClick={() => (window.location.href = `/campaigns/${campaign.id}`)} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-accent-500 dark:hover:border-accent-500 transition-colors cursor-pointer">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
                                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{campaign.Name}</h3>
-                                                    <p className="text-sm text-gray-600 dark:text-gray-400">{campaign.PlayerCount} players</p>
+                                                    {/* <p className="text-sm text-gray-600 dark:text-gray-400">{campaign.PlayerCount} players</p> -- TODO: Add this? */}
                                                 </div>
                                                 <i className="pi pi-chevron-right text-gray-400"></i>
                                             </div>

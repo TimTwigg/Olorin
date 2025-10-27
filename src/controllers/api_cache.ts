@@ -2,9 +2,9 @@ import { deepCopy } from "@src/controllers/utils";
 
 class APICacheEntry {
     timestamp: Date;
-    data: any;
+    data: unknown;
 
-    constructor(data: any) {
+    constructor(data: unknown) {
         this.timestamp = new Date();
         this.data = data;
     }
@@ -38,7 +38,7 @@ const CACHEABLE_FUNCTIONS = ["request"];
  *
  * @returns string - the generated cache key
  */
-function createCacheKey(func: string, args: any[]): string {
+function createCacheKey(func: string, args: Record<string, string>): string {
     return func + "::" + JSON.stringify(args);
 }
 
@@ -110,7 +110,7 @@ function checkCache(cache_key: string): APICacheEntry | null {
  * @param cache_key - the key to set in the cache
  * @param data - the data to store in the cache
  */
-function setCacheEntry(cache_key: string, data: any): void {
+function setCacheEntry(cache_key: string, data: unknown): void {
     FUNCTION_CACHE.set(cache_key, new APICacheEntry(data));
 }
 

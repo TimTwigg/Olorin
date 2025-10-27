@@ -1,12 +1,13 @@
 import * as api from "@src/models/api_responses";
 import { EntityOverview } from "@src/models/entity";
-import { Encounter, EncounterOverview } from "@src/models/encounter";
+import { Encounter, EncounterOverview, EncounterOverviewJSON } from "@src/models/encounter";
 import { dateFromString } from "@src/controllers/utils";
 import { parseDataAsStatBlock } from "@src/models/statBlock";
 import * as caching from "@src/controllers/api_cache";
 import { SmartMap } from "@src/models/data_structures/smartMap";
 import { Campaign, CampaignOverview } from "@src/models/campaign";
 import { Player } from "@src/models/player";
+import { Condition } from "@src/models/condition";
 
 export type APIDetailLevel = 1 | 2;
 
@@ -19,23 +20,24 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
  * Wrapper for API functions to handle caching
  *
  * @param func function name to call
+ * @param url endpoint URL
  * @param args arguments to pass to the function
  *
- * @returns Promise<any> - the result of the function call
+ * @returns Promise<unknown> - the result of the function call
  */
-async function api_wrapper(func: string, ...args: any): Promise<any> {
-    if (caching.isCacheableFunction(func) && caching.isCacheableRoute(args[0])) {
+async function api_wrapper(func: string, url: string, args: Record<string, string>): Promise<unknown> {
+    if (caching.isCacheableFunction(func) && caching.isCacheableRoute(url)) {
         const cached_entry = caching.checkCache(caching.createCacheKey(func, args));
         if (cached_entry !== null) {
             return cached_entry.data;
         }
     }
-    let data: any;
-    if (func === "request") data = await _request(args[0], args[1]).then((data) => data);
-    else if (func === "push") data = _push(args[0], args[1]).then((data) => data);
-    else if (func === "delete") data = _delete(args[0], args[1]).then((data) => data);
+    let data: unknown;
+    if (func === "request") data = await _request(url, args).then((data) => data);
+    else if (func === "push") data = _push(url, args).then((data) => data);
+    else if (func === "delete") data = _delete(url, args).then((data) => data);
     else return null;
-    if (caching.isCacheableFunction(func) && caching.isCacheableRoute(args[0])) {
+    if (caching.isCacheableFunction(func) && caching.isCacheableRoute(url)) {
         caching.setCacheEntry(caching.createCacheKey(func, args), data);
     }
     return data;
@@ -49,7 +51,7 @@ async function api_wrapper(func: string, ...args: any): Promise<any> {
  *
  * @returns The response data from the server.
  */
-async function _request(url: string, body: any): Promise<any> {
+async function _request(url: string, body: Record<string, string>): Promise<unknown> {
     const response = await fetch(
         BASE_URL +
             url +
@@ -80,7 +82,7 @@ async function _request(url: string, body: any): Promise<any> {
  *
  * @returns The response data from the server.
  */
-async function request(url: string, body: any): Promise<any> {
+async function request(url: string, body: Record<string, string>): Promise<unknown> {
     return api_wrapper("request", url, body).then((data) => data);
 }
 
@@ -92,7 +94,7 @@ async function request(url: string, body: any): Promise<any> {
  *
  * @returns The response data from the server.
  */
-async function _push(url: string, body: any): Promise<any> {
+async function _push(url: string, body: Record<string, string>): Promise<unknown> {
     const response = await fetch(BASE_URL + url, {
         method: "POST",
         headers: {
@@ -117,7 +119,7 @@ async function _push(url: string, body: any): Promise<any> {
  *
  * @returns The response data from the server.
  */
-async function push(url: string, body: any): Promise<any> {
+async function push(url: string, body: Record<string, string>): Promise<unknown> {
     return api_wrapper("push", url, body).then((data) => data);
 }
 
@@ -129,7 +131,7 @@ async function push(url: string, body: any): Promise<any> {
  *
  * @returns The response data from the server.
  */
-async function _delete(url: string, body: any): Promise<any> {
+async function _delete(url: string, body: Record<string, string>): Promise<unknown> {
     const response = await fetch(BASE_URL + url + "/" + body.id, {
         method: "DELETE",
         headers: {
@@ -154,7 +156,7 @@ async function _delete(url: string, body: any): Promise<any> {
  *
  * @returns The response data from the server.
  */
-export async function deleteRequest(url: string, body: { id: any }): Promise<any> {
+export async function deleteRequest(url: string, body: Record<string, string>): Promise<unknown> {
     return api_wrapper("delete", url, body).then((data) => data);
 }
 
@@ -164,10 +166,10 @@ export async function deleteRequest(url: string, body: { id: any }): Promise<any
  * @returns Promise<api.EncounterResponse> - A list of encounters.
  */
 export async function getEncounters(): Promise<api.EncounterResponse> {
-    return request("/encounter/all", {}).then((data: any) => {
+    return request("/encounter/all", {}).then((data: unknown) => {
         return {
-            Encounters: data.map((encounter: any) => {
-                return new EncounterOverview(encounter.ID, encounter.Name, encounter.Description, {
+            Encounters: (data as EncounterOverviewJSON[]).map((encounter) => {
+                return new EncounterOverview(encounter.id, encounter.Name, encounter.Description, {
                     CreationDate: dateFromString(encounter.Metadata.CreationDate),
                     AccessedDate: dateFromString(encounter.Metadata.AccessedDate),
                     CampaignID: encounter.Metadata.CampaignID,
@@ -190,8 +192,8 @@ export async function getEncounters(): Promise<api.EncounterResponse> {
 export async function getEncounter(encounterID: number): Promise<api.SingleEncounterResponse> {
     return request("/encounter", {
         id: encounterID.toString(),
-        detail_level: 2,
-    }).then((data: any) => {
+        detail_level: "2",
+    }).then((data: unknown) => {
         return {
             Encounter: Encounter.loadFromJSON(data),
         };
@@ -204,9 +206,9 @@ export async function getEncounter(encounterID: number): Promise<api.SingleEncou
  * @returns A list of conditions.
  */
 export async function getConditions(): Promise<api.ConditionResponse> {
-    return request("/condition/all", {}).then((data: any) => {
+    return request("/condition/all", {}).then((data: unknown) => {
         return {
-            Conditions: data.map((condition: any) => {
+            Conditions: (data as Condition[]).map((condition) => {
                 return condition;
             }),
         };
@@ -223,8 +225,8 @@ export async function getConditions(): Promise<api.ConditionResponse> {
  */
 export async function getEntities(_page: number, detailLevel: APIDetailLevel = 1): Promise<api.EntityResponse> {
     return request("/statblock/all", {
-        page: _page,
-        detail_level: detailLevel,
+        page: _page.toString(),
+        detail_level: detailLevel.toString(),
     }).then((data: any) => {
         return {
             Entities: data.map((entity: any) => {

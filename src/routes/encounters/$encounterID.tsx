@@ -75,8 +75,8 @@ function ActiveEncounter() {
      * @param notify Whether to notify the user of success/failure
      */
     const SetActiveEncounter = (enc: Encounter, save: boolean = true, notify: boolean = false) => {
-        _SetActiveEncounter(enc);  // Always update state first
-        if (save) saveEncounter(enc, notify);  // Pass enc explicitly to avoid stale closure
+        _SetActiveEncounter(enc); // Always update state first
+        if (save) saveEncounter(enc, notify); // Pass enc explicitly to avoid stale closure
     };
 
     /**
@@ -362,9 +362,9 @@ function ActiveEncounter() {
 
         // Scroll the element into view with smooth behavior and center alignment
         element.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-            inline: 'nearest'
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest",
         });
     };
 

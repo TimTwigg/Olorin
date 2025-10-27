@@ -7,7 +7,7 @@ import { Button } from "primereact/button";
 import { ButtonGroup } from "primereact/buttongroup";
 import { Card } from "primereact/card";
 import { Tag } from "primereact/tag";
-import { AutoComplete } from "primereact/autocomplete";
+import { AutoComplete, AutoCompleteChangeEvent } from "primereact/autocomplete";
 import { IoWarningSharp } from "react-icons/io5";
 import { toast } from "react-toastify";
 
@@ -242,7 +242,7 @@ function ActiveCampaign() {
                         completeMethod={(e) => {
                             SetTypeSelectionOptions(context.creatureTypes.filter((c) => c.toLowerCase().startsWith(e.query.toLowerCase())));
                         }}
-                        onChange={(e: any) => SetLocalStringState3(e.value)}
+                        onChange={(e: AutoCompleteChangeEvent) => SetLocalStringState3(e.value)}
                         placeholder="Select Type"
                         invalid={LocalStringState3 === ""}
                         dropdown

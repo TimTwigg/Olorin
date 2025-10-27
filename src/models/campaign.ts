@@ -1,4 +1,4 @@
-import { Player } from "@src/models/player";
+import { Player, PlayerJSON } from "@src/models/player";
 import { dateFromString, newLocalDate } from "@src/controllers/utils";
 
 export type CampaignOverviewT = {
@@ -22,6 +22,15 @@ export class CampaignOverview implements CampaignOverviewT {
         this.LastModified = lastModified;
     }
 }
+
+type CampaignJSON = {
+    id: number;
+    Name: string;
+    Description: string;
+    CreationDate: string;
+    LastModified: string;
+    Players: Player[];
+};
 
 export class Campaign {
     id: number;
@@ -52,8 +61,8 @@ export class Campaign {
         return c;
     }
 
-    public static loadFromJSON(json: any): Campaign {
-        const players = json.Players ? json.Players.map((p: any) => Player.loadFromJSON(p)) : [];
+    public static loadFromJSON(json: CampaignJSON): Campaign {
+        const players = json.Players ? json.Players.map((p: PlayerJSON) => Player.loadFromJSON(p)) : [];
         const c = new Campaign(json.id, json.Name, json.Description, players);
         c.CreationDate = dateFromString(json.CreationDate);
         c.LastModified = dateFromString(json.LastModified);

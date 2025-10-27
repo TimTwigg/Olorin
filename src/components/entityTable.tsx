@@ -49,7 +49,7 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
         const _filters = { ...filters };
 
         if (_filters["global"] && "value" in _filters["global"]) {
-            (_filters["global"] as { value: any }).value = value;
+            (_filters["global"] as { value: unknown }).value = value;
         }
 
         setFilters(_filters);
@@ -80,7 +80,7 @@ export const EntityTable = ({ creatures, displayCallback, addCallback }: EntityT
         );
     };
 
-    const stringItemTemplate = (option: any) => {
+    const stringItemTemplate = (option: string) => {
         return (
             <div>
                 <span>{option}</span>

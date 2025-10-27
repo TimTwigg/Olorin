@@ -102,7 +102,7 @@ export const EntityDisplay = React.forwardRef<HTMLDivElement, EntityDisplayProps
 
     setDisplay =
         setDisplay ||
-        ((_: any) => {
+        ((_: unknown) => {
             console.log(`No display callback found for entity: ${entity ? entity.Name : "undefined"}`);
         });
 

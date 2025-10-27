@@ -72,10 +72,7 @@ function LibraryLanding() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {sections.map((section, index) =>
                             section.disabled ? (
-                                <div
-                                    key={index}
-                                    className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed"
-                                >
+                                <div key={index} className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed">
                                     <div className="flex items-start gap-4">
                                         <div className={`p-3 ${section.color} rounded-lg`}>
                                             <i className={`pi ${section.icon} text-2xl text-white`}></i>
@@ -90,11 +87,7 @@ function LibraryLanding() {
                                     </div>
                                 </div>
                             ) : (
-                                <Link
-                                    key={index}
-                                    to={section.to!}
-                                    className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-red-500 dark:hover:border-red-500 hover:shadow-lg transition-all block"
-                                >
+                                <Link key={index} to={section.to!} className="p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-red-500 dark:hover:border-red-500 hover:shadow-lg transition-all block">
                                     <div className="flex items-start gap-4">
                                         <div className={`p-3 ${section.color} rounded-lg`}>
                                             <i className={`pi ${section.icon} text-2xl text-white`}></i>

@@ -14,11 +14,27 @@ export type EncounterMetadata = {
     Turn?: number;
 };
 
+export type EncounterMetadataJSON = {
+    CreationDate: string;
+    AccessedDate: string;
+    CampaignID: number;
+    Started: boolean;
+    Round: number;
+    Turn: number;
+};
+
 export type EncounterOverviewT = {
     id: number;
     Name: string;
     Description: string;
     Metadata: EncounterMetadata;
+};
+
+export type EncounterOverviewJSON = {
+    id: number;
+    Name: string;
+    Description: string;
+    Metadata: EncounterMetadataJSON;
 };
 
 export class EncounterOverview implements EncounterOverviewT {
@@ -41,6 +57,19 @@ export class EncounterOverview implements EncounterOverviewT {
         };
     }
 }
+
+export type EncounterJSON = {
+    id: number;
+    Name: string;
+    Description: string;
+    Metadata: EncounterMetadataJSON;
+    Entities: Entity[];
+    HasLair: boolean;
+    Lair?: Lair;
+    LairOwnerID: number;
+    ActiveID: string;
+    InitiativeOrder: [string, number][];
+};
 
 export class Encounter {
     id: number;
@@ -158,10 +187,10 @@ export class Encounter {
         }
         let num = newEncounter.Metadata.Turn!;
         if (num === newEncounter.InitiativeOrder.length) {
-            newEncounter.Metadata = {...newEncounter.Metadata, Round: (newEncounter.Metadata.Round || 1) + 1};
+            newEncounter.Metadata = { ...newEncounter.Metadata, Round: (newEncounter.Metadata.Round || 1) + 1 };
             num = 0;
         }
-        newEncounter.Metadata = {...newEncounter.Metadata, Turn: num + 1};
+        newEncounter.Metadata = { ...newEncounter.Metadata, Turn: num + 1 };
         newEncounter.ActiveID = newEncounter.InitiativeOrder[num][0];
         return newEncounter;
     }
@@ -185,7 +214,7 @@ export class Encounter {
     reset(): Encounter {
         const newEncounter = this.clone();
         newEncounter.Entities.forEach((e) => e.resetAll());
-        newEncounter.Metadata = {...newEncounter.Metadata, Turn: 1, Round: 1, Started: false};
+        newEncounter.Metadata = { ...newEncounter.Metadata, Turn: 1, Round: 1, Started: false };
         newEncounter.ActiveID = "";
         return newEncounter.setInitiativeOrder().recalculateEntitySuffixes();
     }
@@ -339,9 +368,8 @@ export class Encounter {
         return num_b - num_a;
     }
 
-    public static loadFromJSON(json: any): Encounter {
-        const encounter = new Encounter(json.ID, json.Name, json.Description, -1, json.Metadata);
-        encounter.Metadata = {
+    public static loadFromJSON(json: EncounterJSON): Encounter {
+        const metadata: EncounterMetadata = {
             CreationDate: json.Metadata.CreationDate === undefined ? newLocalDate() : dateFromString(json.Metadata.CreationDate),
             AccessedDate: json.Metadata.AccessedDate === undefined ? newLocalDate() : dateFromString(json.Metadata.AccessedDate),
             CampaignID: json.Metadata.CampaignID === undefined ? -1 : json.Metadata.CampaignID,
@@ -349,7 +377,8 @@ export class Encounter {
             Round: json.Metadata.Round === undefined ? 1 : json.Metadata.Round,
             Turn: json.Metadata.Turn === undefined ? 1 : json.Metadata.Turn,
         };
-        encounter.Entities = json.Entities.map((e: any) => StatBlockEntity.loadFromJSON(e));
+        const encounter = new Encounter(json.id, json.Name, json.Description, -1, metadata);
+        encounter.Entities = json.Entities.map((e: unknown) => StatBlockEntity.loadFromJSON(e));
         encounter.ActiveID = json.ActiveID;
         encounter.HasLair = json.HasLair;
         encounter.LairOwnerID = json.LairOwnerID || -1;

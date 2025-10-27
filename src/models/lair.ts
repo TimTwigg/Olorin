@@ -18,7 +18,7 @@ export class Lair {
         }[];
     };
 
-    constructor(name: string, OwningEntityDBID: number, description: string, initiative: number, actions?: { Description: string, Items: {Name: string, Description: string}[] }, regionalEffects?: { Description: string, Items: {Name: string, Description: string}[] }) {
+    constructor(name: string, OwningEntityDBID: number, description: string, initiative: number, actions?: { Description: string; Items: { Name: string; Description: string }[] }, regionalEffects?: { Description: string; Items: { Name: string; Description: string }[] }) {
         this.Name = name;
         this.OwningEntityDBID = OwningEntityDBID;
         this.Description = description;
@@ -27,11 +27,11 @@ export class Lair {
         this.RegionalEffects = regionalEffects;
     }
 
-    public static loadFromJSON(json: any): Lair {
+    public static loadFromJSON(json: unknown): Lair {
         return json as Lair;
     }
 }
 
 export function isLair(arg: object): arg is Lair {
-    return (Object.hasOwn(arg, "Name") && Object.hasOwn(arg, "Description") && Object.hasOwn(arg, "Initiative")) && !Object.hasOwn(arg, "EntityType");
+    return Object.hasOwn(arg, "Name") && Object.hasOwn(arg, "Description") && Object.hasOwn(arg, "Initiative") && !Object.hasOwn(arg, "EntityType");
 }

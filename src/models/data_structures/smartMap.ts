@@ -3,7 +3,7 @@ export class SmartMap<keyType, valueType> extends Map<keyType, valueType> {
         super(entries);
     }
 
-    dGet(key: keyType, defaultValue: valueType): any {
+    dGet(key: keyType, defaultValue: valueType): valueType {
         return super.get(key) || defaultValue;
     }
 

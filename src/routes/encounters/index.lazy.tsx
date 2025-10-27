@@ -165,13 +165,16 @@ function Encounters() {
         );
     };
 
-    const finishLoadingAfterContext = React.useCallback(function finishLoading(callback: () => void) {
-        if (context.loaded) {
-            callback();
-            return;
-        }
-        setTimeout(() => finishLoading(callback), 500);
-    }, [context.loaded]);
+    const finishLoadingAfterContext = React.useCallback(
+        function finishLoading(callback: () => void) {
+            if (context.loaded) {
+                callback();
+                return;
+            }
+            setTimeout(() => finishLoading(callback), 500);
+        },
+        [context.loaded]
+    );
 
     const header = renderHeader();
 

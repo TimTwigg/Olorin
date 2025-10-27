@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { createRootRouteWithContext, Link, Outlet, useRouter, useRouteContext } from "@tanstack/react-router";
+import { createRootRouteWithContext, Link, Outlet, useRouter, useRouteContext, ErrorComponentProps } from "@tanstack/react-router";
 import { ToastContainer } from "react-toastify";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import Session from "supertokens-auth-react/recipe/session";
@@ -21,11 +21,6 @@ const TanStackRouterDevtools =
               }))
           )
         : () => <></>;
-
-type ErrorComponentProps = {
-    error: any;
-    reset: () => void;
-};
 
 const NavBar = () => {
     const context = useRouteContext({ from: "__root__" });

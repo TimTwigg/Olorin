@@ -86,7 +86,7 @@ function Campaigns() {
         const _filters = { ...filters };
 
         if (_filters["global"] && "value" in _filters["global"]) {
-            (_filters["global"] as { value: any }).value = value;
+            (_filters["global"] as { value: unknown }).value = value;
         }
 
         setFilters(_filters);

@@ -31,12 +31,7 @@ export function useTheme() {
             // Update PrimeReact theme
             const themeLink = document.getElementById("theme-link");
             if (themeLink) {
-                themeLink.setAttribute(
-                    "href",
-                    isDark
-                        ? "primereact/resources/themes/bootstrap4-dark-blue/theme.css"
-                        : "primereact/resources/themes/bootstrap4-light-blue/theme.css"
-                );
+                themeLink.setAttribute("href", isDark ? "primereact/resources/themes/bootstrap4-dark-blue/theme.css" : "primereact/resources/themes/bootstrap4-light-blue/theme.css");
             }
 
             // Update Tailwind dark mode

@@ -1,8 +1,15 @@
 import { StatBlock, parseDataAsStatBlock } from "@src/models/statBlock";
 
+export type PlayerJSON = {
+    Campaign: string;
+    StatBlock: unknown;
+    Notes: string;
+    RowID: number;
+};
+
 export class Player {
     Campaign: string;
-    StatBlock:  StatBlock;
+    StatBlock: StatBlock;
     Notes: string;
     RowID: number;
 
@@ -13,7 +20,7 @@ export class Player {
         this.RowID = rowID;
     }
 
-    public static loadFromJSON(json: any): Player {
+    public static loadFromJSON(json: PlayerJSON): Player {
         const statBlock = parseDataAsStatBlock(json.StatBlock);
         return new Player(json.Campaign, statBlock, json.Notes, json.RowID);
     }
