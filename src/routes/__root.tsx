@@ -231,7 +231,7 @@ const loadContextData = async (context: ModelContext) => {
     context.conditions = conditions.Conditions || [];
 
     // Load user campaigns
-    const campaigns = await api.getCampaigns(1);
+    const campaigns = await api.getCampaigns();
     context.campaigns = campaigns.Campaigns || [];
 
     // Load theme and color scheme from metadata (requires authentication)

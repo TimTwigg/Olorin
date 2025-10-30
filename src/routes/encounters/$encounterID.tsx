@@ -158,7 +158,7 @@ function ActiveEncounter() {
         } else {
             // load entities if needed
             if (CreatureList.length === 0) {
-                api.getEntities(1, 1).then((res) => {
+                api.getEntities(1).then((res) => {
                     SetCreatureList(res.Entities as EntityOverview[]);
                 });
             }
@@ -340,7 +340,7 @@ function ActiveEncounter() {
                     entity={entity}
                     deleteCallback={deleteEntity}
                     setDisplay={(statblock) => {
-                        SetDisplayEntity(statblock);
+                        SetDisplayEntity(statblock as StatBlock);
                         SetDisplayEntityType("statblock");
                     }}
                     overviewOnly={overviewOnly}

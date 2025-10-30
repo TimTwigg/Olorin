@@ -1,8 +1,8 @@
-import { StatBlock, parseDataAsStatBlock } from "@src/models/statBlock";
+import { StatBlock, StatBlockJSON, parseDataAsStatBlock } from "@src/models/statBlock";
 
 export type PlayerJSON = {
     Campaign: string;
-    StatBlock: unknown;
+    StatBlock: StatBlockJSON;
     Notes: string;
     RowID: number;
 };

@@ -1,7 +1,7 @@
 import { Campaign, CampaignOverview } from "@src/models/campaign";
 
 export type CampaignResponse = {
-    Campaigns: Campaign[] | CampaignOverview[];
+    Campaigns: CampaignOverview[];
 }
 
 export type SingleCampaignResponse = {

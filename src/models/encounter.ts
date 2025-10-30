@@ -1,4 +1,4 @@
-import { Entity } from "@src/models/entity";
+import { Entity, EntityJSON } from "@src/models/entity";
 import { StatBlockEntity } from "@src/models/statBlockEntity";
 import { CounterMap } from "@src/models/data_structures/counterMap";
 import { Lair } from "@src/models/lair";
@@ -63,7 +63,7 @@ export type EncounterJSON = {
     Name: string;
     Description: string;
     Metadata: EncounterMetadataJSON;
-    Entities: Entity[];
+    Entities: EntityJSON[];
     HasLair: boolean;
     Lair?: Lair;
     LairOwnerID: number;
@@ -378,7 +378,7 @@ export class Encounter {
             Turn: json.Metadata.Turn === undefined ? 1 : json.Metadata.Turn,
         };
         const encounter = new Encounter(json.id, json.Name, json.Description, -1, metadata);
-        encounter.Entities = json.Entities.map((e: unknown) => StatBlockEntity.loadFromJSON(e));
+        encounter.Entities = json.Entities.map((e) => StatBlockEntity.loadFromJSON(e));
         encounter.ActiveID = json.ActiveID;
         encounter.HasLair = json.HasLair;
         encounter.LairOwnerID = json.LairOwnerID || -1;

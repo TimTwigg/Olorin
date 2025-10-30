@@ -38,7 +38,7 @@ const CACHEABLE_FUNCTIONS = ["request"];
  *
  * @returns string - the generated cache key
  */
-function createCacheKey(func: string, args: Record<string, string>): string {
+function createCacheKey(func: string, args: Record<string, unknown>): string {
     return func + "::" + JSON.stringify(args);
 }
 

@@ -22,7 +22,7 @@ export class StatBlockEntity implements Entity {
     Notes = "";
     IsHostile;
     EncounterLocked = false;
-    Displayable;
+    Displayable: StatBlock;
     StatBlock: StatBlock;
     EntityType;
     SavingThrows;

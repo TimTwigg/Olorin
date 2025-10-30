@@ -145,7 +145,7 @@ function Campaigns() {
 
     React.useEffect(() => {
         initFilters();
-        api.getCampaigns(1).then((data) => {
+        api.getCampaigns().then((data) => {
             SetCampaigns(data.Campaigns);
         });
         setLoading(false);

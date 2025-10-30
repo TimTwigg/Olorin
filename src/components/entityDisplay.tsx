@@ -13,13 +13,12 @@ import { TbPencilOff, TbPencil } from "react-icons/tb";
 import { Entity } from "@src/models/entity";
 import { Card } from "@src/components/card";
 import { SmartMap } from "@src/models/data_structures/smartMap";
-import { StatBlock } from "@src/models/statBlock";
 import "@src/styles/entityDisplay.scss";
 
 type EntityDisplayProps = {
     entity: Entity;
     deleteCallback: (id: string) => void;
-    setDisplay?: (statblock?: StatBlock) => void;
+    setDisplay?: (displayable: unknown) => void;
     overviewOnly?: boolean;
     editMode?: boolean;
     isActive?: boolean;

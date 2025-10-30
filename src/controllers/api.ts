@@ -1,12 +1,12 @@
 import * as api from "@src/models/api_responses";
-import { EntityOverview } from "@src/models/entity";
-import { Encounter, EncounterOverview, EncounterOverviewJSON } from "@src/models/encounter";
+import { EntityOverview, EntityOverviewT } from "@src/models/entity";
+import { Encounter, EncounterOverview, EncounterOverviewJSON, EncounterJSON } from "@src/models/encounter";
 import { dateFromString } from "@src/controllers/utils";
-import { parseDataAsStatBlock } from "@src/models/statBlock";
+import { parseDataAsStatBlock, StatBlockJSON } from "@src/models/statBlock";
 import * as caching from "@src/controllers/api_cache";
 import { SmartMap } from "@src/models/data_structures/smartMap";
-import { Campaign, CampaignOverview } from "@src/models/campaign";
-import { Player } from "@src/models/player";
+import { Campaign, CampaignOverview, CampaignJSON, CampaignOverviewJSON } from "@src/models/campaign";
+import { Player, PlayerJSON } from "@src/models/player";
 import { Condition } from "@src/models/condition";
 
 export type APIDetailLevel = 1 | 2;
@@ -25,7 +25,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
  *
  * @returns Promise<unknown> - the result of the function call
  */
-async function api_wrapper(func: string, url: string, args: Record<string, string>): Promise<unknown> {
+async function api_wrapper(func: string, url: string, args: Record<string, unknown>): Promise<unknown> {
     if (caching.isCacheableFunction(func) && caching.isCacheableRoute(url)) {
         const cached_entry = caching.checkCache(caching.createCacheKey(func, args));
         if (cached_entry !== null) {
@@ -33,9 +33,9 @@ async function api_wrapper(func: string, url: string, args: Record<string, strin
         }
     }
     let data: unknown;
-    if (func === "request") data = await _request(url, args).then((data) => data);
+    if (func === "request") data = await _request(url, args as Record<string, string>).then((data) => data);
     else if (func === "push") data = _push(url, args).then((data) => data);
-    else if (func === "delete") data = _delete(url, args).then((data) => data);
+    else if (func === "delete") data = _delete(url, (args as { id: string }).id).then((data) => data);
     else return null;
     if (caching.isCacheableFunction(func) && caching.isCacheableRoute(url)) {
         caching.setCacheEntry(caching.createCacheKey(func, args), data);
@@ -94,7 +94,7 @@ async function request(url: string, body: Record<string, string>): Promise<unkno
  *
  * @returns The response data from the server.
  */
-async function _push(url: string, body: Record<string, string>): Promise<unknown> {
+async function _push(url: string, body: Record<string, unknown>): Promise<unknown> {
     const response = await fetch(BASE_URL + url, {
         method: "POST",
         headers: {
@@ -119,20 +119,20 @@ async function _push(url: string, body: Record<string, string>): Promise<unknown
  *
  * @returns The response data from the server.
  */
-async function push(url: string, body: Record<string, string>): Promise<unknown> {
-    return api_wrapper("push", url, body).then((data) => data);
+async function push(url: string, body: unknown): Promise<unknown> {
+    return api_wrapper("push", url, body as Record<string, unknown>).then((data) => data);
 }
 
 /**
  * [INTERNAL] Delete data from the server using a DELETE request.
  *
  * @param url The endpoint to delete data from.
- * @param body The data to send in the request body.
+ * @param id The ID of the resource to delete.
  *
  * @returns The response data from the server.
  */
-async function _delete(url: string, body: Record<string, string>): Promise<unknown> {
-    const response = await fetch(BASE_URL + url + "/" + body.id, {
+async function _delete(url: string, id: string): Promise<unknown> {
+    const response = await fetch(BASE_URL + url + "/" + id, {
         method: "DELETE",
         headers: {
             Accept: "application/json",
@@ -152,12 +152,12 @@ async function _delete(url: string, body: Record<string, string>): Promise<unkno
  * Delete data from the server using a DELETE request.
  *
  * @param url The endpoint to delete data from.
- * @param body The data to send in the request body.
+ * @param id The ID of the resource to delete.
  *
  * @returns The response data from the server.
  */
-export async function deleteRequest(url: string, body: Record<string, string>): Promise<unknown> {
-    return api_wrapper("delete", url, body).then((data) => data);
+export async function deleteRequest(url: string, id: string): Promise<unknown> {
+    return api_wrapper("delete", url, { id: id }).then((data) => data);
 }
 
 /**
@@ -193,9 +193,9 @@ export async function getEncounter(encounterID: number): Promise<api.SingleEncou
     return request("/encounter", {
         id: encounterID.toString(),
         detail_level: "2",
-    }).then((data: unknown) => {
+    }).then((data) => {
         return {
-            Encounter: Encounter.loadFromJSON(data),
+            Encounter: Encounter.loadFromJSON(data as EncounterJSON),
         };
     });
 }
@@ -219,19 +219,16 @@ export async function getConditions(): Promise<api.ConditionResponse> {
  * Fetch all entities from the server, within a given page.
  *
  * @param _page The page number for pagination.
- * @param detailLevel The detail level for the entity data.
  *
  * @returns A list of entities.
  */
-export async function getEntities(_page: number, detailLevel: APIDetailLevel = 1): Promise<api.EntityResponse> {
+export async function getEntities(_page: number): Promise<api.EntityResponse> {
     return request("/statblock/all", {
         page: _page.toString(),
-        detail_level: detailLevel.toString(),
-    }).then((data: any) => {
+    }).then((data) => {
         return {
-            Entities: data.map((entity: any) => {
-                if (detailLevel == 1) return new EntityOverview(entity.ID, entity.Name, entity.Type, entity.Size, entity.ChallengeRating, entity.Source);
-                else return parseDataAsStatBlock(entity);
+            Entities: (data as EntityOverviewT[]).map((entity) => {
+                return new EntityOverview(entity.ID, entity.Name, entity.Type, entity.Size, entity.ChallengeRating, entity.Source);
             }),
         };
     });
@@ -246,11 +243,11 @@ export async function getEntities(_page: number, detailLevel: APIDetailLevel = 1
  */
 export async function getStatBlock(entityID: number): Promise<api.SingleStatBlockResponse> {
     return request("/statblock", {
-        id: entityID,
-        detail_level: 2,
-    }).then((data: any) => {
+        id: entityID.toString(),
+        detail_level: "2",
+    }).then((data) => {
         return {
-            StatBlock: parseDataAsStatBlock(data),
+            StatBlock: parseDataAsStatBlock(data as StatBlockJSON),
         };
     });
 }
@@ -266,8 +263,8 @@ export async function saveEncounter(encounter: Encounter): Promise<Encounter> {
     if (!encounter) {
         throw new Error("Encounter is null or undefined.");
     }
-    return push("/encounter", encounter).then((data: any) => {
-        return Encounter.loadFromJSON(data);
+    return push("/encounter", encounter).then((data) => {
+        return Encounter.loadFromJSON(data as EncounterJSON);
     });
 }
 
@@ -279,9 +276,7 @@ export async function saveEncounter(encounter: Encounter): Promise<Encounter> {
  * @returns A boolean indicating success or failure.
  */
 export async function deleteEncounter(encounterID: number): Promise<boolean> {
-    return deleteRequest("/encounter", {
-        id: encounterID,
-    }).then(
+    return deleteRequest("/encounter", encounterID.toString()).then(
         () => {
             return true;
         },
@@ -297,9 +292,9 @@ export async function deleteEncounter(encounterID: number): Promise<boolean> {
  * @returns The metadata
  */
 export async function getMetadata(): Promise<api.MetadataResponse> {
-    return request("/metadata", {}).then((data: object) => {
+    return request("/metadata", {}).then((data) => {
         return {
-            Metadata: new SmartMap<string, string>(Object.entries(data)),
+            Metadata: new SmartMap<string, string>(Object.entries(data as object)),
         };
     });
 }
@@ -314,7 +309,7 @@ export async function getMetadata(): Promise<api.MetadataResponse> {
 export async function setMetadata(metadata: Map<string, string>): Promise<api.MetadataResponse> {
     return push("/metadata", Object.fromEntries(metadata)).then((data) => {
         return {
-            Metadata: new SmartMap<string, string>(Object.entries(data)),
+            Metadata: new SmartMap<string, string>(Object.entries(data as object)),
         };
     });
 }
@@ -354,21 +349,13 @@ export async function sendSupportRequest(description: string): Promise<boolean> 
 /**
  * Fetch all campaigns from the server.
  *
- * @param detailLevel  The detail level for the campaign data (1 for overview, 2 for full details).
- *
- * @returns A list of campaigns.
+ * @returns A list of campaign overviews.
  */
-export async function getCampaigns(detailLevel: APIDetailLevel = 1): Promise<api.CampaignResponse> {
-    return request("/campaign/all", {
-        detail_level: detailLevel,
-    }).then((data: any) => {
+export async function getCampaigns(): Promise<api.CampaignResponse> {
+    return request("/campaign/all", {}).then((data) => {
         return {
-            Campaigns: data.map((c: any) => {
-                if (detailLevel === 1) {
-                    return new CampaignOverview(c.ID, c.Name, c.Description, dateFromString(c.CreationDate), dateFromString(c.LastModified));
-                } else {
-                    return Campaign.loadFromJSON(c);
-                }
+            Campaigns: (data as CampaignOverviewJSON[]).map((c) => {
+                return new CampaignOverview(c.id, c.Name, c.Description, dateFromString(c.CreationDate), dateFromString(c.LastModified));
             }),
         };
     });
@@ -383,11 +370,10 @@ export async function getCampaigns(detailLevel: APIDetailLevel = 1): Promise<api
  */
 export async function getCampaign(campaignID: number): Promise<api.SingleCampaignResponse> {
     return request("/campaign", {
-        id: campaignID,
-        detail_level: 2,
-    }).then((data: any) => {
+        id: campaignID.toString(),
+    }).then((data) => {
         return {
-            Campaign: Campaign.loadFromJSON(data),
+            Campaign: Campaign.loadFromJSON(data as CampaignJSON),
         };
     });
 }
@@ -403,8 +389,8 @@ export async function saveCampaign(campaign: Campaign): Promise<Campaign> {
     if (!campaign) {
         throw new Error("Campaign is null or undefined.");
     }
-    return push("/campaign", campaign).then((data: any) => {
-        return Campaign.loadFromJSON(data);
+    return push("/campaign", campaign).then((data) => {
+        return Campaign.loadFromJSON(data as CampaignJSON);
     });
 }
 
@@ -416,9 +402,7 @@ export async function saveCampaign(campaign: Campaign): Promise<Campaign> {
  * @returns A boolean indicating success or failure.
  */
 export async function deleteCampaign(campaignID: number): Promise<boolean> {
-    return deleteRequest("/campaign", {
-        id: campaignID,
-    }).then(
+    return deleteRequest("/campaign", campaignID.toString()).then(
         () => {
             return true;
         },
@@ -439,8 +423,8 @@ export async function createCampaign(campaign: Campaign): Promise<Campaign> {
     if (!campaign) {
         throw new Error("Campaign is null or undefined.");
     }
-    return push("/campaign", campaign).then((data: any) => {
-        return Campaign.loadFromJSON(data);
+    return push("/campaign", campaign).then((data) => {
+        return Campaign.loadFromJSON(data as CampaignJSON);
     });
 }
 
@@ -465,10 +449,10 @@ export async function getPlayerEntity(id?: number, player?: Player): Promise<api
     }
 
     return request("/player", {
-        id: entityID,
-    }).then((data: any) => {
+        id: entityID.toString(),
+    }).then((data) => {
         return {
-            StatBlock: parseDataAsStatBlock(data),
+            StatBlock: parseDataAsStatBlock(data as StatBlockJSON),
         };
     });
 }
@@ -484,8 +468,8 @@ export async function editPlayer(player: Player): Promise<Player> {
     if (!player) {
         throw new Error("Player is null or undefined.");
     }
-    return push("/player", player).then((data: any) => {
-        return Player.loadFromJSON(data);
+    return push("/player", player).then((data) => {
+        return Player.loadFromJSON(data as PlayerJSON);
     });
 }
 
@@ -497,9 +481,7 @@ export async function editPlayer(player: Player): Promise<Player> {
  * @returns A boolean indicating success or failure.
  */
 export async function deletePlayer(player: Player): Promise<boolean> {
-    return deleteRequest("/player", {
-        id: `${player.Campaign},${player.RowID}`,
-    }).then(
+    return deleteRequest("/player", `${player.Campaign},${player.RowID}`).then(
         () => {
             return true;
         },
@@ -515,9 +497,9 @@ export async function deletePlayer(player: Player): Promise<boolean> {
  * @returns A list of types.
  */
 export async function getTypes(): Promise<api.TypeResponse> {
-    return request("/type/all", {}).then((data: any) => {
+    return request("/type/all", {}).then((data) => {
         return {
-            Types: data,
+            Types: data as string[],
         };
     });
 }
@@ -528,9 +510,9 @@ export async function getTypes(): Promise<api.TypeResponse> {
  * @returns A list of sizes.
  */
 export async function getSizes(): Promise<api.SizeResponse> {
-    return request("/size/all", {}).then((data: any) => {
+    return request("/size/all", {}).then((data) => {
         return {
-            Sizes: data,
+            Sizes: data as string[],
         };
     });
 }
@@ -541,9 +523,9 @@ export async function getSizes(): Promise<api.SizeResponse> {
  * @returns A list of sources.
  */
 export async function getUsedSources(): Promise<api.SourceResponse> {
-    return request("/source/used/all", {}).then((data: any) => {
+    return request("/source/used/all", {}).then((data) => {
         return {
-            Sources: data,
+            Sources: data as string[],
         };
     });
 }

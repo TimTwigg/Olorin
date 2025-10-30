@@ -29,7 +29,7 @@ export function StatBlockList({ filter, context: _context }: StatBlockListProps)
     const loadStatBlocks = React.useCallback(async () => {
         setLoading(true);
         try {
-            const response = await api.getEntities(currentPage, 1);
+            const response = await api.getEntities(currentPage);
             const blocks = response.Entities as EntityOverview[];
 
             // Filter by custom vs official based on Source field

@@ -1,10 +1,20 @@
 import { Player, PlayerJSON } from "@src/models/player";
 import { dateFromString, newLocalDate } from "@src/controllers/utils";
 
+export type CampaignOverviewJSON = {
+    id: number;
+    Name: string;
+    Description: string;
+    CreationDate: string;
+    LastModified: string;
+}
+
 export type CampaignOverviewT = {
     id: number;
     Name: string;
     Description: string;
+    CreationDate: Date;
+    LastModified: Date;
 };
 
 export class CampaignOverview implements CampaignOverviewT {
@@ -23,7 +33,7 @@ export class CampaignOverview implements CampaignOverviewT {
     }
 }
 
-type CampaignJSON = {
+export type CampaignJSON = {
     id: number;
     Name: string;
     Description: string;

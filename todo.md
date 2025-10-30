@@ -23,7 +23,7 @@
 - Add logged-in version of the landing page (in addition to the dashboard page?)
 - Optimize where api calls are made - loader vs in render
 - Make design more responsive for screen sizes
-- Continue fixing errors in api.ts
+- Fix mix-up in terminology of Entity and Statblock
 
 ## Ideas
 
