@@ -139,48 +139,51 @@ function Dashboard() {
     }, [context.loaded, context.campaigns]);
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8" style={{ fontSize: "16px" }}>
+        <div className="min-h-screen bg-primary-50 dark:bg-primary-950 py-8" style={{ fontSize: "16px" }}>
             <div className="max-w-7xl mx-auto px-4">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">Dashboard</h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-400">Welcome back! Here's what's happening with your campaigns.</p>
+                    <h1 className="text-4xl font-bold text-primary-900 dark:text-white mb-2 flex items-center gap-3">
+                        <i className="pi pi-home text-accent-500"></i>
+                        Dashboard
+                    </h1>
+                    <p className="text-lg text-primary-600 dark:text-primary-300">Welcome back! Here's what's happening with your campaigns.</p>
                 </div>
 
                 {/* Quick Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <Card key="stat-campaigns" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <Card key="stat-campaigns" className="bg-gradient-to-br from-primary-600 to-accent-500 dark:from-primary-700 dark:to-accent-600 border-2 border-accent-600 dark:border-accent-500 shadow-lg">
                         <div className="flex items-center gap-4">
-                            <div className="p-3 bg-primary-100 dark:bg-primary-800 rounded-lg">
-                                <i className="pi pi-map text-3xl text-primary-600 dark:text-primary-300"></i>
+                            <div className="p-3 bg-white/20 dark:bg-black/20 rounded-lg backdrop-blur-sm">
+                                <i className="pi pi-map text-3xl text-white"></i>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Active Campaigns</p>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.campaigns}</p>
+                                <p className="text-sm text-white/90 font-medium">Active Campaigns</p>
+                                <p className="text-3xl font-bold text-white">{stats.campaigns}</p>
                             </div>
                         </div>
                     </Card>
 
-                    <Card key="stat-encounters" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <Card key="stat-encounters" className="bg-gradient-to-br from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-800 border-2 border-primary-500 dark:border-primary-600 shadow-lg">
                         <div className="flex items-center gap-4">
-                            <div className="p-3 bg-primary-200 dark:bg-primary-700 rounded-lg">
-                                <i className="pi pi-shield text-3xl text-primary-700 dark:text-primary-200"></i>
+                            <div className="p-3 bg-white/20 dark:bg-black/20 rounded-lg backdrop-blur-sm">
+                                <i className="pi pi-shield text-3xl text-white"></i>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Total Encounters</p>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.encounters}</p>
+                                <p className="text-sm text-white/90 font-medium">Total Encounters</p>
+                                <p className="text-3xl font-bold text-white">{stats.encounters}</p>
                             </div>
                         </div>
                     </Card>
 
-                    <Card key="stat-statblocks" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <Card key="stat-statblocks" className="bg-gradient-to-br from-accent-400 to-primary-600 dark:from-accent-500 dark:to-primary-700 border-2 border-accent-500 dark:border-accent-600 shadow-lg">
                         <div className="flex items-center gap-4">
-                            <div className="p-3 bg-primary-200 dark:bg-primary-700 rounded-lg">
-                                <i className="pi pi-book text-3xl text-primary-700 dark:text-primary-200"></i>
+                            <div className="p-3 bg-white/20 dark:bg-black/20 rounded-lg backdrop-blur-sm">
+                                <i className="pi pi-book text-3xl text-white"></i>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Custom Stat Blocks</p>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.statBlocks}</p>
+                                <p className="text-sm text-white/90 font-medium">Custom Stat Blocks</p>
+                                <p className="text-3xl font-bold text-white">{stats.statBlocks}</p>
                             </div>
                         </div>
                     </Card>
@@ -190,22 +193,25 @@ function Dashboard() {
                     {/* Main Content - Recent Activity */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Recent Campaigns */}
-                        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <Card className="bg-white dark:bg-primary-900 border-2 border-primary-200 dark:border-primary-700">
                             <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Recent Campaigns</h2>
+                                <h2 className="text-2xl font-semibold text-primary-900 dark:text-white flex items-center gap-2">
+                                    <i className="pi pi-map text-accent-500"></i>
+                                    Recent Campaigns
+                                </h2>
                                 <Link to="/campaigns">
-                                    <Button label="View All" icon="pi pi-arrow-right" iconPos="right" className="p-button-text text-accent-600 dark:text-accent-400" />
+                                    <Button label="View All" icon="pi pi-arrow-right" iconPos="right" className="p-button-text text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300" />
                                 </Link>
                             </div>
 
                             {loading ? (
                                 <div className="text-center py-8">
-                                    <i className="pi pi-spin pi-spinner text-4xl text-gray-400 dark:text-gray-600"></i>
+                                    <i className="pi pi-spin pi-spinner text-4xl text-primary-400 dark:text-primary-600"></i>
                                 </div>
                             ) : campaigns.length === 0 ? (
                                 <div className="text-center py-8">
-                                    <i className="pi pi-map text-5xl text-gray-400 dark:text-gray-600 mb-4"></i>
-                                    <p className="text-base text-gray-600 dark:text-gray-400 mb-4">You don't have any campaigns yet</p>
+                                    <i className="pi pi-map text-5xl text-primary-300 dark:text-primary-700 mb-4"></i>
+                                    <p className="text-base text-primary-600 dark:text-primary-400 mb-4">You don't have any campaigns yet</p>
                                     <Link to="/campaigns">
                                         <Button label="Create Your First Campaign" icon="pi pi-plus" className="bg-accent-600 hover:bg-accent-700 text-white border-accent-600" />
                                     </Link>
@@ -213,13 +219,13 @@ function Dashboard() {
                             ) : (
                                 <div className="space-y-3">
                                     {campaigns.slice(0, 5).map((campaign, i) => (
-                                        <div key={i} onClick={() => (window.location.href = `/campaigns/${campaign.id}`)} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-accent-500 dark:hover:border-accent-500 transition-colors cursor-pointer">
+                                        <div key={i} onClick={() => (window.location.href = `/campaigns/${campaign.id}`)} className="p-4 bg-primary-50 dark:bg-primary-800 border-2 border-primary-200 dark:border-primary-700 rounded-lg hover:border-accent-500 dark:hover:border-accent-500 hover:bg-accent-50 dark:hover:bg-accent-950/30 transition-all cursor-pointer">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
-                                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{campaign.Name}</h3>
-                                                    {/* <p className="text-sm text-gray-600 dark:text-gray-400">{campaign.PlayerCount} players</p> -- TODO: Add this? */}
+                                                    <h3 className="text-lg font-semibold text-primary-900 dark:text-white">{campaign.Name}</h3>
+                                                    {/* <p className="text-sm text-primary-600 dark:text-primary-400">{campaign.PlayerCount} players</p> -- TODO: Add this? */}
                                                 </div>
-                                                <i className="pi pi-chevron-right text-gray-400"></i>
+                                                <i className="pi pi-chevron-right text-accent-500"></i>
                                             </div>
                                         </div>
                                     ))}
@@ -230,31 +236,34 @@ function Dashboard() {
 
                     {/* Sidebar - Quick Actions */}
                     <div className="space-y-6">
-                        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+                        <Card className="bg-gradient-to-br from-primary-600 to-primary-700 dark:from-primary-800 dark:to-primary-900 border-2 border-primary-500 dark:border-primary-700 shadow-lg">
+                            <h2 className="text-2xl font-semibold text-white mb-4 flex items-center gap-2">
+                                <i className="pi pi-bolt text-accent-400"></i>
+                                Quick Actions
+                            </h2>
                             <div className="space-y-3">
                                 <Link key="action-campaigns" to="/campaigns">
-                                    <button className="w-full flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors text-left">
-                                        <i className="pi pi-plus-circle text-xl text-accent-500 dark:text-accent-400"></i>
-                                        <span className="text-base font-medium text-gray-900 dark:text-white">New Campaign</span>
+                                    <button className="w-full flex items-center gap-3 p-3 bg-white/10 hover:bg-accent-500 dark:bg-white/5 dark:hover:bg-accent-600 backdrop-blur-sm rounded-lg transition-all text-left border border-white/20 hover:border-accent-400 shadow-sm hover:shadow-md">
+                                        <i className="pi pi-plus-circle text-xl text-accent-300 group-hover:text-white"></i>
+                                        <span className="text-base font-medium text-white">New Campaign</span>
                                     </button>
                                 </Link>
                                 <Link key="action-encounters" to="/encounters">
-                                    <button className="w-full flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors text-left">
-                                        <i className="pi pi-shield text-xl text-accent-500 dark:text-accent-400"></i>
-                                        <span className="text-base font-medium text-gray-900 dark:text-white">Start Encounter</span>
+                                    <button className="w-full flex items-center gap-3 p-3 bg-white/10 hover:bg-accent-500 dark:bg-white/5 dark:hover:bg-accent-600 backdrop-blur-sm rounded-lg transition-all text-left border border-white/20 hover:border-accent-400 shadow-sm hover:shadow-md">
+                                        <i className="pi pi-shield text-xl text-accent-300 group-hover:text-white"></i>
+                                        <span className="text-base font-medium text-white">Start Encounter</span>
                                     </button>
                                 </Link>
                                 <Link key="action-statblocks" to="/library/custom-statblocks">
-                                    <button className="w-full flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors text-left">
-                                        <i className="pi pi-file-edit text-xl text-accent-500 dark:text-accent-400"></i>
-                                        <span className="text-base font-medium text-gray-900 dark:text-white">Add Stat Block</span>
+                                    <button className="w-full flex items-center gap-3 p-3 bg-white/10 hover:bg-accent-500 dark:bg-white/5 dark:hover:bg-accent-600 backdrop-blur-sm rounded-lg transition-all text-left border border-white/20 hover:border-accent-400 shadow-sm hover:shadow-md">
+                                        <i className="pi pi-file-edit text-xl text-accent-300 group-hover:text-white"></i>
+                                        <span className="text-base font-medium text-white">Add Stat Block</span>
                                     </button>
                                 </Link>
                                 <Link key="action-library" to="/library">
-                                    <button className="w-full flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors text-left">
-                                        <i className="pi pi-book text-xl text-accent-500 dark:text-accent-400"></i>
-                                        <span className="text-base font-medium text-gray-900 dark:text-white">Browse Library</span>
+                                    <button className="w-full flex items-center gap-3 p-3 bg-white/10 hover:bg-accent-500 dark:bg-white/5 dark:hover:bg-accent-600 backdrop-blur-sm rounded-lg transition-all text-left border border-white/20 hover:border-accent-400 shadow-sm hover:shadow-md">
+                                        <i className="pi pi-book text-xl text-accent-300 group-hover:text-white"></i>
+                                        <span className="text-base font-medium text-white">Browse Library</span>
                                     </button>
                                 </Link>
                             </div>

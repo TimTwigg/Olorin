@@ -14,30 +14,55 @@
 
 ## Current Open Tasks
 
-### Lint Error Fixes (Ongoing)
-
-**Current Status**: **55 problems (55 errors, 0 warnings)** - down from 75!
-
-**Progress this session**:
-- ✅ Deleted unused `tableFilter.tsx` component (4 problems eliminated)
-- ✅ Deleted unused `debouncedInput.tsx` component (1 problem eliminated)
-- ✅ Fixed ALL react-hooks/exhaustive-deps warnings (7 warnings fixed)
-    - Added missing dependencies to useEffect hooks
-    - Wrapped functions in useCallback to prevent infinite loops
-    - Files fixed: entityTable.tsx, playerDialog.tsx, statBlockList.tsx, __root.tsx, encounters/index.lazy.tsx, profile.lazy.tsx
-
-**Remaining work** (55 errors):
-- **Category 1**: `@typescript-eslint/no-explicit-any` (55 errors) - case by case review needed
-    - Most are in `src/controllers/api.ts` (35 errors)
-    - Others in models (10 errors), components (3 errors), routes (7 errors)
-
-**Next Steps** (when resuming lint fixes):
-1. **Category 1** - Fix TypeScript no-explicit-any errors case-by-case (55 errors) - varies in difficulty
-   - Consider starting with api.ts since it has the most (35 errors)
+*(No active tasks - all lint errors resolved!)*
 
 ---
 
 ## Recently Completed Work
+
+### ✅ Dashboard Theme Integration (Session: 2025-11-01)
+
+**Objective**: Make theme switching much more visible on the dashboard
+
+**Changes Made**:
+1. **Background**: Changed from generic `bg-gray-50/gray-900` to `bg-primary-50/primary-950`
+2. **Header**: Added accent-colored icon and primary text colors
+3. **Stat Cards**: Complete redesign with vibrant gradients:
+   - Active Campaigns: Primary to accent gradient (`from-primary-600 to-accent-500`)
+   - Total Encounters: Primary gradient (`from-primary-600 to-primary-700`)
+   - Custom Stat Blocks: Accent to primary gradient (`from-accent-400 to-primary-600`)
+   - All cards now use white text with glassmorphism icon backgrounds
+   - Left and right cards both shift colors for visual interest
+4. **Campaign List Card**:
+   - Card background uses `bg-white/primary-900` with primary borders
+   - Individual campaigns use `bg-primary-50/primary-800` with accent hover states
+   - Added accent-colored section icon and chevron icons
+5. **Quick Actions Sidebar**:
+   - Gradient background (`from-primary-600 to-primary-700`)
+   - Added bolt icon to header in accent color
+   - Buttons use glassmorphism with accent hover states
+   - All text now white for better contrast
+
+**Result**: Theme changes are now immediately obvious when switching between color schemes!
+
+**Files Modified**: `src/routes/index.lazy.tsx`
+
+---
+
+### ✅ All Lint Errors Fixed! (Session: 2025-11-01)
+
+**Final Status**: **0 problems (0 errors, 0 warnings)** ✨
+
+All remaining `@typescript-eslint/no-explicit-any` errors were resolved by properly typing the API layer and related code. The codebase now passes linting completely!
+
+**Key changes**:
+- Fixed all type annotations in `src/controllers/api.ts` and `src/controllers/api_cache.ts`
+- Improved cache key generation to include URL parameter (prevents cache collision issues)
+- Removed debug console.log statement
+
+**Total progress**: From 75 problems → 0 problems
+
+---
 
 ### ✅ Lint Fixes - Easy Categories (Session: 2025-10-25 continued)
 
@@ -129,4 +154,4 @@
 
 ---
 
-**Last Updated**: 2025-10-25 (end of session)
+**Last Updated**: 2025-11-01 (end of session - dashboard theme integration complete)

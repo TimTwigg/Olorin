@@ -27,7 +27,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
  */
 async function api_wrapper(func: string, url: string, args: Record<string, unknown>): Promise<unknown> {
     if (caching.isCacheableFunction(func) && caching.isCacheableRoute(url)) {
-        const cached_entry = caching.checkCache(caching.createCacheKey(func, args));
+        const cached_entry = caching.checkCache(caching.createCacheKey(func, url, args));
         if (cached_entry !== null) {
             return cached_entry.data;
         }
@@ -38,7 +38,7 @@ async function api_wrapper(func: string, url: string, args: Record<string, unkno
     else if (func === "delete") data = _delete(url, (args as { id: string }).id).then((data) => data);
     else return null;
     if (caching.isCacheableFunction(func) && caching.isCacheableRoute(url)) {
-        caching.setCacheEntry(caching.createCacheKey(func, args), data);
+        caching.setCacheEntry(caching.createCacheKey(func, url, args), data);
     }
     return data;
 }
